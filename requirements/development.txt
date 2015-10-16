@@ -1,0 +1,4 @@
+-r ../requirements.txt
+
+bumpversion
+wheel>=0.23.0

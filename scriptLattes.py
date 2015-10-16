@@ -1,18 +1,18 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # encoding: utf-8
 #
 #
 #  scriptLattes V8
-# Copyright 2005-2014: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
+#  Copyright 2005-2014: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,8 @@
 import logging
 
 import warnings
-import requests, BeautifulSoup # required by QualisExtractor
+import requests, BeautifulSoup  # required by QualisExtractor
+
 warnings.filterwarnings('ignore')
 
 from scriptLattes.grupo import *

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 #
-# GUI/Windows version
+#  GUI/Windows version
 #  Copyright 2014: Roberto Faga Jr
 #
 #  http://github.com/rfaga/scriptlattesgui

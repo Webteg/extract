@@ -1,26 +1,6 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grupo.py
-#
-# scriptLattes V8
-#  Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
-#  http://scriptlattes.sourceforge.net/
-#
-#
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
-#  Licença, ou (na sua opinião) qualquer versão.
-#
-#  Este programa é distribuído na esperança que possa ser util, 
-#  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
-#  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
-#  Licença Pública Geral GNU para maiores detalhes.
-#
-#  Você deve ter recebido uma cópia da Licença Pública Geral GNU
-#  junto com este programa, se não, escreva para a Fundação do Software
-#  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
 
 import fileinput
 import unicodedata
@@ -265,7 +245,6 @@ class Grupo:
         # (6) arquivo GDF
         self.gerarArquivoGDF(prefix + "rede.gdf")
 
-
     def gerarArquivoGDF(self, nomeArquivo):
         # Vêrtices
         N = len(self.listaDeMembros)
@@ -304,7 +283,6 @@ class Grupo:
         arquivo.write(string)  # .encode("utf8","ignore"))
         arquivo.close()
 
-
     def HTMLColorToRGB(self, colorstring):
         colorstring = colorstring.strip()
         if colorstring[0] == '#': colorstring = colorstring[1:]
@@ -312,7 +290,6 @@ class Grupo:
         r, g, b = [int(n, 16) for n in (r, g, b)]
         #return (r, g, b)
         return str(r) + "," + str(g) + "," + str(b)
-
 
     def imprimeCSVListaIndividual(self, nomeCompleto, lista):
         s = ""
@@ -334,7 +311,6 @@ class Grupo:
                     s += pub.csv().encode('utf8') + "\n"
         return s
 
-
     def gerarRISdeMembros(self):
         prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
         s = ""
@@ -342,13 +318,11 @@ class Grupo:
             s += membro.ris().encode('utf8') + "\n"
         self.salvarArquivoGenerico(s, prefix + 'membros.ris')
 
-
     def salvarArquivoGenerico(self, conteudo, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')
         arquivo = open(dir + "/" + nomeArquivo, 'w')
         arquivo.write(conteudo)
         arquivo.close()
-
 
     def carregarDadosCVLattes(self):
         indice = 1
@@ -365,7 +339,6 @@ class Grupo:
 
     def gerarPaginasWeb(self):
         paginasWeb = GeradorDePaginasWeb(self)
-
 
     def compilarListasDeItems(self):
         self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
@@ -742,4 +715,3 @@ class Grupo:
         self.listaDeParametros.append(['mapa-incluir_alunos_de_pos_doutorado', 'sim'])
         self.listaDeParametros.append(['mapa-incluir_alunos_de_doutorado', 'sim'])
         self.listaDeParametros.append(['mapa-incluir_alunos_de_mestrado', 'nao'])
-

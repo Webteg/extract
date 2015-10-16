@@ -107,4 +107,7 @@ crashlytics.properties
 crashlytics-build.properties
 
 ## Extras
-dados/
+/dados/
+/examples/cache
+/examples/teste-01
+/examples/teste-02
