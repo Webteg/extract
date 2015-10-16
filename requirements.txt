@@ -1,2 +1,14 @@
 setuptools
+matplotlib
+mechanize
+numpy
+pygraphviz
+scipy
+BeautifulSoup
+python_Levenshtein
+Pillow
+# PySide
+Requests
+pytidylib
 six
+# utidylib

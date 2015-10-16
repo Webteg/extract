@@ -21,11 +21,27 @@ Jesús P. Mena-Chalco e equipe
 
 ---
 
-# scriptLattes V8.12
+# scriptLattes 9.0.0
 
 ## SINOPSE
 
 `scriptLattes.py <nome_arquivo_de_configuracao>`
+
+## Install for development
+
+```bash
+$ git clone git clone https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.repo_name }}.git
+$ cd {{ cookiecutter.repo_name }}
+$ pip install --editable .
+```
+
+
+## Contributing
+Qualquer um pode ajudar a melhorar este projeto - leia [CONTRIBUTING](CONTRIBUTING.md) para ver como começar!
+
+
+## License
+GPLv3. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 
 ## REQUISITOS
@@ -81,6 +97,15 @@ O resultado da execução estará disponível em: `./exemplo/teste-02/`
 
 * Jesús P. Mena-Chalco <jesus.mena@ufabc.edu.br>
 * Roberto M. Cesar-Jr <cesar@vision.ime.usp.br>
+
+
+## CONTRIBUIDORES
+
+* Fábio N. Kepler <fabio@kepler.pro.br>
+* Roberto Fagá <rfaga@usp.br>
+* Marcos V. Treviso <marcosvtreviso@gmail.com>
+* Cristhian Bilhalva <cristhian.bilhalva@gmail.com>
+
 
 ## URL DO PROJETO
 
