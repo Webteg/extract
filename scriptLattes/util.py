@@ -1,19 +1,11 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # encoding: utf-8
-#
-#
 import logging
-
 import os
 import shutil
 import sys
 
 import Levenshtein
-
-
-SEP = os.path.sep
-BASE = 'scriptLattes' + SEP
-ABSBASE = os.path.abspath('.') + SEP
 
 
 class OutputStream:
@@ -59,13 +51,13 @@ def buscarArquivo(filepath, arquivoConfiguracao=None):
 
 
 def copiarArquivos(dir):
-    base = ABSBASE
+    base = os.path.abspath('.') + os.path.sep
 
     try:
         dst = os.path.join(dir, 'css')
         if os.path.exists(dst):
             shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'css'), dst)
+        shutil.copytree(os.path.join(base, 'static/css'), dst)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)
@@ -73,18 +65,18 @@ def copiarArquivos(dir):
     # shutil.copy2(os.path.join(base, 'css', 'scriptLattes.css'), dir)
     # shutil.copy2(os.path.join(base, 'css', 'jquery.dataTables.css'), dir)
 
-    shutil.copy2(os.path.join(base, 'imagens', 'lattesPoint0.png'), dir)
-    shutil.copy2(os.path.join(base, 'imagens', 'lattesPoint1.png'), dir)
-    shutil.copy2(os.path.join(base, 'imagens', 'lattesPoint2.png'), dir)
-    shutil.copy2(os.path.join(base, 'imagens', 'lattesPoint3.png'), dir)
-    shutil.copy2(os.path.join(base, 'imagens', 'lattesPoint_shadow.png'), dir)
-    shutil.copy2(os.path.join(base, 'imagens', 'doi.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint0.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint1.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint2.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint3.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint_shadow.png'), dir)
+    shutil.copy2(os.path.join(base, 'static/images', 'doi.png'), dir)
 
     try:
         dst = os.path.join(dir, 'images')
         if os.path.exists(dst):
             shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'images'), dst)
+        shutil.copytree(os.path.join(base, 'static/images'), dst)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)
@@ -93,7 +85,7 @@ def copiarArquivos(dir):
         dst = os.path.join(dir, 'js')
         if os.path.exists(dst):
             shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'js'), dst)
+        shutil.copytree(os.path.join(base, 'static/js'), dst)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)

@@ -64,7 +64,7 @@ if __name__ == "__main__":
         novoGrupo.gerarPaginasWeb() # obrigatorio
         novoGrupo.gerarArquivosTemporarios() # obrigatorio
 
-        # copiar imagens e css
+        # copiar images e css
         copiarArquivos(novoGrupo.obterParametro('global-diretorio_de_saida'))
 
         # finalizando o processo
