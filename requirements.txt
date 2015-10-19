@@ -1,6 +1,6 @@
 setuptools
 matplotlib
-mechanize
+robobrowser
 numpy
 pygraphviz
 scipy
