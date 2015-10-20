@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # validate.py
 # A Validator object
 # Copyright (C) 2005-2014:

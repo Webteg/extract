@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -75,7 +75,7 @@ class MapaDeGeolocalizacao:
    var options = { zoom: 2, center: latlng, mapTypeId: google.maps.MapTypeId.ROADMAP }; \n\
    var map = new google.maps.Map(document.getElementById("map_canvas"), options); \n\
  \n'
-      
+
 		cvsProcessados = set([])
 
 		if self.grupo.obterParametro('mapa-incluir_membros_do_grupo'):
@@ -91,12 +91,12 @@ class MapaDeGeolocalizacao:
 
 		if self.grupo.obterParametro('mapa-incluir_alunos_de_pos_doutorado'):
 			keys =self.grupo.compilador.listaCompletaOCSupervisaoDePosDoutorado.keys()
-			for ano in keys:		
+			for ano in keys:
 				for aluno in self.grupo.compilador.listaCompletaOCSupervisaoDePosDoutorado[ano]:
 					idOrientando = aluno.idOrientando
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
-						membro = Membro('', idOrientando, '', '', '', '', '', self.grupo.diretorioCache)
+						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregarDadosCVLattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
@@ -109,12 +109,12 @@ class MapaDeGeolocalizacao:
 
 		if self.grupo.obterParametro('mapa-incluir_alunos_de_doutorado'):
 			keys =self.grupo.compilador.listaCompletaOCTeseDeDoutorado.keys()
-			for ano in keys:		
+			for ano in keys:
 				for aluno in self.grupo.compilador.listaCompletaOCTeseDeDoutorado[ano]:
 					idOrientando = aluno.idOrientando
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
-						membro = Membro('', idOrientando, '', '', '', '', '', self.grupo.diretorioCache)
+						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregarDadosCVLattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
@@ -127,12 +127,12 @@ class MapaDeGeolocalizacao:
 
 		if self.grupo.obterParametro('mapa-incluir_alunos_de_mestrado'):
 			keys =self.grupo.compilador.listaCompletaOCDissertacaoDeMestrado.keys()
-			for ano in keys:		
+			for ano in keys:
 				for aluno in self.grupo.compilador.listaCompletaOCDissertacaoDeMestrado[ano]:
 					idOrientando = aluno.idOrientando
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
-						membro = Membro('', idOrientando, '', '', '', '', '', self.grupo.diretorioCache)
+						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregarDadosCVLattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
@@ -150,7 +150,7 @@ class MapaDeGeolocalizacao:
 		#print "--------------------------------------------------------------------"
 		#print self.mapa.encode('utf8','replace')
 		#print "--------------------------------------------------------------------"
-		
+
 		self.mapa = re.sub("\'", '', self.mapa)
 		print "\n[MAPA DE GEOLOCALIZACAO CRIADO]"
 
@@ -161,7 +161,7 @@ class MapaDeGeolocalizacao:
 			m = listaDeMembros[lista[0]]
 			s = aluno.tipoDeOrientacao+': '+m.nomeCompleto
 		else:
-			s = 'Orientadores: ' 
+			s = 'Orientadores: '
 			for i in lista:
 				m = listaDeMembros[i]
 				s+= m.nomeCompleto+', '

@@ -4,6 +4,7 @@
 
 import fileinput
 import unicodedata
+import pandas
 
 from geradorDeXML import *
 from qualis import qualis
@@ -23,12 +24,6 @@ class Grupo:
     listaDeRotulos = []
     listaDeRotulosCores = []
     listaDePublicacoesEinternacionalizacao = []
-
-    arquivoConfiguracao = None
-    itemsDesdeOAno = None
-    itemsAteOAno = None
-    diretorioCache = None
-    diretorioDoi = None
 
     matrizArtigoEmPeriodico = None
     matrizLivroPublicado = None
@@ -67,48 +62,26 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, arquivo):
-        self.arquivoConfiguracao = arquivo
-        self.carregarParametrosPadrao()
+    def __init__(self, ids_file_path, desde_ano=0, ate_ano=None):
 
-        # atualizamos a lista de parametros
-        for linha in fileinput.input(self.arquivoConfiguracao):
-            linha = linha.replace("\r", "")
-            linha = linha.replace("\n", "")
+        if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
+            desde_ano = str(datetime.datetime.now().year)
+        if ate_ano is None or type(ate_ano) is str and ate_ano.lower() == 'hoje':
+            ate_ano = str(datetime.datetime.now().year)
 
-            linhaPart = linha.partition("#")  # eliminamos os comentários
-            linhaDiv = linhaPart[0].split("=", 1)
+        self.items_desde_ano = desde_ano
+        self.items_ate_ano = ate_ano
 
-            if len(linhaDiv) == 2:
-                self.atualizarParametro(linhaDiv[0], linhaDiv[1])
-
-        # carregamos o periodo global
-        ano1 = self.obterParametro('global-itens_desde_o_ano')
-        ano2 = self.obterParametro('global-itens_ate_o_ano')
-        if ano1.lower() == 'hoje':
-            ano1 = str(datetime.datetime.now().year)
-        if ano2.lower() == 'hoje':
-            ano2 = str(datetime.datetime.now().year)
-        if ano1 == '':
-            ano1 = '0'
-        if ano2 == '':
-            ano2 = '10000'
-        self.itemsDesdeOAno = int(ano1)
-        self.itemsAteOAno = int(ano2)
-
-        self.diretorioCache = self.obterParametro('global-diretorio_de_armazenamento_de_cvs')
-        if not self.diretorioCache == '':
-            util.criarDiretorio(self.diretorioCache)
-
-        self.diretorioDoi = self.obterParametro('global-diretorio_de_armazenamento_de_doi')
-        if not self.diretorioDoi == '':
-            util.criarDiretorio(self.diretorioDoi)
+        # FIXME: onde que isto é usado?
+        # self.diretorioDoi = self.obterParametro('global-diretorio_de_armazenamento_de_doi')
+        # if not self.diretorioDoi == '':
+        #     util.criarDiretorio(self.diretorioDoi)
 
         # carregamos a lista de membros
-        entrada = buscarArquivo(self.obterParametro('global-arquivo_de_entrada'))
+        ids = pandas.read_csv(ids_file_path, sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
 
         idSequencial = 0
-        for linha in fileinput.input(entrada.decode('utf8')):
+        for linha in fileinput.input(ids_file_path.decode('utf8')):
             linha = linha.replace("\r", "")
             linha = linha.replace("\n", "")
 
@@ -128,12 +101,11 @@ class Grupo:
 
                 # atribuicao dos valores iniciais para cada membro
                 ###if 'xml' in identificador.lower():
-                ###### self.listaDeMembros.append(Membro(idSequencial, '', nome, periodo, rotulo, self.itemsDesdeOAno, self.itemsAteOAno, xml=identificador))
-                ###	self.listaDeMembros.append(Membro(idSequencial, identificador, nome, periodo, rotulo, self.itemsDesdeOAno, self.itemsAteOAno, diretorioCache))
+                ###### self.listaDeMembros.append(Membro(idSequencial, '', nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano, xml=identificador))
+                ###	self.listaDeMembros.append(Membro(idSequencial, identificador, nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano, diretorioCache))
                 ###else:
                 self.listaDeMembros.append(
-                    Membro(idSequencial, identificador, nome, periodo, rotulo, self.itemsDesdeOAno, self.itemsAteOAno,
-                           self.diretorioCache))
+                    Membro(idSequencial, identificador, nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano))
 
                 self.listaDeRotulos.append(rotulo)
                 idSequencial += 1
@@ -586,16 +558,6 @@ class Grupo:
     def imprimirListaDeRotulos(self):
         for rotulo in self.listaDeRotulos:
             print "[ROTULO] ", rotulo
-
-    def atualizarParametro(self, parametro, valor):
-        parametro = parametro.strip().lower()
-        valor = valor.strip()
-
-        for i in range(0, len(self.listaDeParametros)):
-            if parametro == self.listaDeParametros[i][0]:
-                self.listaDeParametros[i][1] = valor
-                return
-        print "[AVISO IMPORTANTE] Nome de parametro desconhecido: " + parametro
 
     def obterParametro(self, parametro):
         for i in range(0, len(self.listaDeParametros)):

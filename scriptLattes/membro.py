@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -30,6 +30,7 @@ import os
 import pandas
 from lxml import etree
 from baixaLattes import baixaCVLattes
+from cache import cache
 
 from parserLattes import *
 from parserLattesXML import *
@@ -63,7 +64,6 @@ class Membro:
 
     itemsDesdeOAno = ''  # periodo global
     itemsAteOAno = ''  # periodo global
-    diretorioCache = ''  # diretorio de armazento de CVs (útil para extensas listas de CVs)
 
     listaFormacaoAcademica = []
     listaProjetoDePesquisa = []
@@ -134,9 +134,9 @@ class Membro:
 
     tabela_qualis = pandas.DataFrame(columns=['ano', 'area', 'estrato', 'freq'])
 
-    ###def __init__(self, idMembro, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno, xml=''):
+    ###def __init__(self, idMembro, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano, xml=''):
 
-    def __init__(self, idMembro, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno, diretorioCache):
+    def __init__(self, idMembro, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
         self.idMembro = idMembro
         self.idLattes = identificador
         self.nomeInicial = nome
@@ -156,7 +156,6 @@ class Membro:
         self.itemsDesdeOAno = itemsDesdeOAno
         self.itemsAteOAno = itemsAteOAno
         self.criarListaDePeriodos(self.periodo)
-        self.diretorioCache = diretorioCache
 
     def criarListaDePeriodos(self, periodoDoMembro):
         self.listaPeriodo = []
@@ -184,10 +183,11 @@ class Membro:
 
 
     def carregarDadosCVLattes(self):
-        cvPath = self.diretorioCache + '/' + self.idLattes
+        # FIXME: check if cache is being used
+        cv_path = cache.directory / self.idLattes if cache.directory else None
 
-        if 'xml' in cvPath:
-            arquivoX = open(cvPath)
+        if 'xml' in cv_path:
+            arquivoX = open(cv_path)
             cvLattesXML = arquivoX.read()
             arquivoX.close()
 
@@ -198,7 +198,7 @@ class Membro:
 
             self.idLattes = parser.idLattes
             self.url = parser.url
-            print "(*) Utilizando CV armazenado no cache: " + cvPath
+            print "(*) Utilizando CV armazenado no cache: " + cv_path
 
         elif '0000000000000000' == self.idLattes:
             # se o codigo for '0000000000000000' então serao considerados dados de pessoa estrangeira - sem Lattes.
@@ -207,15 +207,15 @@ class Membro:
             return
 
         else:
-            if os.path.exists(cvPath):
-                arquivoH = open(cvPath)
+            if cv_path.exists():
+                arquivoH = open(cv_path)
                 cvLattesHTML = arquivoH.read()
                 if self.idMembro!='':
-                    print "(*) Utilizando CV armazenado no cache: "+cvPath
+                    print "(*) Utilizando CV armazenado no cache: "+cv_path
             else:
                 cvLattesHTML = baixaCVLattes(self.idLattes)
-                if not self.diretorioCache=='':
-                    file = open(cvPath, 'w')
+                if cache.directory:
+                    file = open(cv_path, 'w')
                     file.write(cvLattesHTML)
                     file.close()
                     print " (*) O CV está sendo armazenado no Cache"
