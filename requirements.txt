@@ -1,8 +1,8 @@
-configobj
+configobj == 5.0.6
 setuptools
 matplotlib
 robobrowser
-numpy
+numpy >= 1.10.0
 pygraphviz
 scipy
 BeautifulSoup
@@ -13,3 +13,5 @@ Requests
 pytidylib
 six
 # utidylib
+pathlib
+pandas >= 0.17.0

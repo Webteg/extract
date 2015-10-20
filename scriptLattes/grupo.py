@@ -78,9 +78,15 @@ class Grupo:
         #     util.criarDiretorio(self.diretorioDoi)
 
         # carregamos a lista de membros
-        ids = pandas.read_csv(ids_file_path, sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
+        test = ids_file_path.open().read()
+        # ids = pandas.read_csv(ids_file_path.open(), sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
+        ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, encoding='utf-8', skip_blank_lines=True)
+        column_names = ['identificador', 'nome', 'periodo', 'rotulo']
+        num_columns = len(ids.columns)
+        ids.columns = column_names[:num_columns]
 
         idSequencial = 0
+        # FIXME: keep cleaning
         for linha in fileinput.input(ids_file_path.decode('utf8')):
             linha = linha.replace("\r", "")
             linha = linha.replace("\n", "")

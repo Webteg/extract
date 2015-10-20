@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # FIXME: implementar opção de gravar arquivo de configuração padrão
 # FIXME: resolver caminhos da configuração relativamente ao caminho do arquivo de config, caso a config não seja um caminho absoluto
 
-default_configuration = """
+default_configuration = u"""
 global-nome_do_grupo = string
 global-arquivo_de_entrada = string
 global-diretorio_de_saida = string
