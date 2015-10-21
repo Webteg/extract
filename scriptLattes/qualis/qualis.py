@@ -88,7 +88,7 @@ class Qualis:
 
         # self.periodicos = self.carregar_qualis_de_arquivo(grupo.obterParametro('global-arquivo_qualis_de_periodicos'))
         # qualis extractor -> extrai qualis diretamente da busca online do qualis
-        self.qextractor = QualisExtractor(read_from_cache, arquivo_areas_qualis, data_file_path)
+        self.qextractor = QualisExtractor(read_from_cache, str(arquivo_areas_qualis), data_file_path)
 
         # self.qextractor.extract_qualis()
         # self.qextractor.save_data(data_file_path)

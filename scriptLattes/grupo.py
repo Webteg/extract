@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grupo.py
+import csv
 
 import fileinput
 import unicodedata
 import pandas
+from cache import cache
 
 from geradorDeXML import *
 from qualis import qualis
@@ -61,7 +63,7 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, ids_file_path, desde_ano=0, ate_ano=None):
+    def __init__(self, ids_file_path, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
 
         if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
             desde_ano = str(datetime.datetime.now().year)
@@ -80,7 +82,7 @@ class Grupo:
         test = ids_file_path.open().read()
         # ids = pandas.read_csv(ids_file_path.open(), sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
         ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, engine='python',
-                              encoding='utf-8', skip_blank_lines=True)
+                              encoding='utf-8', skip_blank_lines=True, converters={0: lambda x: str(x)})
         num_columns = len(ids.columns)
         column_names = ['identificador', 'nome', 'periodo', 'rotulo']
         ids.columns = column_names[:num_columns]
@@ -95,15 +97,12 @@ class Grupo:
         self.listaDeRotulos.sort()
         self.listaDeRotulosCores = [''] * len(self.listaDeRotulos)
 
-        if self.obterParametro('global-identificar_publicacoes_com_qualis'):
-            read_from_cache = self.obterParametro('global-usar_cache_qualis')
-            qualis_de_congressos = self.obterParametro('global-arquivo_qualis_de_congressos')
-            areas_qualis = self.obterParametro('global-arquivo_areas_qualis')
-
-            self.qualis = qualis.Qualis(read_from_cache=read_from_cache,
-                                        data_file_path=self.diretorioCache + '/qualis.data',
-                                        arquivo_qualis_de_congressos=qualis_de_congressos,
-                                        arquivo_areas_qualis=areas_qualis)
+        # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
+        read_from_cache = True if cache.file('qualis.data') else False
+        self.qualis = qualis.Qualis(read_from_cache=read_from_cache,
+                                    data_file_path=cache.file('qualis.data'),
+                                    arquivo_qualis_de_congressos=qualis_de_congressos,
+                                    arquivo_areas_qualis=areas_qualis)
 
     def gerarXMLdeGrupo(self):
         if self.obterParametro('global-salvar_informacoes_em_formato_xml'):
@@ -282,7 +281,7 @@ class Grupo:
         for membro in self.listaDeMembros:
             print('\n[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(indice))
             indice += 1
-            membro.carregarDadosCVLattes()
+            membro.carregar_dados_cv_lattes()
             membro.filtrarItemsPorPeriodo()
             print membro
 

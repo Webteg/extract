@@ -97,7 +97,7 @@ class MapaDeGeolocalizacao:
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
 						membro = Membro('', idOrientando, '', '', '', '', '')
-						membro.carregarDadosCVLattes()
+						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':
@@ -115,7 +115,7 @@ class MapaDeGeolocalizacao:
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
 						membro = Membro('', idOrientando, '', '', '', '', '')
-						membro.carregarDadosCVLattes()
+						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':
@@ -133,7 +133,7 @@ class MapaDeGeolocalizacao:
 
 					if len(idOrientando)==16 and cvsProcessados.isdisjoint([idOrientando]):
 						membro = Membro('', idOrientando, '', '', '', '', '')
-						membro.carregarDadosCVLattes()
+						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
 						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':

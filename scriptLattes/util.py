@@ -6,6 +6,9 @@ import shutil
 import sys
 
 import Levenshtein
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 class OutputStream:
@@ -31,6 +34,28 @@ class OutputStream:
                 self.output.write(unicode(text))
             except:
                 self.output.write('ERRO na impressao')
+
+
+def resolve_file_path(file_name, config_file_path):
+    file_path = Path(file_name)
+    if file_path.is_absolute():
+        return file_path
+    return config_file_path.parent.joinpath(file_path).resolve()
+
+
+def find_file(file_name, config_file_path):
+    file_path = Path(file_name)
+    if not file_path.exists():
+        # Path(config_file_path).parent / file_path
+        # file_path = Path(config_file_path).with_name(file_path.name)
+        file_path = config_file_path.parent.joinpath(file_path)
+        if not file_path.exists():
+            logger.error(u"Arquivo de lista de IDs não existe: '{}'".format(file_path))
+            return None
+    if not file_path.is_file():
+        logger.error(u"Caminho para arquivo da lista de IDs '{}' não é um arquivo".format(file_path))
+        return None
+    return file_path.resolve()
 
 
 def buscarArquivo(filepath, arquivoConfiguracao=None):

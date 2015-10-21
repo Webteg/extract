@@ -38,7 +38,6 @@ from charts.geolocalizador import *
 
 
 class Membro:
-    idLattes = None  # ID Lattes
     idMembro = None
     rotulo = ''
 
@@ -138,7 +137,7 @@ class Membro:
 
     def __init__(self, idMembro, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
         self.idMembro = idMembro
-        self.idLattes = identificador
+        self.idLattes = str(identificador)
         self.nomeInicial = nome
         self.nomeCompleto = nome.split(";")[0].strip().decode('utf8', 'replace')
         self.periodo = periodo
@@ -181,12 +180,11 @@ class Membro:
                     print("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}\n".format(self.idLattes,
                                                                                   self.nomeInicial.encode('utf8')))
 
-
-    def carregarDadosCVLattes(self):
+    def carregar_dados_cv_lattes(self):
         # FIXME: check if cache is being used
         cv_path = cache.directory / self.idLattes if cache.directory else None
 
-        if 'xml' in cv_path:
+        if cv_path and 'xml' in str(cv_path):
             arquivoX = open(cv_path)
             cvLattesXML = arquivoX.read()
             arquivoX.close()
@@ -208,29 +206,29 @@ class Membro:
 
         else:
             if cv_path.exists():
-                arquivoH = open(cv_path)
+                arquivoH = cv_path.open()
                 cvLattesHTML = arquivoH.read()
                 if self.idMembro!='':
-                    print "(*) Utilizando CV armazenado no cache: "+cv_path
+                    print "(*) Utilizando CV armazenado no cache: {}".format(cv_path)
             else:
                 cvLattesHTML = baixaCVLattes(self.idLattes)
                 if cache.directory:
-                    file = open(cv_path, 'w')
+                    file = cv_path.open(mode='w')
                     file.write(cvLattesHTML)
                     file.close()
                     print " (*) O CV está sendo armazenado no Cache"
 
-            extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
-            special_chars = ' -'''
-            #cvLattesHTML  = cvLattesHTML.decode('ascii','replace')+extended_chars+special_chars                                          # Wed Jul 25 16:47:39 BRT 2012
-            cvLattesHTML = cvLattesHTML.decode('iso-8859-1', 'replace') + extended_chars + special_chars
+            # extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
+            # special_chars = ' -'''
+            # #cvLattesHTML  = cvLattesHTML.decode('ascii','replace')+extended_chars+special_chars                                          # Wed Jul 25 16:47:39 BRT 2012
+            # cvLattesHTML = cvLattesHTML.decode('iso-8859-1', 'replace') + extended_chars + special_chars
             parser = ParserLattes(self.idMembro, cvLattesHTML)
 
             p = re.compile('[a-zA-Z]+')
             if p.match(self.idLattes):
                 self.identificador10 = self.idLattes
                 self.idLattes = parser.identificador16
-                self.url = 'http://lattes.cnpq.br/' + self.idLattes
+                self.url = 'http://lattes.cnpq.br/{}'.format(self.idLattes)
 
         # -----------------------------------------------------------------------------------------
         # Obtemos todos os dados do CV Lattes

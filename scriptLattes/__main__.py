@@ -20,6 +20,7 @@ from cache import cache
 from grupo import Grupo
 from scriptLattes.log import configure_stream
 from util import criarDiretorio, copiarArquivos
+import util
 from validate import Validator
 
 logger = logging.getLogger(__name__)
@@ -46,9 +47,9 @@ global-salvar_informacoes_em_formato_xml = boolean(default='não')
 
 global-identificar_publicacoes_com_qualis = boolean(default='não')
 global-usar_cache_qualis = boolean(default='sim')
-global-arquivo_areas_qualis = string
-global-arquivo_qualis_de_congressos = string
-global-arquivo_qualis_de_periodicos = string
+global-arquivo_areas_qualis = string(default=None)
+global-arquivo_qualis_de_congressos = string(default=None)
+global-arquivo_qualis_de_periodicos = string(default=None)
 
 relatorio-salvar_publicacoes_em_formato_ris = boolean(default='não')
 relatorio-incluir_artigo_em_periodico = boolean(default='sim')
@@ -153,31 +154,36 @@ def cli():
     logger.info("Executando '{}'".format(' '.join(sys.argv)))
 
     # FIXME: use docopt for command line arguments (or argparse)
-    config_filename = sys.argv[1]
-    if not Path(config_filename).exists():
-        logger.error("Arquivo de configuração '{}' não existe.".format(config_filename))
+    config_file_path = Path(sys.argv[1])
+    if not config_file_path.exists():
+        logger.error("Arquivo de configuração '{}' não existe.".format(config_file_path))
         return -1
-    config = load_config(config_filename)
+    config = load_config(str(config_file_path))
 
     # configure cache
     if 'global-diretorio_de_armazenamento_de_cvs' in config and config.get('global-diretorio_de_armazenamento_de_cvs'):
-        cache.set_directory(config['global-diretorio_de_armazenamento_de_cvs'])
+        cache_path = util.resolve_file_path(config['global-diretorio_de_armazenamento_de_cvs'], config_file_path)
+        cache.set_directory(cache_path)
 
-    ids_file_path = Path(config['global-arquivo_de_entrada'])
-    if not ids_file_path.exists():
-        # Path(sys.argv[1]).parent / ids_filename
-        ids_file_path = Path(sys.argv[1]).with_name(ids_file_path.name)
-        if not ids_file_path.exists():
-            logger.error("Arquivo de lista de IDs não existe: '{}'".format(ids_file_path))
-            return -1
-    if not ids_file_path.is_file():
-        logger.error("Caminho para arquivo da lista de IDs '{}' não é um arquivo".format(ids_file_path))
+    ids_file_path = util.find_file(Path(config['global-arquivo_de_entrada']), config_file_path)
+    if not ids_file_path:
         return -1
-    ids_file_path = ids_file_path.resolve()
+
+    qualis_de_congressos = None
+    areas_qualis = None
+    if 'global-identificar_publicacoes_com_qualis' in config and config['global-identificar_publicacoes_com_qualis']:
+        if config['global-usar_cache_qualis']:
+            cache.new_file('qualis.data')
+        if config['global-arquivo_qualis_de_congressos']:
+            qualis_de_congressos = util.find_file(Path(config['global-arquivo_qualis_de_congressos']), config_file_path)
+        if config['global-arquivo_areas_qualis']:
+            areas_qualis = util.find_file(Path(config['global-arquivo_areas_qualis']), config_file_path)
 
     group = Grupo(ids_file_path=ids_file_path,
                   desde_ano=config['global-itens_desde_o_ano'],
-                  ate_ano=config['global-itens_ate_o_ano'])
+                  ate_ano=config['global-itens_ate_o_ano'],
+                  qualis_de_congressos=qualis_de_congressos,
+                  areas_qualis=areas_qualis)
     # group.imprimirListaDeParametros()
     group.imprimirListaDeRotulos()
 
@@ -196,7 +202,7 @@ def cli():
         group.gerarArquivosTemporarios()  # obrigatorio
 
         # copiar images e css
-        copiarArquivos(group.obterParametro('global-diretorio_de_saida'))
+        copiarArquivos(config['global-diretorio_de_saida'])
 
         # finalizando o processo
         print('\n\n\n[PARA REFERENCIAR/CITAR ESTE SOFTWARE USE]')
