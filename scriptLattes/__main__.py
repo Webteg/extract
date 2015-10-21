@@ -153,10 +153,15 @@ def cli():
     logger.info("Executando '{}'".format(' '.join(sys.argv)))
 
     # FIXME: use docopt for command line arguments (or argparse)
-    config = load_config(sys.argv[1])
+    config_filename = sys.argv[1]
+    if not Path(config_filename).exists():
+        logger.error("Arquivo de configuração '{}' não existe.".format(config_filename))
+        return -1
+    config = load_config(config_filename)
 
     # configure cache
-    cache.set_directory(config['global-diretorio_de_armazenamento_de_cvs'])
+    if 'global-diretorio_de_armazenamento_de_cvs' in config and config.get('global-diretorio_de_armazenamento_de_cvs'):
+        cache.set_directory(config['global-diretorio_de_armazenamento_de_cvs'])
 
     ids_file_path = Path(config['global-arquivo_de_entrada'])
     if not ids_file_path.exists():
@@ -176,7 +181,8 @@ def cli():
     # group.imprimirListaDeParametros()
     group.imprimirListaDeRotulos()
 
-    if criarDiretorio(group.obterParametro('global-diretorio_de_saida')):
+    # if criarDiretorio('global-diretorio_de_saida')):
+    if 'global-diretorio_de_saida' in config:
         group.carregarDadosCVLattes()  # obrigatorio
         group.compilarListasDeItems()  # obrigatorio
         group.identificarQualisEmPublicacoes()  # obrigatorio

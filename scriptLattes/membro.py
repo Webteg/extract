@@ -148,10 +148,10 @@ class Membro:
 
         p = re.compile('[a-zA-Z]+')
 
-        if p.match(identificador):
-            self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=' + identificador
+        if p.match(str(identificador)):
+            self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
         else:
-            self.url = 'http://lattes.cnpq.br/' + identificador
+            self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
 
         self.itemsDesdeOAno = itemsDesdeOAno
         self.itemsAteOAno = itemsAteOAno

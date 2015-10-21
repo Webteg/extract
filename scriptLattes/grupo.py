@@ -21,7 +21,6 @@ class Grupo:
     compilador = None
     listaDeParametros = []
     listaDeMembros = []
-    listaDeRotulos = []
     listaDeRotulosCores = []
     listaDePublicacoesEinternacionalizacao = []
 
@@ -75,48 +74,24 @@ class Grupo:
         # FIXME: onde que isto é usado?
         # self.diretorioDoi = self.obterParametro('global-diretorio_de_armazenamento_de_doi')
         # if not self.diretorioDoi == '':
-        #     util.criarDiretorio(self.diretorioDoi)
+        # util.criarDiretorio(self.diretorioDoi)
 
         # carregamos a lista de membros
         test = ids_file_path.open().read()
         # ids = pandas.read_csv(ids_file_path.open(), sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
-        ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, encoding='utf-8', skip_blank_lines=True)
-        column_names = ['identificador', 'nome', 'periodo', 'rotulo']
+        ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, engine='python',
+                              encoding='utf-8', skip_blank_lines=True)
         num_columns = len(ids.columns)
+        column_names = ['identificador', 'nome', 'periodo', 'rotulo']
         ids.columns = column_names[:num_columns]
+        ids = ids.reindex(columns=column_names, fill_value='')  # Add new columns with empty strings
 
-        idSequencial = 0
-        # FIXME: keep cleaning
-        for linha in fileinput.input(ids_file_path.decode('utf8')):
-            linha = linha.replace("\r", "")
-            linha = linha.replace("\n", "")
+        for index, row in ids.iterrows():
+            self.listaDeMembros.append(
+                Membro(index, row['identificador'], row['nome'], row['periodo'], row['rotulo'],
+                       self.items_desde_ano, self.items_ate_ano))
 
-            linhaPart = linha.partition("#")  # eliminamos os comentários
-            linhaDiv = linhaPart[0].split(",")
-            if ';' in linhaPart[0] and len(linhaDiv) < 2:
-                linhaDiv = linhaPart[0].split(";")
-            if '\t' in linhaPart[0] and len(linhaDiv) < 2:
-                linhaDiv = linhaPart[0].split("\t")
-
-            if linhaDiv[0].strip():
-                identificador = linhaDiv[0].strip() if len(linhaDiv) > 0 else ''
-                nome = linhaDiv[1].strip() if len(linhaDiv) > 1 else ''
-                periodo = linhaDiv[2].strip() if len(linhaDiv) > 2 else ''
-                rotulo = linhaDiv[3].strip() if len(linhaDiv) > 3 and linhaDiv[3].strip() else '[Sem rotulo]'
-                # rotulo        = rotulo.capitalize()
-
-                # atribuicao dos valores iniciais para cada membro
-                ###if 'xml' in identificador.lower():
-                ###### self.listaDeMembros.append(Membro(idSequencial, '', nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano, xml=identificador))
-                ###	self.listaDeMembros.append(Membro(idSequencial, identificador, nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano, diretorioCache))
-                ###else:
-                self.listaDeMembros.append(
-                    Membro(idSequencial, identificador, nome, periodo, rotulo, self.items_desde_ano, self.items_ate_ano))
-
-                self.listaDeRotulos.append(rotulo)
-                idSequencial += 1
-
-        self.listaDeRotulos = list(set(self.listaDeRotulos))  # lista unica de rotulos
+        self.listaDeRotulos = ids['rotulo'].unique()
         self.listaDeRotulos.sort()
         self.listaDeRotulosCores = [''] * len(self.listaDeRotulos)
 
@@ -266,7 +241,7 @@ class Grupo:
         if colorstring[0] == '#': colorstring = colorstring[1:]
         r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
         r, g, b = [int(n, 16) for n in (r, g, b)]
-        #return (r, g, b)
+        # return (r, g, b)
         return str(r) + "," + str(g) + "," + str(b)
 
     def imprimeCSVListaIndividual(self, nomeCompleto, lista):
@@ -357,8 +332,9 @@ class Grupo:
             # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
             self.qualis.qextractor.save_data(filename)
 
-            self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico, self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-                        self.compilador.listaCompletaResumoExpandidoEmCongresso)
+            self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
+                                                   self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
+                                                   self.compilador.listaCompletaResumoExpandidoEmCongresso)
 
     def salvarListaTXT(self, lista, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')
@@ -565,15 +541,15 @@ class Grupo:
         for rotulo in self.listaDeRotulos:
             print "[ROTULO] ", rotulo
 
-    def obterParametro(self, parametro):
-        for i in range(0, len(self.listaDeParametros)):
-            if parametro == self.listaDeParametros[i][0]:
-                if self.listaDeParametros[i][1].lower() == 'sim':
-                    return 1
-                if self.listaDeParametros[i][1].lower() == 'nao' or self.listaDeParametros[i][1].lower() == 'não':
-                    return 0
-
-                return self.listaDeParametros[i][1]
+    # def obterParametro(self, parametro):
+    #     for i in range(0, len(self.listaDeParametros)):
+    #         if parametro == self.listaDeParametros[i][0]:
+    #             if self.listaDeParametros[i][1].lower() == 'sim':
+    #                 return 1
+    #             if self.listaDeParametros[i][1].lower() == 'nao' or self.listaDeParametros[i][1].lower() == 'não':
+    #                 return 0
+    #
+    #             return self.listaDeParametros[i][1]
 
     def atribuirCoNoRotulo(self, indice, cor):
         self.listaDeRotulosCores[indice] = cor

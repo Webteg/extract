@@ -9,7 +9,7 @@ BeautifulSoup
 python_Levenshtein
 Pillow
 # PySide
-Requests
+Requests >= 2.8.1
 pytidylib
 six
 # utidylib
