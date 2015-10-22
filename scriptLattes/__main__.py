@@ -1,23 +1,48 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-scriptlattes.__main__
-~~~~~~~~~~~~~~~~~~~~~
+scriptLattes
+~~~~~~~~~~~~
 
 The main entry point for the command line interface.
 
 Invoke as ``scriptlattes`` (if installed)
 or ``python -m scriptlattes`` (no install required).
+
+Usage:
+  scriptlattes [options] CONFIG_FILE [--offline]
+  scriptlattes [options] download CONFIG_FILE
+  scriptlattes [options] extract CONFIG_FILE [--offline]
+  scriptlattes process CONFIG_FILE [--offline]
+  scriptlattes report CONFIG_FILE [--offline]
+  scriptlattes (-h | --help | --version)
+
+Arguments:
+  CONFIG_FILE  arquivo de configuração
+
+Options:
+  -h --help            show this help message and exit
+  --version            show version and exit
+  -v --verbose         log debug messages
+  -q --quiet           log only warning and error messages
+
+Other:
+  --offline            do not try to download data; instead, use persisted data configured in CONFIG_FILE
 """
+
 from __future__ import absolute_import, unicode_literals
 import logging
 import sys
 
+from docopt import docopt
 from configobj import ConfigObj
 import pandas
 from pathlib import Path
 
-from persist import cache
+from fetch.download_html import download_html
+from parserLattesHTML import ParserLattesHTML
+from extract.parserLattesXML import ParserLattesXML
+from persist.cache import cache
 from grupo import Grupo
 from persist.store import Store
 from scriptLattes.log import configure_stream
@@ -25,12 +50,11 @@ from util import copiarArquivos
 import util
 from validate import Validator
 
-
 logger = logging.getLogger(__name__)
+
 
 # FIXME: incluir comentários abaixo (retirar dos exemplos)
 # FIXME: implementar opção de gravar arquivo de configuração padrão
-# FIXME: resolver caminhos da configuração relativamente ao caminho do arquivo de config, caso a config não seja um caminho absoluto
 
 default_configuration = u"""
 global-nome_do_grupo = string
@@ -160,15 +184,22 @@ def read_list_file(ids_file_path):
 
 
 def cli():
+    # FIXME: use docopt for command line arguments (or argparse)
+    arguments = docopt(__doc__, argv=None, help=True, version='9.0.0', options_first=False)
+
     """Add some useful functionality here or import from a submodule."""
     # configure root logger to print to STDERR
-    configure_stream(level='DEBUG')
+    if arguments['--verbose']:
+        configure_stream(level='DEBUG')
+    elif arguments['--quiet']:
+        configure_stream(level='WARNING')
+    else:
+        configure_stream(level='INFO')
 
     # launch the command line interface
     logger.info("Executando '{}'".format(' '.join(sys.argv)))
 
-    # FIXME: use docopt for command line arguments (or argparse)
-    config_file_path = Path(sys.argv[1])
+    config_file_path = Path(arguments['CONFIG_FILE'])
     if not config_file_path.exists():
         logger.error("Arquivo de configuração '{}' não existe.".format(config_file_path))
         return -1
@@ -206,13 +237,78 @@ def cli():
     # group.imprimirListaDeParametros()
     group.imprimirListaDeRotulos()
 
+    cvs_content = {'html': {}, 'xml': {}}
+    use_xml = False  # FIXME: definir opção no arquivo de config
+    if arguments['download'] or (arguments['extract'] and not arguments['--offline']):
+        # obter/carregar
+        for id_lattes in ids['identificador']:
+            if use_xml:
+                # TODO: tentar usar webservice do CNPq
+                raise "Download de CVs em XML ainda não implementado."
+                # cvs_content['xml'][id_lattes] = cv_xml
+            else:  # use html
+                cv_html = download_html(id_lattes)
+                if cache.directory:
+                    id_file = cache.new_file(id_lattes)
+                    with id_file.open('w') as f:
+                        f.write(cv_html)
+                        logger.info("CV '{}' armazenado na cache.".format(id_lattes))
+                cvs_content['html'][id_lattes] = cv_html
+
+    if arguments['extract']:
+        # extrair/carregar
+        # parser = extract()
+        if arguments['--offline']:
+            if not cache.cache_directory:
+                logger.error("Opção --offline exige que um diretório de cache válido seja usado; verifique seu arquivo de configuração.")
+                return -1
+            for id_lattes in ids['identificador']:
+                if id_lattes == '0000000000000000':
+                    # se o codigo for '0000000000000000' então serao considerados dados de pessoa estrangeira - sem Lattes.
+                    # sera procurada a coautoria endogena com os outros membro.
+                    # para isso é necessario indicar o nome abreviado no arquivo .list
+                    # FIXME: verificar se ainda funciona
+                    continue
+                try:
+                    cv_path = (cache.directory / id_lattes).resolve()
+                except OSError:
+                    logger.error("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
+                    continue
+
+                with cv_path.open() as f:
+                    cv_lattes_content = f.read()
+                logger.debug("Utilizando CV armazenado no cache: {}.".format(cv_path))
+
+                if use_xml:
+                    # TODO: verificar se realmente isto é necessário
+                    extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
+                    special_chars = ' -'''
+                    cv_lattes_content = cv_lattes_content.decode('iso-8859-1', 'replace') + extended_chars + special_chars
+
+                    cvs_content['xml'][id_lattes] = cv_lattes_content
+                else:
+                    # extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
+                    # special_chars = ' -'''
+                    # #cvLattesHTML  = cvLattesHTML.decode('ascii','replace')+extended_chars+special_chars                                          # Wed Jul 25 16:47:39 BRT 2012
+                    # cvLattesHTML = cvLattesHTML.decode('iso-8859-1', 'replace') + extended_chars + special_chars
+                    cvs_content['html'][id_lattes] = cv_lattes_content
+
+        for id_lattes in ids['identificador']:
+            if use_xml:
+                parser = ParserLattesXML(id_lattes, cvs_content['xml'][id_lattes])
+            else:
+                parser = ParserLattesHTML(id_lattes, cvs_content['html'][id_lattes])
+
+    if arguments['process']:
+        # processar/carregar
+        pass
+
+    if arguments['report']:
+        pass
+
 
     # if criarDiretorio('global-diretorio_de_saida')):
     if 'global-diretorio_de_saida' in config:
-        obter/carregar
-        extrair/carregar
-            parser = extract()
-        processar/carregar
 
         group.carregarDadosCVLattes(parser)  # obrigatorio
         group.compilarListasDeItems()  # obrigatorio

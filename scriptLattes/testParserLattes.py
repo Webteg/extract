@@ -1,18 +1,18 @@
 #!/usr/bin/python
 # encoding: utf-8
-# filename: parserLattes.py
+# filename: parserLattesHTML.py
 #
 #  scriptLattes V8
 #  Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -90,7 +90,7 @@ from participacaoEmEvento import *
 
 
 class ParserLattes:
-	
+
 	# arvore do html
 	tree = None
 
@@ -105,8 +105,8 @@ class ParserLattes:
 	atualizacaoCV = ''
 	foto = ''
 	textoResumo = ''
-	
-	
+
+
 	salvarIdentificador16 = None
 	salvarNome = None
 	salvarBolsaProdutividade = None
@@ -140,7 +140,7 @@ class ParserLattes:
 	achouOrientacoes = None
 	achouOutrasInformacoesRelevantes = None
 	spanInformacaoArtigo = None
-	
+
 	recuperarIdentificador16 = None
 
 
@@ -177,7 +177,7 @@ class ParserLattes:
 	achouDesenhoIndustrial = None
 	achouPatenteRegistro = None
 
-	
+
 	achouProducaoArtistica = None
 
 	achouOrientacoesEmAndamento	= None
@@ -224,7 +224,7 @@ class ParserLattes:
 	listaPatente = []
 	listaProgramaComputador = []
 	listaDesenhoIndustrial = []
-		
+
 	listaProducaoArtistica = []
 
 	# Orientaççoes em andamento (OA)
@@ -293,7 +293,7 @@ class ParserLattes:
 		self.listaPatente = []
 		self.listaProgramaComputador = []
 		self.listaDesenhoIndustrial = []
-				
+
 		self.listaProducaoArtistica = []
 
 		self.listaOASupervisaoDePosDoutorado = []
@@ -317,7 +317,7 @@ class ParserLattes:
 
 
 		# inicializacao para evitar a busca exaustiva de algumas palavras-chave
-		self.salvarAtualizacaoCV = 1 
+		self.salvarAtualizacaoCV = 1
 		self.salvarFoto = 1
 		self.procurarCabecalho = 0
 		self.achouGrupo = 0
@@ -329,7 +329,7 @@ class ParserLattes:
 		utf8_parser = etree.HTMLParser(encoding="utf-8")
 		self.tree = etree.HTML(cvLattesHTML, parser=utf8_parser)
 		#print etree.tostring(self.tree)
-		
+
 		self.set_nome()
 		self.set_bolsa_produtividade()
 		self.set_resumo()
@@ -357,7 +357,7 @@ class ParserLattes:
 		# self.feed(cvLattesHTML)
 
 	# ------------------------------------------------------------------------ #
-	
+
 	def parse_issn(self,url):
 		s = url.find('issn=')
 		if s == -1:
@@ -365,13 +365,13 @@ class ParserLattes:
 		e = url.find('&',s)
 		if e == -1:
 			return None
-		
+
 		issnvalue = url[s:e].split('=')
 		issn = issnvalue[1]
 		if len(issn) < 8: return
 		issn = issn[:8]
 		self.issn = issn[0:4]+'-'+issn[4:8]
-	
+
 
 
 	def parar(self):
@@ -431,7 +431,7 @@ class ParserLattes:
 		txts = self.get_table_of("Endereco")
 		self.enderecoProfissional = txts["Endereço Profissional"]
 		# print self.enderecoProfissional
-	
+
 
 	def set_formacao_academica(self):
 		txts = self.get_table_of("FormacaoAcademica")
@@ -459,10 +459,10 @@ class ParserLattes:
 					self.salvarNome = 1
 					self.item = ''
 					break
-		
+
 		if tag=='li':
 			self.recuperarIdentificador16 = 1
-					  
+
 		if tag=='p':
 			for name, value in attributes:
 				if name=='class' and value=='resumo':
@@ -480,15 +480,15 @@ class ParserLattes:
 			self.item = ''
 
 		if tag=='div':
-			
+
 			for name, value in attributes:
 				if name == 'cvuri':
 					self.parse_issn(value)
-					
-			
+
+
 			for name, value in attributes:
 				if name=='class' and value=='title-wrapper':
-					self.umaUnidade = 1	
+					self.umaUnidade = 1
 					break
 
 			for name, value in attributes:
@@ -508,17 +508,17 @@ class ParserLattes:
 					if self.salvarParte1:
 						self.salvarParte1 = 0
 						self.salvarParte2 = 1
-				
+
 				if name=='class' and value=='layout-cell-pad-5 text-align-right':
 					self.item = ''
-					if self.achouFormacaoAcademica or self.achouAtuacaoProfissional or self.achouProjetoDePesquisa or self.achouMembroDeCorpoEditorial or self.achouRevisorDePeriodico or self.achouAreaDeAtuacao or self.achouIdioma or self.achouPremioOuTitulo or self.salvarItem: 
+					if self.achouFormacaoAcademica or self.achouAtuacaoProfissional or self.achouProjetoDePesquisa or self.achouMembroDeCorpoEditorial or self.achouRevisorDePeriodico or self.achouAreaDeAtuacao or self.achouIdioma or self.achouPremioOuTitulo or self.salvarItem:
 						self.salvarParte1 = 1
 						self.salvarParte2 = 0
 						if not self.salvarParte3:
 							self.partesDoItem = []
 
 
-		if tag=='h1' and self.umaUnidade: 
+		if tag=='h1' and self.umaUnidade:
 			self.procurarCabecalho = 1
 
 			self.achouIdentificacao = 0
@@ -543,7 +543,7 @@ class ParserLattes:
 			self.achouPatenteRegistro = 0
 
 		if tag=='img':
-			if self.salvarFoto: 
+			if self.salvarFoto:
 				for name, value in attributes:
 					if name=='src' and u'servletrecuperafoto' in value:
 						self.foto = value
@@ -555,26 +555,26 @@ class ParserLattes:
 					if name=='src' and u'ico_relevante' in value:
 						self.relevante = 1
 						break
-				
+
 				"""for name,value in attributes:
 					if name=='data-issn':
 						if len(value) == 8:
 							self.issn = value[0:4]+'-'+value[4:8]
 						break
-				""" 
-			
-			
-			
+				"""
+
+
+
 
 		if tag=='br':
 			self.item = self.item + ' '
-		
+
 		if tag=='span':
 			if self.achouProducaoEmCTA:
 				for name, value in attributes:
 					if name=='class' and value==u'informacao-artigo':
 						self.spanInformacaoArtigo = 1
-		
+
 		if tag=='a':
 			if self.salvarItem: # and self.achouArtigoEmPeriodico:
 				for name, value in attributes:
@@ -610,17 +610,17 @@ class ParserLattes:
 			self.bolsaProdutividade = re.sub('Bolsista de Produtividade em Pesquisa do CNPq - ','', self.bolsaProdutividade)
 			self.bolsaProdutividade = self.bolsaProdutividade.strip('()')
 			self.salvarBolsaProdutividade = 0
-		
+
 		if tag=='span' and self.salvarIdentificador16 == 1:
 			self.identificador16 = re.findall(u'http://lattes.cnpq.br/(\d{16})', value)
 			self.salvarIdentificador16 = 0
-			
+
 		# Cabeçalhos
 		if tag=='h1' and self.procurarCabecalho:
 			self.procurarCabecalho = 0
 
 
-		if tag=='div': 
+		if tag=='div':
 			if self.salvarNomeEmCitacoes:
 				self.nomeEmCitacoesBibliograficas = stripBlanks(self.item)
 				self.salvarNomeEmCitacoes = 0
@@ -635,7 +635,7 @@ class ParserLattes:
 				self.enderecoProfissional = re.sub("\"", '', self.enderecoProfissional)
 				self.salvarEnderecoProfissional = 0
 				self.achouEnderecoProfissional = 0
-			
+
 			if (self.salvarParte1 and not self.salvarParte2) or (self.salvarParte2 and not self.salvarParte1) :
 				if len(stripBlanks(self.item))>0:
 					self.partesDoItem.append(stripBlanks(self.item)) # acrescentamos cada celula da linha em uma lista!
@@ -666,11 +666,11 @@ class ParserLattes:
 
 					#if self.achouRevisorDePeriodico:
 					#	print self.partesDoItem
-					
+
 					if self.achouAreaDeAtuacao and len(self.partesDoItem)>=2:
 						iessimaAreaDeAtucao = AreaDeAtuacao(self.partesDoItem) # criamos um objeto com a lista correspondentes às celulas da linha
 						self.listaAreaDeAtuacao.append(iessimaAreaDeAtucao) # acrescentamos o objeto de AreaDeAtuacao
-					
+
 					if self.achouIdioma and len(self.partesDoItem)>=2:
 						iessimoIdioma = Idioma(self.partesDoItem) # criamos um objeto com a lista correspondentes às celulas da linha
 						self.listaIdioma.append(iessimoIdioma) # acrescentamos o objeto de Idioma
@@ -684,7 +684,7 @@ class ParserLattes:
 						#print "===>>>> PROCESSANDO PATENTE e REGISTRO"
 						if self.achouPatente:
 							iessimoItem = Patente(self.idMembro, self.partesDoItem, self.relevante)
-							self.listaPatente.append(iessimoItem)    
+							self.listaPatente.append(iessimoItem)
 						if self.achouProgramaComputador:
 							iessimoItem = ProgramaComputador(self.idMembro, self.partesDoItem, self.relevante)
 							self.listaProgramaComputador.append(iessimoItem)
@@ -701,50 +701,50 @@ class ParserLattes:
 								self.doi = ''
 								self.issn = ''
 								self.relevante = 0
-	
+
 							if self.achouLivroPublicado:
 								iessimoItem = LivroPublicado(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaLivroPublicado.append(iessimoItem)
 								self.relevante = 0
-	
+
 							if self.achouCapituloDeLivroPublicado:
 								iessimoItem = CapituloDeLivroPublicado(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaCapituloDeLivroPublicado.append(iessimoItem)
 								self.relevante = 0
-					
+
 							if self.achouTextoEmJornalDeNoticia:
 								iessimoItem = TextoEmJornalDeNoticia(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaTextoEmJornalDeNoticia.append(iessimoItem)
 								self.relevante = 0
-					
+
 							if self.achouTrabalhoCompletoEmCongresso:
 								iessimoItem = TrabalhoCompletoEmCongresso(self.idMembro, self.partesDoItem, self.doi, self.relevante)
 								self.listaTrabalhoCompletoEmCongresso.append(iessimoItem)
 								self.doi = ''
 								self.relevante = 0
-						
+
 							if self.achouResumoExpandidoEmCongresso:
 								iessimoItem = ResumoExpandidoEmCongresso(self.idMembro, self.partesDoItem, self.doi, self.relevante)
 								self.listaResumoExpandidoEmCongresso.append(iessimoItem)
 								self.doi = ''
 								self.relevante = 0
-					
+
 							if self.achouResumoEmCongresso:
 								iessimoItem = ResumoEmCongresso(self.idMembro, self.partesDoItem, self.doi, self.relevante)
 								self.listaResumoEmCongresso.append(iessimoItem)
 								self.doi = ''
 								self.relevante = 0
-	
+
 							if self.achouArtigoAceito:
 								iessimoItem =  ArtigoAceito(self.idMembro, self.partesDoItem, self.doi, self.relevante)
 								self.listaArtigoAceito.append(iessimoItem)
 								self.doi = ''
 								self.relevante = 0
-					
+
 							if self.achouApresentacaoDeTrabalho:
 								iessimoItem =  ApresentacaoDeTrabalho(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaApresentacaoDeTrabalho.append(iessimoItem)
-	
+
 							if self.achouOutroTipoDeProducaoBibliografica:
 								iessimoItem = OutroTipoDeProducaoBibliografica(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaOutroTipoDeProducaoBibliografica.append(iessimoItem)
@@ -754,23 +754,23 @@ class ParserLattes:
 							if self.achouSoftwareComPatente:
 								iessimoItem = SoftwareComPatente(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaSoftwareComPatente.append(iessimoItem)
-	
+
 							if self.achouSoftwareSemPatente:
 								iessimoItem = SoftwareSemPatente(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaSoftwareSemPatente.append(iessimoItem)
-						
+
 							if self.achouProdutoTecnologico:
 								iessimoItem = ProdutoTecnologico(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaProdutoTecnologico.append(iessimoItem)
-	
+
 							if self.achouProcessoOuTecnica:
 								iessimoItem = ProcessoOuTecnica(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaProcessoOuTecnica.append(iessimoItem)
-	
+
 							if self.achouTrabalhoTecnico:
 								iessimoItem = TrabalhoTecnico(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaTrabalhoTecnico.append(iessimoItem)
-	
+
 							if self.achouOutroTipoDeProducaoTecnica:
 								iessimoItem = OutroTipoDeProducaoTecnica(self.idMembro, self.partesDoItem, self.relevante)
 								self.listaOutroTipoDeProducaoTecnica.append(iessimoItem)
@@ -850,7 +850,7 @@ class ParserLattes:
 			self.item = self.item + htmlentitydecode(dado)
 
 		dado = stripBlanks(dado)
-			
+
 		if self.salvarAtualizacaoCV:
 			data = re.findall(u'Última atualização do currículo em (\d{2}/\d{2}/\d{4})', dado)
 			if len(data)>0: # se a data de atualizacao do CV for identificada
@@ -893,10 +893,10 @@ class ParserLattes:
 				self.achouOrientacoes = 1
 			if u'Patentes e registros'== dado:
 				self.achouPatenteRegistro = 1
-				#print "0==>>>>ACHOU PATENTE e REGISTRO"	
+				#print "0==>>>>ACHOU PATENTE e REGISTRO"
 			if u'Outras informações relevantes'==dado:
 				self.achouOutrasInformacoesRelevantes = 1
-			self.umaUnidade = 0	
+			self.umaUnidade = 0
 		if self.achouIdentificacao:
 			if u'Nome em citações bibliográficas'==dado:
 				self.achouNomeEmCitacoes = 1
@@ -912,20 +912,20 @@ class ParserLattes:
 				self.salvarItem = 1
 				self.achouPatente = 1
 				self.achouProgramaComputador = 0
-				self.achouDesenhoIndustrial = 0					
-				#print "1==>>>>ACHOU PATENTE e REGISTRO"				
+				self.achouDesenhoIndustrial = 0
+				#print "1==>>>>ACHOU PATENTE e REGISTRO"
 			if u'Programa de computador'==dado:
 				self.salvarItem = 1
 				self.achouPatente = 0
 				self.achouProgramaComputador = 1
-				self.achouDesenhoIndustrial = 0	
+				self.achouDesenhoIndustrial = 0
 				#print "2==>>>>ACHOU PATENTE e REGISTRO"
 			if u'Desenho industrial'==dado:
 				self.salvarItem = 1
 				self.achouPatente = 0
 				self.achouProgramaComputador = 0
-				self.achouDesenhoIndustrial = 1			
-			
+				self.achouDesenhoIndustrial = 1
+
 		if self.achouProducoes:
 			if u'Produção bibliográfica'==dado:
 				self.achouProducaoEmCTA = 1
@@ -939,7 +939,7 @@ class ParserLattes:
 				self.achouProducaoEmCTA = 0
 				self.achouProducaoTecnica = 0
 				self.achouProducaoArtisticaCultural= 1
-			
+
 			if u'Demais trabalhos'==dado:
 				self.salvarItem = 0
 				self.achouProducaoEmCTA = 0
@@ -1129,14 +1129,14 @@ class ParserLattes:
 				#	self.achouProcessoOuTecnica = 0
 				#	self.achouTrabalhoTecnico = 0
 				#	self.achouOutroTipoDeProducaoTecnica = 0
-	
+
 			if self.achouProducaoArtisticaCultural:
 				#if u'Produção artística/cultural'==dado:
 				if u'Outras produções artísticas/culturais'==dado or u'Artes Cênicas'==dado or u'Música'==dado:
-					# separar as listas de producoes artisticas por tipos 
+					# separar as listas de producoes artisticas por tipos
 					self.salvarItem = 1
 					self.achouOutraProducaoArtisticaCultural = 1
-			
+
 		if self.achouBancas:
 			if u'Participação em bancas de trabalhos de conclusão'==dado:
 				self.salvarItem = 0
@@ -1227,7 +1227,7 @@ class ParserLattes:
 
 		if self.achouOutrasInformacoesRelevantes:
 			self.salvarItem = 0
-				
+
 		if self.recuperarIdentificador16 and self.identificador16 == '':
 		  id = re.findall(u'http://lattes.cnpq.br/(\d{16})', dado)
 		  if len(id) > 0:
@@ -1244,9 +1244,9 @@ class ParserLattes:
 def stripBlanks(s):
 	return re.sub('\s+', ' ', s).strip()
 
-def htmlentitydecode(s):                                                                               
-	return re.sub('&(%s);' % '|'.join(name2codepoint),                                                 
-		lambda m: unichr(name2codepoint[m.group(1)]), s)   
+def htmlentitydecode(s):
+	return re.sub('&(%s);' % '|'.join(name2codepoint),
+		lambda m: unichr(name2codepoint[m.group(1)]), s)
 
 
 
@@ -1257,8 +1257,8 @@ if __name__ == "__main__":
 	"0362417828475021", "5416099300504556", "0926213060635986",
 	"0644408634493034", "5251389003736909", "1647118503085126",
 	"2240951178648368", "4727357182510680",
-	"1228255861618623", "1660070580824436", "2837012019824386"] 
-	
+	"1228255861618623", "1660070580824436", "2837012019824386"]
+
 	baseUrl = 'http://lattes.cnpq.br'
 	cvPath = ''
 	idMembro = -1
@@ -1284,7 +1284,7 @@ if __name__ == "__main__":
 			while tentativa < 5:
 				try:
 					txdata = None
-					txheaders = {   
+					txheaders = {
 					'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0) Gecko/20100101 Firefox/4.0',
 					'Accept-Language': 'en-us,en;q=0.5',
 					'Accept-Encoding': 'deflate',
@@ -1293,11 +1293,11 @@ if __name__ == "__main__":
 					'Cache-Control': 'max-age=0',
 					'Cookie': 'style=standard; __utma=140185953.294397416.1313390179.1313390179.1317145115.2; __utmz=140185953.1317145115.2.2.utmccn=(referral)|utmcsr=emailinstitucional.cnpq.br|utmcct=/ei/emailInstitucional.do|utmcmd=referral; JSESSIONID=1B98ABF9642E01597AABA0F7A8807FD1.node2',
 					}
-	
+
 					print "Baixando CV: "+urlLattes
 
 					req = urllib2.Request(urlLattes, txdata, txheaders) # Young folks by P,B&J!
-					arquivoH = urllib2.urlopen(req) 
+					arquivoH = urllib2.urlopen(req)
 					cvLattesHTML = arquivoH.read()
 					arquivoH.close()
 					time.sleep(1)
@@ -1329,7 +1329,7 @@ if __name__ == "__main__":
 		#cvLattesHTML  = cvLattesHTML.decode('ascii','replace')+extended_chars+special_chars                                          # Wed Jul 25 16:47:39 BRT 2012
 		cvLattesHTML  = cvLattesHTML.decode('iso-8859-1','replace')+extended_chars+special_chars
 		parser        = ParserLattes(idMembro, cvLattesHTML)
-		
+
 		p = re.compile('[a-zA-Z]+');
 		if p.match(idLattes):
 		  # self.identificador10 = idLattes

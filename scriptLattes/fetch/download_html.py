@@ -1,11 +1,14 @@
 #!/usr/bin/python
 # encoding: utf-8
-
+import logging
 import time
 import random
 import re
 
 from robobrowser.browser import RoboBrowser
+
+
+logger = logging.getLogger(__name__)
 
 
 # try:
@@ -108,7 +111,6 @@ def download_html(id_lattes, debug=True):
     # depois de 5 tentativas, verifiquemos se existe uma nova versao do baixaLattes
     __self_update()
     if debug:
-        print '[AVISO] Nao é possível obter o CV Lattes: ', id_lattes
-        print '[AVISO] Certifique-se que o CV existe.'
+        logger.error('Não foi possível obter o CV Lattes: {}. Certifique-se que o CV existe.'.format(id_lattes))
 
-    raise Exception("Nao foi possivel baixar o CV Lattes em 5 tentativas")
+    raise Exception('Não foi possível baixar o CV Lattes em 5 tentativas')

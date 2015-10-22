@@ -1,3 +1,4 @@
+docopt
 configobj == 5.0.6
 setuptools
 matplotlib
@@ -15,3 +16,4 @@ six
 # utidylib
 pathlib
 pandas >= 0.17.0
+tables

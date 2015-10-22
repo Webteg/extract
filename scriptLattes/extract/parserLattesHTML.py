@@ -1,18 +1,18 @@
 #!/usr/bin/python
 # encoding: utf-8
-# filename: parserLattes.py
+# filename: parserLattesHTML.py
 #
 # scriptLattes V8
 # Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -63,7 +63,7 @@ from eventos.organizacaoDeEvento import *
 from eventos.participacaoEmEvento import *
 
 
-class ParserLattes(HTMLParser):
+class ParserLattesHTML(HTMLParser):
 
     identificador16 = ''
     item = None
@@ -591,12 +591,12 @@ class ParserLattes(HTMLParser):
                                 self.issn = ''
                                 self.relevante = 0
                                 self.complemento = ''
-    
+
                             if self.achouLivroPublicado:
                                 iessimoItem = LivroPublicado(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaLivroPublicado.append(iessimoItem)
                                 self.relevante = 0
-    
+
                             if self.achouCapituloDeLivroPublicado:
                                 iessimoItem = CapituloDeLivroPublicado(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaCapituloDeLivroPublicado.append(iessimoItem)
@@ -627,7 +627,7 @@ class ParserLattes(HTMLParser):
                                 self.listaResumoEmCongresso.append(iessimoItem)
                                 self.doi = ''
                                 self.relevante = 0
-    
+
                             if self.achouArtigoAceito:
                                 iessimoItem = ArtigoAceito(self.idMembro, self.partesDoItem, self.doi, self.relevante)
                                 self.listaArtigoAceito.append(iessimoItem)
@@ -637,7 +637,7 @@ class ParserLattes(HTMLParser):
                             if self.achouApresentacaoDeTrabalho:
                                 iessimoItem = ApresentacaoDeTrabalho(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaApresentacaoDeTrabalho.append(iessimoItem)
-    
+
                             if self.achouOutroTipoDeProducaoBibliografica:
                                 iessimoItem = OutroTipoDeProducaoBibliografica(self.idMembro, self.partesDoItem,
                                                                                self.relevante)
@@ -648,7 +648,7 @@ class ParserLattes(HTMLParser):
                             if self.achouSoftwareComPatente:
                                 iessimoItem = SoftwareComPatente(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaSoftwareComPatente.append(iessimoItem)
-    
+
                             if self.achouSoftwareSemPatente:
                                 iessimoItem = SoftwareSemPatente(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaSoftwareSemPatente.append(iessimoItem)
@@ -656,15 +656,15 @@ class ParserLattes(HTMLParser):
                             if self.achouProdutoTecnologico:
                                 iessimoItem = ProdutoTecnologico(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaProdutoTecnologico.append(iessimoItem)
-    
+
                             if self.achouProcessoOuTecnica:
                                 iessimoItem = ProcessoOuTecnica(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaProcessoOuTecnica.append(iessimoItem)
-    
+
                             if self.achouTrabalhoTecnico:
                                 iessimoItem = TrabalhoTecnico(self.idMembro, self.partesDoItem, self.relevante)
                                 self.listaTrabalhoTecnico.append(iessimoItem)
-    
+
                             if self.achouOutroTipoDeProducaoTecnica:
                                 iessimoItem = OutroTipoDeProducaoTecnica(self.idMembro, self.partesDoItem,
                                                                          self.relevante)
@@ -1024,7 +1024,7 @@ class ParserLattes(HTMLParser):
                 #	self.achouProcessoOuTecnica = 0
                 #	self.achouTrabalhoTecnico = 0
                 #	self.achouOutroTipoDeProducaoTecnica = 0
-    
+
             if self.achouProducaoArtisticaCultural:
                 #if u'Produção artística/cultural'==dado:
                 if u'Outras produções artísticas/culturais'==dado or u'Artes Cênicas'==dado or u'Música'==dado:
@@ -1139,7 +1139,7 @@ class ParserLattes(HTMLParser):
 def stripBlanks(s):
     return re.sub('\s+', ' ', s).strip()
 
-def htmlentitydecode(s):                                                                               
+def htmlentitydecode(s):
     return re.sub('&(%s);' % '|'.join(name2codepoint),
         lambda m: unichr(name2codepoint[m.group(1)]), s)
 

@@ -26,7 +26,7 @@
 import sets
 # from htmlentitydefs import name2codepoint
 
-from parserLattesXML import *
+from extract.parserLattesXML import *
 from charts.geolocalizador import *
 
 

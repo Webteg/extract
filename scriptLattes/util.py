@@ -40,7 +40,7 @@ def resolve_file_path(file_name, config_file_path):
     file_path = Path(file_name)
     if file_path.is_absolute():
         return file_path
-    return config_file_path.parent.joinpath(file_path).resolve()
+    return config_file_path.parent.joinpath(file_path)
 
 
 def find_file(file_name, config_file_path):
@@ -58,23 +58,23 @@ def find_file(file_name, config_file_path):
     return file_path.resolve()
 
 
-def buscarArquivo(filepath, arquivoConfiguracao=None):
-    if not arquivoConfiguracao:
-        arquivoConfiguracao = sys.argv[1]
-    curdir = os.path.abspath(os.path.curdir)
-    if not os.path.isfile(filepath) and arquivoConfiguracao:
-        # vamos tentar mudar o diretorio pro atual do arquivo
-        os.chdir(os.path.abspath(os.path.join(arquivoConfiguracao, os.pardir)))
-    if not os.path.isfile(filepath):
-        # se ainda nao existe, tentemos ver se o arquivo não está junto com o config
-        filepath = os.path.abspath(os.path.basename(filepath))
-    else:
-        # se encontramos, definimos então caminho absoluto
-        filepath = os.path.abspath(filepath)
-    os.chdir(curdir)
-    return filepath
-
-
+# def buscarArquivo(filepath, arquivoConfiguracao=None):
+#     if not arquivoConfiguracao:
+#         arquivoConfiguracao = sys.argv[1]
+#     curdir = os.path.abspath(os.path.curdir)
+#     if not os.path.isfile(filepath) and arquivoConfiguracao:
+#         # vamos tentar mudar o diretorio pro atual do arquivo
+#         os.chdir(os.path.abspath(os.path.join(arquivoConfiguracao, os.pardir)))
+#     if not os.path.isfile(filepath):
+#         # se ainda nao existe, tentemos ver se o arquivo não está junto com o config
+#         filepath = os.path.abspath(os.path.basename(filepath))
+#     else:
+#         # se encontramos, definimos então caminho absoluto
+#         filepath = os.path.abspath(filepath)
+#     os.chdir(curdir)
+#     return filepath
+#
+#
 def copiarArquivos(dir):
     base = os.path.abspath('.') + os.path.sep
 

@@ -4,6 +4,7 @@
 
 import pandas as pd
 from geradorDeXML import *
+from persist.cache import cache
 from qualis import qualis
 
 from membro import Membro
