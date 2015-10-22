@@ -43,7 +43,7 @@ def __self_update():
     # d = simplejson.loads(r.read())
     # if d['updated_on'][:13] != VERSION:
     # 	print "BaixaLattes desatualizado, atualizando..."
-    # 	r = br.open(d['files']['baixaLattes.py']['links']['self']['href'])
+    # 	r = br.open(d['files']['download_html.py']['links']['self']['href'])
     # 	content = r.read()
     # 	fpath = os.path.abspath(inspect.getfile(inspect.currentframe()))
     # 	try:
@@ -90,7 +90,7 @@ def __get_data(id_lattes):
     return br.parsed
 
 
-def baixaCVLattes(id_lattes, debug=True):
+def download_html(id_lattes, debug=True):
     tries = 5
     while tries > 0:
         try:

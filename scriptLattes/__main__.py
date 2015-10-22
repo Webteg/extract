@@ -14,14 +14,17 @@ import logging
 import sys
 
 from configobj import ConfigObj
+import pandas
 from pathlib import Path
-from cache import cache
 
+from persist import cache
 from grupo import Grupo
+from persist.store import Store
 from scriptLattes.log import configure_stream
-from util import criarDiretorio, copiarArquivos
+from util import copiarArquivos
 import util
 from validate import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +148,17 @@ def load_config(filename):
     return config
 
 
+def read_list_file(ids_file_path):
+    # ids = pandas.read_csv(ids_file_path.open(), sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
+    ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, engine='python',
+                          encoding='utf-8', skip_blank_lines=True, converters={0: lambda x: str(x)})
+    num_columns = len(ids.columns)
+    column_names = ['identificador', 'nome', 'periodo', 'rotulo']
+    ids.columns = column_names[:num_columns]
+    ids = ids.reindex(columns=column_names, fill_value='')  # Add new columns with empty strings
+    return ids
+
+
 def cli():
     """Add some useful functionality here or import from a submodule."""
     # configure root logger to print to STDERR
@@ -164,10 +178,15 @@ def cli():
     if 'global-diretorio_de_armazenamento_de_cvs' in config and config.get('global-diretorio_de_armazenamento_de_cvs'):
         cache_path = util.resolve_file_path(config['global-diretorio_de_armazenamento_de_cvs'], config_file_path)
         cache.set_directory(cache_path)
+        # FIXME: colocar store como configuração
+        store_path = util.resolve_file_path("store.h5", config_file_path)
+        store = Store(store_path)
 
     ids_file_path = util.find_file(Path(config['global-arquivo_de_entrada']), config_file_path)
     if not ids_file_path:
         return -1
+
+    ids = read_list_file(ids_file_path)
 
     qualis_de_congressos = None
     areas_qualis = None
@@ -179,7 +198,7 @@ def cli():
         if config['global-arquivo_areas_qualis']:
             areas_qualis = util.find_file(Path(config['global-arquivo_areas_qualis']), config_file_path)
 
-    group = Grupo(ids_file_path=ids_file_path,
+    group = Grupo(ids=ids,
                   desde_ano=config['global-itens_desde_o_ano'],
                   ate_ano=config['global-itens_ate_o_ano'],
                   qualis_de_congressos=qualis_de_congressos,
@@ -187,9 +206,15 @@ def cli():
     # group.imprimirListaDeParametros()
     group.imprimirListaDeRotulos()
 
+
     # if criarDiretorio('global-diretorio_de_saida')):
     if 'global-diretorio_de_saida' in config:
-        group.carregarDadosCVLattes()  # obrigatorio
+        obter/carregar
+        extrair/carregar
+            parser = extract()
+        processar/carregar
+
+        group.carregarDadosCVLattes(parser)  # obrigatorio
         group.compilarListasDeItems()  # obrigatorio
         group.identificarQualisEmPublicacoes()  # obrigatorio
         group.calcularInternacionalizacao()  # obrigatorio

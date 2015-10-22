@@ -1,18 +1,11 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grupo.py
-import csv
 
-import fileinput
-import unicodedata
-import pandas
-from cache import cache
-
+import pandas as pd
 from geradorDeXML import *
 from qualis import qualis
-from scriptLattes.util import *
 
-import util
 from membro import Membro
 from compiladorDeListas import CompiladorDeListas
 from authorRank import AuthorRank
@@ -63,7 +56,7 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, ids_file_path, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+    def __init__(self, ids, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
 
         if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
             desde_ano = str(datetime.datetime.now().year)
@@ -79,14 +72,6 @@ class Grupo:
         # util.criarDiretorio(self.diretorioDoi)
 
         # carregamos a lista de membros
-        test = ids_file_path.open().read()
-        # ids = pandas.read_csv(ids_file_path.open(), sep=None, comment='#', encoding='utf-8', skip_blank_lines=True)
-        ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, engine='python',
-                              encoding='utf-8', skip_blank_lines=True, converters={0: lambda x: str(x)})
-        num_columns = len(ids.columns)
-        column_names = ['identificador', 'nome', 'periodo', 'rotulo']
-        ids.columns = column_names[:num_columns]
-        ids = ids.reindex(columns=column_names, fill_value='')  # Add new columns with empty strings
 
         for index, row in ids.iterrows():
             self.listaDeMembros.append(
@@ -276,12 +261,12 @@ class Grupo:
         arquivo.write(conteudo)
         arquivo.close()
 
-    def carregarDadosCVLattes(self):
+    def carregarDadosCVLattes(self, parser):
         indice = 1
         for membro in self.listaDeMembros:
             print('\n[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(indice))
             indice += 1
-            membro.carregar_dados_cv_lattes()
+            membro.carregar_dados_cv_lattes(parser)
             membro.filtrarItemsPorPeriodo()
             print membro
 
