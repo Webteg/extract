@@ -129,7 +129,7 @@ class Membro:
     ###def __init__(self, idMembro, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano, xml=''):
 
     def __init__(self, idMembro, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
-        self.idMembro = idMembro
+        # self.idMembro = idMembro
         self.idLattes = str(identificador)
         self.nomeInicial = nome
         self.nomeCompleto = nome.split(";")[0].strip().decode('utf8', 'replace')

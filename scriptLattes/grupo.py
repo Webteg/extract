@@ -1,9 +1,12 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grupo.py
+import logging
 
 import pandas as pd
+from charts.grafoDeColaboracoes import GrafoDeColaboracoes
 from geradorDeXML import *
+from internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
 from persist.cache import cache
 from qualis import qualis
 
@@ -12,12 +15,11 @@ from compiladorDeListas import CompiladorDeListas
 from authorRank import AuthorRank
 from geradorDePaginasWeb import GeradorDePaginasWeb
 
+logger = logging.getLogger(__name__)
+
 
 class Grupo:
     compilador = None
-    listaDeParametros = []
-    listaDeMembros = []
-    listaDeRotulosCores = []
     listaDePublicacoesEinternacionalizacao = []
 
     matrizArtigoEmPeriodico = None
@@ -74,14 +76,15 @@ class Grupo:
 
         # carregamos a lista de membros
 
+        self.members_list = {}
         for index, row in ids.iterrows():
-            self.listaDeMembros.append(
-                Membro(index, row['identificador'], row['nome'], row['periodo'], row['rotulo'],
-                       self.items_desde_ano, self.items_ate_ano))
+            self.members_list[row.identificador] = Membro(row['identificador'], row['nome'], row['periodo'],
+                                                          row['rotulo'], self.items_desde_ano, self.items_ate_ano)
 
-        self.listaDeRotulos = ids['rotulo'].unique()
-        self.listaDeRotulos.sort()
-        self.listaDeRotulosCores = [''] * len(self.listaDeRotulos)
+        self.ids_df = ids
+        # self.labels_set = ids['rotulo'].unique()
+        # self.labels_set.sort()
+        # self.listaDeRotulosCores = [''] * len(self.labels_set)
 
         # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
         read_from_cache = True if cache.file('qualis.data') else False
@@ -89,6 +92,19 @@ class Grupo:
                                     data_file_path=cache.file('qualis.data'),
                                     arquivo_qualis_de_congressos=qualis_de_congressos,
                                     arquivo_areas_qualis=areas_qualis)
+
+    @property
+    def labels_set(self):
+        return sorted(self.ids_df.rotulo.unique())
+
+    def extract_cvs_data(self, parser, cvs_raw_data):
+        for index, (id_lattes, cv_content) in enumerate(cvs_raw_data.items()):
+            logger.info('[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(index + 1))
+            if id_lattes in self.members_list.keys():
+                parsed_content = parser(id_lattes, cv_content)
+                self.members_list[id_lattes].carregar_dados_cv_lattes(parsed_content)
+                self.members_list[id_lattes].filtrarItemsPorPeriodo()
+                logger.debug("{}".format(self.members_list[id_lattes]))
 
     def gerarXMLdeGrupo(self):
         if self.obterParametro('global-salvar_informacoes_em_formato_xml'):
@@ -160,7 +176,7 @@ class Grupo:
 
         # (2) listas de nomes, rótulos, ids
         self.salvarListaTXT(self.nomes, prefix + "listaDeNomes.txt")
-        self.salvarListaTXT(self.rotulos, prefix + "listaDeRotulos.txt")
+        self.salvarListaTXT(self.rotulos, prefix + "labels_set.txt")
         self.salvarListaTXT(self.ids, prefix + "listaDeIDs.txt")
 
         # (3) medidas de authorRanks
@@ -262,15 +278,6 @@ class Grupo:
         arquivo.write(conteudo)
         arquivo.close()
 
-    def carregarDadosCVLattes(self, parser):
-        indice = 1
-        for membro in self.listaDeMembros:
-            print('\n[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(indice))
-            indice += 1
-            membro.carregar_dados_cv_lattes(parser)
-            membro.filtrarItemsPorPeriodo()
-            print membro
-
     def gerarMapaDeGeolocalizacao(self):
         if self.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
@@ -350,41 +357,41 @@ class Grupo:
         arquivo = open(dir + "/" + nomeArquivo, 'w')
 
         s = '<?xml version="1.0" encoding="UTF-8"?> \
-            \n<!--  An excerpt of an egocentric social network  --> \
-            \n<graphml xmlns="http://graphml.graphdrawing.org/xmlns"> \
-            \n<graph edgedefault="undirected"> \
-            \n<!-- data schema --> \
-            \n<key id="name" for="node" attr.name="name" attr.type="string"/> \
-            \n<key id="nickname" for="node" attr.name="nickname" attr.type="string"/> \
-            \n<key id="gender" for="node" attr.name="gender" attr.type="string"/> \
-            \n<key id="image" for="node" attr.name="image" attr.type="string"/> \
-            \n<key id="link" for="node" attr.name="link" attr.type="string"/> \
-            \n<key id="amount" for="edge" attr.name="amount" attr.type="int"/> \
-            \n<key id="pubs" for="node" attr.name="pubs" attr.type="int"/>'
+                \n<!--  An excerpt of an egocentric social network  --> \
+                \n<graphml xmlns="http://graphml.graphdrawing.org/xmlns"> \
+                \n<graph edgedefault="undirected"> \
+                \n<!-- data schema --> \
+                \n<key id="name" for="node" attr.name="name" attr.type="string"/> \
+                \n<key id="nickname" for="node" attr.name="nickname" attr.type="string"/> \
+                \n<key id="gender" for="node" attr.name="gender" attr.type="string"/> \
+                \n<key id="image" for="node" attr.name="image" attr.type="string"/> \
+                \n<key id="link" for="node" attr.name="link" attr.type="string"/> \
+                \n<key id="amount" for="edge" attr.name="amount" attr.type="int"/> \
+                \n<key id="pubs" for="node" attr.name="pubs" attr.type="int"/>'
 
         for i in range(0, self.numeroDeMembros()):
             membro = self.listaDeMembros[i]
             s += '\n<!-- nodes --> \
-                \n<node id="' + str(membro.idMembro) + '"> \
-                \n<data key="name">' + membro.nomeCompleto + '</data> \
-                \n<data key="nickname">' + membro.nomeEmCitacoesBibliograficas + '</data> \
-                \n<data key="gender">' + membro.sexo[0].upper() + '</data> \
-                \n<data key="image">' + membro.foto + '</data> \
-                \n<data key="link">' + membro.url + '</data> \
-                \n<data key="pubs">' + str(int(self.vetorDeCoAutoria[i])) + '</data> \
-                \n</node>'
+                    \n<node id="' + str(membro.idMembro) + '"> \
+                    \n<data key="name">' + membro.nomeCompleto + '</data> \
+                    \n<data key="nickname">' + membro.nomeEmCitacoesBibliograficas + '</data> \
+                    \n<data key="gender">' + membro.sexo[0].upper() + '</data> \
+                    \n<data key="image">' + membro.foto + '</data> \
+                    \n<data key="link">' + membro.url + '</data> \
+                    \n<data key="pubs">' + str(int(self.vetorDeCoAutoria[i])) + '</data> \
+                    \n</node>'
 
         N = matriz.shape[0]
         for i in range(0, N):
             for j in range(0, N):
                 if matriz[i, j] > 0:
                     s += '\n<!-- edges --> \
-                        \n<edge source="' + str(i) + '" target="' + str(j) + '"> \
-                        \n<data key="amount">' + str(matriz[i, j]) + '</data> \
-                        \n</edge>'
+                            \n<edge source="' + str(i) + '" target="' + str(j) + '"> \
+                            \n<data key="amount">' + str(matriz[i, j]) + '</data> \
+                            \n</edge>'
 
         s += '\n</graph>\
-            \n</graphml>'
+                \n</graphml>'
 
         arquivo.write(s.encode('utf8'))
         arquivo.close()
@@ -478,7 +485,7 @@ class Grupo:
         if self.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):
             self.grafosDeColaboracoes = GrafoDeColaboracoes(self, self.obterParametro('global-diretorio_de_saida'))
         print "\n[ROTULOS]"
-        print "- " + str(self.listaDeRotulos)
+        print "- " + str(self.labels_set)
         print "- " + str(self.listaDeRotulosCores)
 
     def gerarGraficoDeProporcoes(self):
@@ -506,8 +513,8 @@ class Grupo:
         print "\n[MATRIZ DE FREQUENCIA NORMALIZADA]"
         print self.matrizDeFrequenciaNormalizada
 
-    def numeroDeMembros(self):
-        return len(self.listaDeMembros)
+    # def numeroDeMembros(self):
+    #     return len(self.members_list)
 
     def ordenarListaDeMembros(self, chave):
         self.listaDeMembros.sort(key=operator.attrgetter(chave))  # ordenamos por nome
@@ -523,19 +530,18 @@ class Grupo:
         print
 
     def imprimirListaDeRotulos(self):
-        for rotulo in self.listaDeRotulos:
+        for rotulo in self.labels_set:
             print "[ROTULO] ", rotulo
 
-    # def obterParametro(self, parametro):
-    #     for i in range(0, len(self.listaDeParametros)):
-    #         if parametro == self.listaDeParametros[i][0]:
-    #             if self.listaDeParametros[i][1].lower() == 'sim':
-    #                 return 1
-    #             if self.listaDeParametros[i][1].lower() == 'nao' or self.listaDeParametros[i][1].lower() == 'não':
-    #                 return 0
-    #
-    #             return self.listaDeParametros[i][1]
+            # def obterParametro(self, parametro):
+            #     for i in range(0, len(self.listaDeParametros)):
+            #         if parametro == self.listaDeParametros[i][0]:
+            #             if self.listaDeParametros[i][1].lower() == 'sim':
+            #                 return 1
+            #             if self.listaDeParametros[i][1].lower() == 'nao' or self.listaDeParametros[i][1].lower() == 'não':
+            #                 return 0
+            #
+            #             return self.listaDeParametros[i][1]
 
-    def atribuirCoNoRotulo(self, indice, cor):
-        self.listaDeRotulosCores[indice] = cor
-
+            # def atribuirCoNoRotulo(self, indice, cor):
+            #     self.listaDeRotulosCores[indice] = cor

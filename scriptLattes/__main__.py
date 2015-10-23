@@ -10,7 +10,7 @@ Invoke as ``scriptlattes`` (if installed)
 or ``python -m scriptlattes`` (no install required).
 
 Usage:
-  scriptlattes [options] CONFIG_FILE [--offline]
+  scriptlattes [options] all CONFIG_FILE [--offline]
   scriptlattes [options] download CONFIG_FILE
   scriptlattes [options] extract CONFIG_FILE [--offline]
   scriptlattes process CONFIG_FILE [--offline]
@@ -33,19 +33,19 @@ Other:
 from __future__ import absolute_import, unicode_literals
 import logging
 import sys
+import pandas
 
 from docopt import docopt
 from configobj import ConfigObj
-import pandas
 from pathlib import Path
 
+from scriptLattes.log import configure_stream
 from fetch.download_html import download_html
-from parserLattesHTML import ParserLattesHTML
+from extract.parserLattesHTML import ParserLattesHTML
 from extract.parserLattesXML import ParserLattesXML
 from persist.cache import cache
-from grupo import Grupo
 from persist.store import Store
-from scriptLattes.log import configure_stream
+from grupo import Grupo
 from util import copiarArquivos
 import util
 from validate import Validator
@@ -235,7 +235,7 @@ def cli():
                   qualis_de_congressos=qualis_de_congressos,
                   areas_qualis=areas_qualis)
     # group.imprimirListaDeParametros()
-    group.imprimirListaDeRotulos()
+    # group.imprimirListaDeRotulos()
 
     cvs_content = {'html': {}, 'xml': {}}
     use_xml = False  # FIXME: definir opção no arquivo de config
@@ -260,7 +260,8 @@ def cli():
         # parser = extract()
         if arguments['--offline']:
             if not cache.cache_directory:
-                logger.error("Opção --offline exige que um diretório de cache válido seja usado; verifique seu arquivo de configuração.")
+                logger.error(
+                    "Opção --offline exige que um diretório de cache válido seja usado; verifique seu arquivo de configuração.")
                 return -1
             for id_lattes in ids['identificador']:
                 if id_lattes == '0000000000000000':
@@ -272,7 +273,8 @@ def cli():
                 try:
                     cv_path = (cache.directory / id_lattes).resolve()
                 except OSError:
-                    logger.error("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
+                    logger.error(
+                        "O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
                     continue
 
                 with cv_path.open() as f:
@@ -283,7 +285,8 @@ def cli():
                     # TODO: verificar se realmente isto é necessário
                     extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
                     special_chars = ' -'''
-                    cv_lattes_content = cv_lattes_content.decode('iso-8859-1', 'replace') + extended_chars + special_chars
+                    cv_lattes_content = cv_lattes_content.decode('iso-8859-1',
+                                                                 'replace') + extended_chars + special_chars
 
                     cvs_content['xml'][id_lattes] = cv_lattes_content
                 else:
@@ -293,11 +296,15 @@ def cli():
                     # cvLattesHTML = cvLattesHTML.decode('iso-8859-1', 'replace') + extended_chars + special_chars
                     cvs_content['html'][id_lattes] = cv_lattes_content
 
-        for id_lattes in ids['identificador']:
-            if use_xml:
-                parser = ParserLattesXML(id_lattes, cvs_content['xml'][id_lattes])
-            else:
-                parser = ParserLattesHTML(id_lattes, cvs_content['html'][id_lattes])
+        # for id_lattes in ids['identificador']:
+        #     if use_xml:
+        #         parser = ParserLattesXML(id_lattes, cvs_content['xml'][id_lattes])
+        #     else:
+        #         parser = ParserLattesHTML(id_lattes, cvs_content['html'][id_lattes])
+        if use_xml:
+            group.extract_cvs_data(ParserLattesXML, cvs_content['xml'])  # obrigatorio
+        else:
+            group.extract_cvs_data(ParserLattesHTML, cvs_content['html'])  # obrigatorio
 
     if arguments['process']:
         # processar/carregar
@@ -309,8 +316,7 @@ def cli():
 
     # if criarDiretorio('global-diretorio_de_saida')):
     if 'global-diretorio_de_saida' in config:
-
-        group.carregarDadosCVLattes(parser)  # obrigatorio
+        group.extract_cvs_data(parser)  # obrigatorio
         group.compilarListasDeItems()  # obrigatorio
         group.identificarQualisEmPublicacoes()  # obrigatorio
         group.calcularInternacionalizacao()  # obrigatorio
