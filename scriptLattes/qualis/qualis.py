@@ -28,9 +28,9 @@ import fileinput
 
 import pandas
 
-from scriptLattes.util import similaridade_entre_cadeias, buscarArquivo
+from scriptLattes.util import similaridade_entre_cadeias
 from qualisextractor import QualisExtractor
-
+from util import find_file
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def padronizar_nome(nome):
 def carregar_qualis_de_arquivo(arquivo):
     lista = {}
     if arquivo:
-        arquivo = buscarArquivo(arquivo)
+        arquivo = find_file(arquivo)
 
         for linha in fileinput.input(arquivo):
             linha = linha.replace("\r", "")

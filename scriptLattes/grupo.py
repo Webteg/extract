@@ -102,9 +102,10 @@ class Grupo:
             logger.info('[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(index + 1))
             if id_lattes in self.members_list.keys():
                 parsed_content = parser(id_lattes, cv_content)
+                # TODO: FIXME: refatorar usando pandas para filtrar
                 self.members_list[id_lattes].carregar_dados_cv_lattes(parsed_content)
                 self.members_list[id_lattes].filtrarItemsPorPeriodo()
-                logger.debug("{}".format(self.members_list[id_lattes]))
+                logger.debug(u"{}".format(self.members_list[id_lattes]))
 
     def gerarXMLdeGrupo(self):
         if self.obterParametro('global-salvar_informacoes_em_formato_xml'):
