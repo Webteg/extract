@@ -2,11 +2,13 @@
 # encoding: utf-8
 import logging
 import os
+import pkgutil
 import shutil
 import sys
 
 import Levenshtein
 from pathlib import Path
+import pkg_resources
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +81,11 @@ def copiarArquivos(dir):
     base = os.path.abspath('.') + os.path.sep
 
     try:
-        dst = os.path.join(dir, 'css')
-        if os.path.exists(dst):
-            shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'static/css'), dst)
+        destination = os.path.join(dir, 'css')
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
+        source = pkg_resources.resource_filename('scriptLattes', 'static/css')
+        shutil.copytree(source, destination)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)
@@ -98,19 +101,19 @@ def copiarArquivos(dir):
     shutil.copy2(os.path.join(base, 'static/images', 'doi.png'), dir)
 
     try:
-        dst = os.path.join(dir, 'images')
-        if os.path.exists(dst):
-            shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'static/images'), dst)
+        destination = os.path.join(dir, 'images')
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
+        shutil.copytree(os.path.join(base, 'static/images'), destination)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)
 
     try:
-        dst = os.path.join(dir, 'js')
-        if os.path.exists(dst):
-            shutil.rmtree(dst)
-        shutil.copytree(os.path.join(base, 'static/js'), dst)
+        destination = os.path.join(dir, 'js')
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
+        shutil.copytree(os.path.join(base, 'static/js'), destination)
     except OSError, e:
         pass  # provavelmente diretório já existe
         logging.warning(e)

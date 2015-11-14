@@ -107,6 +107,8 @@ class Grupo:
                 self.members_list[id_lattes].filtrarItemsPorPeriodo()
                 logger.debug(u"{}".format(self.members_list[id_lattes]))
 
+# REFATORADO ATE AQUI *********************************************************************************************
+
     def gerarXMLdeGrupo(self):
         if self.obterParametro('global-salvar_informacoes_em_formato_xml'):
             self.geradorDeXml = GeradorDeXML(self)
@@ -203,7 +205,7 @@ class Grupo:
     def gerarArquivoGDF(self, nomeArquivo):
         # Vêrtices
         N = len(self.listaDeMembros)
-        string = "nodedef> name VARCHAR, idLattes VARCHAR, label VARCHAR, rotulo VARCHAR, lat DOUBLE, lon DOUBLE, collaborationRank DOUBLE, producaoBibliografica DOUBLE, artigoEmPeriodico DOUBLE, livro DOUBLE, capituloDeLivro DOUBLE, trabalhoEmCongresso DOUBLE, resumoExpandido DOUBLE, resumo DOUBLE, color VARCHAR"
+        string = "nodedef> name VARCHAR, id_lattes VARCHAR, label VARCHAR, rotulo VARCHAR, lat DOUBLE, lon DOUBLE, collaborationRank DOUBLE, producaoBibliografica DOUBLE, artigoEmPeriodico DOUBLE, livro DOUBLE, capituloDeLivro DOUBLE, trabalhoEmCongresso DOUBLE, resumoExpandido DOUBLE, resumo DOUBLE, color VARCHAR"
         i = 0
         for membro in self.listaDeMembros:
             nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')

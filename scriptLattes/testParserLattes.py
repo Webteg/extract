@@ -1332,6 +1332,6 @@ if __name__ == "__main__":
 
 		p = re.compile('[a-zA-Z]+');
 		if p.match(idLattes):
-		  # self.identificador10 = idLattes
+		  # self.identificador10 = id_lattes
 		  idLattes = parser.identificador16
 		  urlLattes = baseUrl+'/'+idLattes

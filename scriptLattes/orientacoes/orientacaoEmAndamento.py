@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,7 @@
 
 
 from scriptLattes.geradorDePaginasWeb import *
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 
 class OrientacaoEmAndamento:
 	item = None # dado bruto
@@ -44,13 +44,13 @@ class OrientacaoEmAndamento:
 		# partesDoItem[1]: Descricao
 		self.idMembro = set([])
 		self.idMembro.add(idMembro)
-		
+
 		self.item = partesDoItem[1]
 		self.idOrientando = str(idOrientando)
 
-		# Dividir o item na suas partes constituintes 
+		# Dividir o item na suas partes constituintes
 		partes = self.item.partition(". (Orientador).")
-		if not partes[1]=='': 
+		if not partes[1]=='':
 			self.tipoDeOrientacao = 'Orientador'
 			partes = partes[0]
 		else:
@@ -61,7 +61,7 @@ class OrientacaoEmAndamento:
 			else:
 				self.tipoDeOrientacao = 'Supervisor'
 				partes = partes[0]
-		
+
 		partes1 = partes.partition(u'. Início: ')
 		partes = partes1[0].rpartition(". ")
 		if not partes[1]=='':
@@ -71,7 +71,7 @@ class OrientacaoEmAndamento:
 			self.nome = partes[2].strip(".").strip(",")
 			self.tituloDoTrabalho = ''
 
-		partes =  partes1[2].partition(". ")	
+		partes =  partes1[2].partition(". ")
 		self.ano = partes[0]
 		partes = partes[2]
 
@@ -96,7 +96,7 @@ class OrientacaoEmAndamento:
 
 	def compararCom(self, objeto):
 		if self.idMembro.isdisjoint(objeto.idMembro) and similaridade_entre_cadeias(self.nome, objeto.nome):
-			# Os IDs dos membros são agrupados. 
+			# Os IDs dos membros são agrupados.
 			# Essa parte é importante para a criação do GRAFO de colaborações
 			self.idMembro.update(objeto.idMembro)
 
@@ -127,7 +127,7 @@ class OrientacaoEmAndamento:
 			m = listaDeMembros[lista[0]]
 			s+= '<br><i><font size=-1>'+self.tipoDeOrientacao+': <a href="'+m.url+'">'+m.nomeCompleto+'</a>.</font></i>'
 		else:
-			s+= '<br><i><font size=-1>Orientadores: ' 
+			s+= '<br><i><font size=-1>Orientadores: '
 			for i in lista:
 				m = listaDeMembros[i]
 				s+= '<a href="'+m.url+'">'+m.nomeCompleto+'</a>, '

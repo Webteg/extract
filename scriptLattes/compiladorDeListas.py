@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -110,7 +110,7 @@ class CompiladorDeListas:
 
 
         # compilamos as producoes de todos os membros (separados por tipos)
-        for membro in grupo.listaDeMembros:
+        for membro in grupo.members_list.values():
             self.listaCompletaArtigoEmPeriodico = self.compilarLista(membro.listaArtigoEmPeriodico,
                                                                      self.listaCompletaArtigoEmPeriodico)
             self.listaCompletaLivroPublicado = self.compilarLista(membro.listaLivroPublicado,
@@ -195,6 +195,7 @@ class CompiladorDeListas:
 
         # ---------------------------------------------------------------------------
         # compilamos as producoes de todos os tipos
+        # STOPED HERE!!!
         if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
             self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaArtigoEmPeriodico,
                                                                 self.listaCompletaPB)
@@ -334,7 +335,7 @@ class CompiladorDeListas:
             for pub in listaCompleta[ano]:
                 if self.procuraNomeEmPublicacao(membro.nomeInicial, pub.autores):
                     pub.idMembro.add(membro.idMembro)
-                    # print ">>>" + membro.nomeInicial
+                    # print ">>>" + membro.nome
                     #print ">>>" + pub.autores
 
 

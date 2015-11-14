@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,7 @@
 
 
 from scriptLattes.geradorDePaginasWeb import *
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 
 
 class ResumoEmCongresso:
@@ -46,7 +46,7 @@ class ResumoEmCongresso:
 		self.idMembro = set([])
 		self.idMembro.add(idMembro)
 
-		if not partesDoItem=='': 
+		if not partesDoItem=='':
 			# partesDoItem[0]: Numero (NAO USADO)
 			# partesDoItem[1]: Descricao do artigo (DADO BRUTO)
 			self.item = partesDoItem[1]
@@ -83,7 +83,7 @@ class ResumoEmCongresso:
 			else:
 				self.numero = partes[2].strip().rstrip(",")
 				partes = partes[0]
-			
+
 			partes = partes.rpartition(" v. ")
 			if partes[1]=='': # se nao existem informacao de volume
 				self.volume = ''
@@ -91,7 +91,7 @@ class ResumoEmCongresso:
 			else:
 				self.volume = partes[2].rstrip(".").rstrip(",")
 				partes = partes[0]
-	
+
 			aux = re.findall(u', ((?:19|20)\d\d)\\b', partes)
 			if len(aux)>0:
 				partes = partes.rpartition(",")
@@ -99,7 +99,7 @@ class ResumoEmCongresso:
 				partes = partes[0]
 	#		else:
 	#			self.ano = ''
-	
+
 	###		partes = partes.rpartition(". ")
 	###		self.tituloDosAnais = partes[2].strip().rstrip('.').rstrip(",")
 	###		partes = partes[0]
@@ -130,7 +130,7 @@ class ResumoEmCongresso:
 
 	def compararCom(self, objeto):
 		if self.idMembro.isdisjoint(objeto.idMembro) and similaridade_entre_cadeias(self.titulo, objeto.titulo):
-			# Os IDs dos membros são agrupados. 
+			# Os IDs dos membros são agrupados.
 			# Essa parte é importante para a criação do GRAFO de colaborações
 			self.idMembro.update(objeto.idMembro)
 
@@ -170,7 +170,7 @@ class ResumoEmCongresso:
 		s+= str(self.ano) + '. '         if str(self.ano).isdigit() else '. '
 
 		if not self.doi=='':
-			s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>' 
+			s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'
 
  		s+= menuHTMLdeBuscaPB(self.titulo)
 		return s

@@ -28,15 +28,9 @@ from charts.geolocalizador import *
 
 
 class Membro:
-    idMembro = None
-    rotulo = ''
 
-    nomeInicial = ''
-    nomeCompleto = ''
     sexo = ''
     nomeEmCitacoesBibliograficas = ''
-    periodo = ''
-    listaPeriodo = []
     bolsaProdutividade = ''
     enderecoProfissional = ''
     enderecoProfissionalLat = ''
@@ -44,14 +38,10 @@ class Membro:
 
     identificador10 = ''
 
-    url = ''
     atualizacaoCV = ''
     foto = ''
     textoResumo = ''
     # xml = None
-
-    itemsDesdeOAno = ''  # periodo global
-    itemsAteOAno = ''  # periodo global
 
     listaFormacaoAcademica = []
     listaProjetoDePesquisa = []
@@ -117,29 +107,23 @@ class Membro:
     listaParticipacaoEmEvento = []
     listaOrganizacaoDeEvento = []
 
-    rotuloCorFG = ''
-    rotuloCorBG = ''
-
     tabela_qualis = pandas.DataFrame(columns=['ano', 'area', 'estrato', 'freq'])
 
     # def __init__(self, idMembro, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano, xml=''):
 
     def __init__(self, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
-        # self.idMembro = idMembro
-        self.idLattes = str(identificador)
-        self.nomeInicial = nome
-        self.nomeCompleto = nome.split(";")[0].strip().decode('utf8', 'replace')
+        self.id_lattes = str(identificador)
+        self.nome = nome
+        # FIXME: precisa dos dois campos de nome?
+        self.nome_completo = nome  # nome.split(";")[0].strip().decode('utf8', 'replace')
         self.periodo = periodo
         self.rotulo = rotulo
-        self.rotuloCorFG = '#000000'
-        self.rotuloCorBG = '#FFFFFF'
 
-        p = re.compile('[a-zA-Z]+')
-
-        if p.match(str(identificador)):
-            self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
-        else:
-            self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
+        # p = re.compile('[a-zA-Z]+')
+        # if p.match(str(identificador)):
+        #     self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
+        # else:
+        #     self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
 
         self.itemsDesdeOAno = itemsDesdeOAno
         self.itemsAteOAno = itemsAteOAno
@@ -165,14 +149,12 @@ class Membro:
                     self.listaPeriodo.append([int(ano1), int(ano2)])
                 else:
                     print("\n[AVISO IMPORTANTE] Periodo nao válido: {}. (periodo desconsiderado na lista)".format(periodo))
-                    print("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}\n".format(self.idLattes,
-                                                                                  self.nomeInicial.encode('utf8')))
+                    print("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}\n".format(self.id_lattes,
+                                                                                  self.nome.encode('utf8')))
 
     def carregar_dados_cv_lattes(self, parser):
-
-        # -----------------------------------------------------------------------------------------
         # Obtemos todos os dados do CV Lattes
-        self.nomeCompleto = parser.nomeCompleto
+        self.nome_completo = parser.nomeCompleto
         self.bolsaProdutividade = parser.bolsaProdutividade
         self.enderecoProfissional = parser.enderecoProfissional
         self.sexo = parser.sexo
@@ -321,7 +303,8 @@ class Membro:
             objeto.anoConclusao = int(objeto.anoConclusao)
             objeto.ano = objeto.anoInicio  # Para comparação entre projetos
 
-            if objeto.anoInicio > self.itemsAteOAno and objeto.anoConclusao > self.itemsAteOAno or objeto.anoInicio < self.itemsDesdeOAno and objeto.anoConclusao < self.itemsDesdeOAno:
+            if objeto.anoInicio > self.itemsAteOAno and objeto.anoConclusao > self.itemsAteOAno\
+                or objeto.anoInicio < self.itemsDesdeOAno and objeto.anoConclusao < self.itemsDesdeOAno:
                 return 0
             else:
                 fora = 0
@@ -357,7 +340,7 @@ class Membro:
     def ris(self):
         s = ''
         s += '\nTY  - MEMBRO'
-        s += '\nNOME  - ' + self.nomeCompleto
+        s += '\nNOME  - ' + self.nome_completo
         # s+= '\nSEXO  - '+self.sexo
         s += '\nCITA  - ' + self.nomeEmCitacoesBibliograficas
         s += '\nBOLS  - ' + self.bolsaProdutividade
@@ -388,10 +371,10 @@ class Membro:
     def __str__(self):
         verbose = 0
 
-        s = "+ ID-MEMBRO   : " + str(self.idMembro) + "\n"
+        s = "+ ID-MEMBRO   : " + str(self.id_lattes) + "\n"
         s += "+ ROTULO      : " + self.rotulo + "\n"
-        # s += "+ ALIAS       : " + self.nomeInicial.encode('utf8','replace') + "\n"
-        s += "+ NOME REAL   : " + self.nomeCompleto + "\n"
+        # s += "+ ALIAS       : " + self.nome.encode('utf8','replace') + "\n"
+        s += "+ NOME REAL   : " + self.nome_completo + "\n"
         # s += "+ SEXO        : " + self.sexo.encode('utf8','replace') + "\n"
         # s += "+ NOME Cits.  : " + self.nomeEmCitacoesBibliograficas.encode('utf8','replace') + "\n"
         # s += "+ PERIODO     : " + self.periodo.encode('utf8','replace') + "\n"

@@ -1043,19 +1043,19 @@ class GeradorDePaginasWeb:
             nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 
             #print " --------------------------------------------"
-            #print membro.nomeCompleto
-            #print type(membro.nomeCompleto)
+            #print membro.nome_completo
+            #print type(membro.nome_completo)
             #print " "
-            #nomeCompleto = membro.nomeCompleto.decode('utf8','replace')
-            #print nomeCompleto
-            #print type(nomeCompleto)
+            #nome_completo = membro.nome_completo.decode('utf8','replace')
+            #print nome_completo
+            #print type(nome_completo)
             #print " --------------------------------------------"
-            #nomeCompleto = membro.nomeCompleto.decode('iso-8859-1','replace')
+            #nome_completo = membro.nome_completo.decode('iso-8859-1','replace')
 
             #print str(elemento)
             #print membro.foto
             #print membro.url
-            #print nomeCompleto
+            #print nome_completo
             #print rotulo
             #print bolsa
             #print membro.periodo

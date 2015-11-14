@@ -28,9 +28,9 @@ import fileinput
 
 import pandas
 
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 from qualisextractor import QualisExtractor
-from util import find_file
+from scriptLattes.util.util import find_file
 
 logger = logging.getLogger(__name__)
 

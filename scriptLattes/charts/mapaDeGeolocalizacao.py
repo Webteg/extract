@@ -99,7 +99,7 @@ class MapaDeGeolocalizacao:
 						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
-						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+						nomeCompleto = unicodedata.normalize('NFKD', membro.nome_completo).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':
 							enderecoProfissional = unicodedata.normalize('NFKD', membro.enderecoProfissional).encode('ASCII', 'ignore')
 							self.mapa += '\n    setMarker1(map, '+membro.enderecoProfissionalLat+'+0.001*Math.random(), '+membro.enderecoProfissionalLon+'+0.001*Math.random(), "'+nomeCompleto+'","'+enderecoProfissional+'","'+self.obterNomesDosOrientadores(aluno, self.grupo.listaDeMembros)+'","'+membro.url+'","'+membro.foto+'");'
@@ -117,7 +117,7 @@ class MapaDeGeolocalizacao:
 						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
-						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+						nomeCompleto = unicodedata.normalize('NFKD', membro.nome_completo).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':
 							enderecoProfissional = unicodedata.normalize('NFKD', membro.enderecoProfissional).encode('ASCII', 'ignore')
 							self.mapa += '\n    setMarker2(map, '+membro.enderecoProfissionalLat+'+0.001*Math.random(), '+membro.enderecoProfissionalLon+'+0.001*Math.random(), "'+nomeCompleto+'","'+enderecoProfissional+'","'+self.obterNomesDosOrientadores(aluno, self.grupo.listaDeMembros)+'","'+membro.url+'","'+membro.foto+'");'
@@ -135,7 +135,7 @@ class MapaDeGeolocalizacao:
 						membro = Membro('', idOrientando, '', '', '', '', '')
 						membro.carregar_dados_cv_lattes()
 						membro.obterCoordenadasDeGeolocalizacao()
-						nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+						nomeCompleto = unicodedata.normalize('NFKD', membro.nome_completo).encode('ASCII', 'ignore')
 						if not membro.enderecoProfissionalLat=='0' and not membro.enderecoProfissionalLon=='0':
 							enderecoProfissional = unicodedata.normalize('NFKD', membro.enderecoProfissional).encode('ASCII', 'ignore')
 							self.mapa += '\n    setMarker3(map, '+membro.enderecoProfissionalLat+'+0.001*Math.random(), '+membro.enderecoProfissionalLon+'+0.001*Math.random(), "'+nomeCompleto+'","'+enderecoProfissional+'","'+self.obterNomesDosOrientadores(aluno, self.grupo.listaDeMembros)+'","'+membro.url+'","'+membro.foto+'");'

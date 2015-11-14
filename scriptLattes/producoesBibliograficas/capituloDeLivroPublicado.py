@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,7 @@
 
 
 from scriptLattes.geradorDePaginasWeb import *
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 
 class CapituloDeLivroPublicado:
 	item = None # dado bruto
@@ -87,7 +87,7 @@ class CapituloDeLivroPublicado:
 				partes = partes[0]
 
 			partes = partes.rpartition(": ")
-			if partes[1]=='': # se nao existe editora 
+			if partes[1]=='': # se nao existe editora
 				self.editora = ''
 				partes = partes[2]
 			else:
@@ -95,7 +95,7 @@ class CapituloDeLivroPublicado:
 				partes = partes[0]
 
 			partes = partes.rpartition(" In: ")
-			if partes[1]=='': # se nao existe titulo de livro 
+			if partes[1]=='': # se nao existe titulo de livro
 				self.livro = ''
 				partes = partes[2]
 			else:
@@ -120,7 +120,7 @@ class CapituloDeLivroPublicado:
 
 	def compararCom(self, objeto):
 		if self.idMembro.isdisjoint(objeto.idMembro) and similaridade_entre_cadeias(self.titulo, objeto.titulo):
-			# Os IDs dos membros são agrupados. 
+			# Os IDs dos membros são agrupados.
 			# Essa parte é importante para a criação do GRAFO de colaborações
 			self.idMembro.update(objeto.idMembro)
 
@@ -135,7 +135,7 @@ class CapituloDeLivroPublicado:
 
 			if len(self.edicao)<len(objeto.edicao):
 				self.edicao = objeto.edicao
-			
+
 			if len(self.editora)<len(objeto.editora):
 				self.editora = objeto.editora
 

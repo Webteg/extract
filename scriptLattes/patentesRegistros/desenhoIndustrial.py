@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,7 @@
 
 
 from scriptLattes.geradorDePaginasWeb import *
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 
 class DesenhoIndustrial:
 	item = None # dado bruto
@@ -32,7 +32,7 @@ class DesenhoIndustrial:
 
 	relevante = None
 	chave = None
-		
+
 	autores = None
 	titulo = None
 	ano = None
@@ -53,9 +53,9 @@ class DesenhoIndustrial:
 		# Dividir o item na suas partes constituintes
 		partes = self.item.partition(" . ")
 		self.autores = partes[0].strip()
-		
+
 		partes = partes[2]
-		partes = partes.partition(", ")				
+		partes = partes.partition(", ")
 		self.titulo = partes[0][0: len(partes[0])-5]
 		self.ano = partes[0][len(partes[0])-4: len(partes[0])]
 
@@ -70,14 +70,14 @@ class DesenhoIndustrial:
 			self.numeroRegistro = partes[2].split(":")[1].split(",")[0].strip();
 			self.dataDeposito = partes[2].split(":")[2].split(",")[0].strip();
 
-				
+
 		self.chave = self.autores # chave de comparação entre os objetos
 
 		# print self.__str__()
 
 	def compararCom(self, objeto):
 		if self.idMembro.isdisjoint(objeto.idMembro) and similaridade_entre_cadeias(self.titulo, objeto.titulo):
-			# Os IDs dos membros são agrupados. 
+			# Os IDs dos membros são agrupados.
 			# Essa parte é importante para a criação do GRAFO de colaborações
 			self.idMembro.update(objeto.idMembro)
 

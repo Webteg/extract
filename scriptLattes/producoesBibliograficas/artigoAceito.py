@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -24,7 +24,7 @@
 
 
 from scriptLattes.geradorDePaginasWeb import *
-from scriptLattes.util import similaridade_entre_cadeias
+from scriptLattes.util.util import similaridade_entre_cadeias
 
 class ArtigoAceito:
 	item = None # dado bruto
@@ -45,7 +45,7 @@ class ArtigoAceito:
 		self.idMembro = set([])
 		self.idMembro.add(idMembro)
 
-		if not partesDoItem=='': 
+		if not partesDoItem=='':
 			# partesDoItem[0]: Numero (NAO USADO)
 			# partesDoItem[1]: Descricao do artigo (DADO BRUTO)
 			self.item = partesDoItem[1]
@@ -60,12 +60,12 @@ class ArtigoAceito:
 				partes = self.item.partition(" ; ")
 				a = partes[0].partition(", et al.") # remocao do et al.
 				a = a[0] + a[2] # estes autores nao estao bem separados pois falta ';'
-				b = a.replace(', ','*') 
+				b = a.replace(', ','*')
 				c = b.replace(' ',' ; ')
 				self.autores = c.replace('*',', ')
 			else:
 				self.autores = partes[0].strip()
-			
+
 			# Processando o resto (tudo menos autores)
 			partes = partes[2].rpartition(", ")
 			self.ano = partes[2].strip().rstrip(".")
@@ -114,7 +114,7 @@ class ArtigoAceito:
 
 	def compararCom(self, objeto):
 		if self.idMembro.isdisjoint(objeto.idMembro) and similaridade_entre_cadeias(self.titulo, objeto.titulo):
-			# Os IDs dos membros são agrupados. 
+			# Os IDs dos membros são agrupados.
 			# Essa parte é importante para a criação do GRAFO de colaborações
 			self.idMembro.update(objeto.idMembro)
 
@@ -153,7 +153,7 @@ class ArtigoAceito:
 		s+= str(self.ano) + '. '         if str(self.ano).isdigit() else '. '
 
 		if not self.doi=='':
-			s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>' 
+			s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'
 
  		s+= menuHTMLdeBuscaPB(self.titulo)
 		return s
