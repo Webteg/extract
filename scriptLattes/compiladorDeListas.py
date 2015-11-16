@@ -108,7 +108,6 @@ class CompiladorDeListas:
         self.listaCompletaParticipacaoEmEvento = {}
         self.listaCompletaOrganizacaoDeEvento = {}
 
-
         # compilamos as producoes de todos os membros (separados por tipos)
         for membro in grupo.members_list.values():
             self.listaCompletaArtigoEmPeriodico = self.compilarLista(membro.listaArtigoEmPeriodico,
@@ -129,8 +128,7 @@ class CompiladorDeListas:
                                                                 self.listaCompletaArtigoAceito)
             self.listaCompletaApresentacaoDeTrabalho = self.compilarLista(membro.listaApresentacaoDeTrabalho,
                                                                           self.listaCompletaApresentacaoDeTrabalho)
-            self.listaCompletaOutroTipoDeProducaoBibliografica = self.compilarLista(
-                membro.listaOutroTipoDeProducaoBibliografica, self.listaCompletaOutroTipoDeProducaoBibliografica)
+            self.listaCompletaOutroTipoDeProducaoBibliografica = self.compilarLista(membro.listaOutroTipoDeProducaoBibliografica, self.listaCompletaOutroTipoDeProducaoBibliografica)
 
             self.listaCompletaSoftwareComPatente = self.compilarLista(membro.listaSoftwareComPatente,
                                                                       self.listaCompletaSoftwareComPatente)
@@ -298,7 +296,7 @@ class CompiladorDeListas:
             self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCOutroTipoDeOrientacao,
                                                                 self.listaCompletaOC)
 
-        for membro in grupo.listaDeMembros:
+        for membro in grupo.members_list.values():
             if membro.idLattes == '0000000000000000':
                 print ":: Processando coautor sem CV-Lattes" + membro.nomeInicial
 

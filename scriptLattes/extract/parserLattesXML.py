@@ -29,20 +29,20 @@
 # Por enquanto esta característica fica sem documentação.
 # ---------------------------------------------------------------------------- #
 
-from htmlentitydefs import name2codepoint
 from HTMLParser import HTMLParser
+from htmlentitydefs import name2codepoint
 
-from producoesBibliograficas.artigoEmPeriodico import *
-from producoesBibliograficas.livroPublicado import *
-from producoesBibliograficas.capituloDeLivroPublicado import *
-from producoesBibliograficas.textoEmJornalDeNoticia import *
-from producoesBibliograficas.trabalhoCompletoEmCongresso import *
-from producoesBibliograficas.resumoExpandidoEmCongresso import *
-from producoesBibliograficas.resumoEmCongresso import *
-from producoesBibliograficas.artigoAceito import *
-from producoesBibliograficas.apresentacaoDeTrabalho import *
-from producoesBibliograficas.outroTipoDeProducaoBibliografica import *
-from orientacoes.orientacaoConcluida import *
+from data.orientacoes.orientacaoConcluida import *
+from data.producoesBibliograficas.apresentacaoDeTrabalho import *
+from data.producoesBibliograficas.artigoAceito import *
+from data.producoesBibliograficas.artigoEmPeriodico import *
+from data.producoesBibliograficas.capituloDeLivroPublicado import *
+from data.producoesBibliograficas.livroPublicado import LivroPublicado
+from data.producoesBibliograficas.outroTipoDeProducaoBibliografica import *
+from data.producoesBibliograficas.resumoEmCongresso import *
+from data.producoesBibliograficas.resumoExpandidoEmCongresso import *
+from data.producoesBibliograficas.textoEmJornalDeNoticia import *
+from data.producoesBibliograficas.trabalhoCompletoEmCongresso import *
 
 
 class ParserLattesXML(HTMLParser):
@@ -127,7 +127,6 @@ class ParserLattesXML(HTMLParser):
     achouOCDissertacaoDeMestrado = None
     achouOCSupervisaoDePosDoutorado = None
     achouOCTeseDeDoutorado = None
-
 
     # ------------------------------------------------------------------------ #
     def __init__(self, idMembro, cvLattesXML):
@@ -317,7 +316,6 @@ class ParserLattesXML(HTMLParser):
             self.ano = ''
             self.natureza = ''
 
-
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
         if tag == 'orientacoes-concluidas-para-pos-doutorado':
@@ -347,7 +345,6 @@ class ParserLattesXML(HTMLParser):
             self.agenciaDeFomento = ''
             self.tipoDeOrientacao = ''
 
-
         # ----------------------------------------------------------------------
         if tag == 'endereco-profissional':
             for name, value in attributes:
@@ -368,7 +365,6 @@ class ParserLattesXML(HTMLParser):
                 if name == 'cep':
                     cep = value
             self.enderecoProfissional = nomeIntituicao + ". " + nomeUnidade + ". " + orgao + ". " + logradouro + " CEP " + cep + " - " + cidade + ", " + uf + " - " + pais
-
 
         # ----------------------------------------------------------------------
         if self.achouArtigoEmPeriodico:
@@ -402,7 +398,6 @@ class ParserLattesXML(HTMLParser):
                     if name == 'pagina-final':
                         pagina2 = value
                 self.paginas = pagina1 + '-' + pagina2
-
 
         # ----------------------------------------------------------------------
         if self.achouLivroPublicado:
@@ -613,7 +608,6 @@ class ParserLattesXML(HTMLParser):
                 for name, value in attributes:
                     if name == 'editora':
                         self.editora = value
-
 
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
@@ -904,8 +898,8 @@ class ParserLattesXML(HTMLParser):
 
 
 
-        # ------------------------------------------------------------------------ #
-        # def handle_data(self, dado):
+            # ------------------------------------------------------------------------ #
+            # def handle_data(self, dado):
 
 
 # ---------------------------------------------------------------------------- #

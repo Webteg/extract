@@ -21,10 +21,9 @@
 #  junto com este programa, se não, escreva para a Fundação do Software
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-from tabulate import tabulate
-
+from data_tables.bibliographic_productions.journal_papers import JournalPapers
 from extract.parserLattesXML import *
-from charts.geolocalizador import *
+from report.charts.geolocalizador import *
 
 
 class Membro:
@@ -119,6 +118,8 @@ class Membro:
         self.periodo = periodo
         self.rotulo = rotulo
 
+        self.journal_papers = JournalPapers(self.id_lattes)
+
         # p = re.compile('[a-zA-Z]+')
         # if p.match(str(identificador)):
         #     self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
@@ -173,6 +174,9 @@ class Membro:
 
         # Produção bibliográfica
         self.listaArtigoEmPeriodico = parser.listaArtigoEmPeriodico
+        # TODO: testando refatoracao
+        self.journal_papers.add_from_parser(parser.listaArtigoEmPeriodico)
+
         self.listaLivroPublicado = parser.listaLivroPublicado
         self.listaCapituloDeLivroPublicado = parser.listaCapituloDeLivroPublicado
         self.listaTextoEmJornalDeNoticia = parser.listaTextoEmJornalDeNoticia

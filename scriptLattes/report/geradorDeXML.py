@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -33,17 +33,17 @@ class GeradorDeXML:
     extensaoPagina = None
     arquivoRis = None
     membros = None
-    listaErroXml = list()
 
     def __init__(self, gr):
         self.grupo = gr
-        self.membros = gr.listaDeMembros
+        self.membros = gr.members_list.values()
         self.dir = self.grupo.obterParametro('global-diretorio_de_saida')
 
     def gerarXmlParaGrupo(self):
         print '\n\n[GERANDO XML PARA CADA UM DOS CVs LATTES]'
         xmlTemp = ''  # variavel importante para continuar a varredura dos membros caso ocorra erros
 
+        errors = []
         xml = ''
         xml += "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
         xml += '<curriculo_lattes data_processamento="' + self.getDataProcessamento() + '">\n'
@@ -101,17 +101,13 @@ class GeradorDeXML:
                 xmlTemp += '  </pesquisador>\n'
             except:
                 # adicionar ids para a lista de erros
-                self.listaErroXml.append(registro.idLattes)
+                errors.append(registro.idLattes)
                 continue
 
             xml += xmlTemp
 
         xml += '</curriculo_lattes>\n'
-        self.salvarXML("database.xml", xml)
-
-        # print "[Liberando memoria usada na geracao do XML]"
-        xml = ""
-        xmlTemp = ""
+        return xml, errors
 
     def getDataProcessamento(self):
         agora = datetime.datetime.now()
@@ -785,11 +781,4 @@ class GeradorDeXML:
             xmlTemp += '    </idiomas>\n'
         return xmlTemp
 
-
-    def salvarXML(self, nome, conteudo):
-        prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
-            'global-prefixo') == '' else ''
-        file = open(self.dir + "/" + prefix + nome, 'w')
-        file.write(conteudo.encode('utf8'))
-        file.close()
 

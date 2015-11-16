@@ -1,19 +1,20 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grupo.py
+import datetime
 import logging
 
-import pandas as pd
-from charts.grafoDeColaboracoes import GrafoDeColaboracoes
-from geradorDeXML import *
-from internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
+from authorRank import AuthorRank
+from compiladorDeListas import CompiladorDeListas
+from data_tables.bibliographic_productions.journal_papers import JournalPapers
+from geradorDePaginasWeb import GeradorDePaginasWeb
+from membro import Membro
+from persist import cache
 from persist.cache import cache
 from qualis import qualis
-
-from membro import Membro
-from compiladorDeListas import CompiladorDeListas
-from authorRank import AuthorRank
-from geradorDePaginasWeb import GeradorDePaginasWeb
+from report.charts.graficoDeBarras import GraficoDeBarras
+from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
+from report.geradorDeXML import GeradorDeXML
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,6 @@ class Grupo:
     vetorDeCoAutoria = None
     grafosDeColaboracoes = None
     mapaDeGeolocalizacao = None
-    geradorDeXml = None
 
     vectorRank = None
     nomes = None
@@ -59,7 +59,7 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, ids, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+    def __init__(self, ids_df, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
 
         if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
             desde_ano = str(datetime.datetime.now().year)
@@ -77,12 +77,12 @@ class Grupo:
         # carregamos a lista de membros
 
         self.members_list = {}
-        for index, row in ids.iterrows():
+        for index, row in ids_df.iterrows():
             self.members_list[row.identificador] = Membro(row['identificador'], row['nome'], row['periodo'],
                                                           row['rotulo'], self.items_desde_ano, self.items_ate_ano)
 
-        self.ids_df = ids
-        # self.labels_set = ids['rotulo'].unique()
+        self.ids_df = ids_df
+        # self.labels_set = ids_df['rotulo'].unique()
         # self.labels_set.sort()
         # self.listaDeRotulosCores = [''] * len(self.labels_set)
 
@@ -107,138 +107,63 @@ class Grupo:
                 self.members_list[id_lattes].filtrarItemsPorPeriodo()
                 logger.debug(u"{}".format(self.members_list[id_lattes]))
 
-# REFATORADO ATE AQUI *********************************************************************************************
+    def aggregate_data(self):
+        self.journal_papers = JournalPapers(id=1)  # TODO: define a group id
+        for _, member in self.members_list.items():
+            self.journal_papers.append(member.journal_papers)
+        self.journal_papers.group_similar()
 
+    # REFATORADO ATE AQUI *********************************************************************************************
+
+    # FIXME: não usar config aqui; elas são no fundo filtros para os relatórios
+    def compilarListasDeItems(self, config):
+        self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
+
+        self.get_colaboration_matrixes()
+
+        # XXX: não sei para que serve o trecho abaixo
+        # listas de nomes, rotulos e IDs
+        # self.nomes = list([])
+        # self.rotulos = list([])
+        # self.ids = list([])
+        # for membro in self.members_list.values():
+        #     self.nomes.append(membro.nomeCompleto)
+        #     self.rotulos.append(membro.rotulo)
+        #     self.ids.append(membro.idLattes)
+
+    def get_colaboration_matrixes(self):
+        # FIXME: depende do compilador ter sido instanciado no método compilarListasDeItems
+        # Grafos de coautoria
+        self.compilador.criarMatrizesDeColaboracao()
+        [self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
+        # soma das linhas = num. de items feitos em co-autoria (parceria) com outro membro do grupo
+        self.vetorDeCoAutoria = self.matrizDeFrequencia.sum(axis=1)
+        self.matrizDeFrequenciaNormalizada = self.matrizDeFrequencia.copy()
+        for i in range(0, self.numeroDeMembros()):
+            if not self.vetorDeCoAutoria[i] == 0:
+                self.matrizDeFrequenciaNormalizada[i, :] /= float(self.vetorDeCoAutoria[i])
+
+        # AuthorRank
+        authorRank = AuthorRank(self.matrizDeFrequenciaNormalizada, 100)
+        self.vectorRank = authorRank.vectorRank
+
+    # FIXME: finish refactoring
     def gerarXMLdeGrupo(self):
-        if self.obterParametro('global-salvar_informacoes_em_formato_xml'):
-            self.geradorDeXml = GeradorDeXML(self)
-            self.geradorDeXml.gerarXmlParaGrupo()
+        geradorDeXml = GeradorDeXML(self)
+        xml, errors = geradorDeXml.gerarXmlParaGrupo()
 
-            if self.geradorDeXml.listaErroXml:
-                print "\n\n[AVISO] Erro ao gerar XML para os lattes abaixo:"
-                for item in self.geradorDeXml.listaErroXml:
-                    print "- [ID Lattes: " + item + "]"
+        def salvarXML(self, nome, conteudo):
+            prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro('global-prefixo') == '' else ''
+            file = open(self.dir + "/" + prefix + nome, 'w')
+            file.write(conteudo.encode('utf8'))
+            file.close()
 
-    def gerarCSVdeQualisdeGrupo(self):
-        prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
+        salvarXML("database.xml", xml)
 
-        # Salvamos a lista individual
-        s = ""
-        for membro in self.listaDeMembros:
-            s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaArtigoEmPeriodico)
-            s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaTrabalhoCompletoEmCongresso)
-            s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaResumoExpandidoEmCongresso)
-        self.salvarArquivoGenerico(s, prefix + 'publicacoesPorMembro.csv')
-
-        # Salvamos a lista total (publicações do grupo)
-        s = ""
-        s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaArtigoEmPeriodico)
-        s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaTrabalhoCompletoEmCongresso)
-        s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaResumoExpandidoEmCongresso)
-        self.salvarArquivoGenerico(s, prefix + 'publicacoesDoGrupo.csv')
-
-    def gerarCSVdeQualisdeGrupoOld(self):
-        if self.obterParametro('global-identificar_publicacoes_com_qualis'):
-            prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro(
-                'global-prefixo') == '' else ''
-
-            # Salvamos a lista individual
-            s = ""
-            for membro in self.listaDeMembros:
-                if (not self.obterParametro('global-arquivo_qualis_de_periodicos') == ''):
-                    s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaArtigoEmPeriodico)
-                if (not self.obterParametro('global-arquivo_qualis_de_congressos') == ''):
-                    s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaTrabalhoCompletoEmCongresso)
-                    s += self.imprimeCSVListaIndividual(membro.nomeCompleto, membro.listaResumoExpandidoEmCongresso)
-            self.salvarArquivoGenerico(s, prefix + 'qualisPorMembro.csv')
-
-            # Salvamos a lista total (publicações do grupo)
-            s = ""
-            if (not self.obterParametro('global-arquivo_qualis_de_periodicos') == ''):
-                s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaArtigoEmPeriodico)
-            if (not self.obterParametro('global-arquivo_qualis_de_congressos') == ''):
-                s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaTrabalhoCompletoEmCongresso)
-                s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaResumoExpandidoEmCongresso)
-            self.salvarArquivoGenerico(s, prefix + 'qualisGrupal.csv')
-
-    def gerarArquivosTemporarios(self):
-        print "\n[CRIANDO ARQUIVOS TEMPORARIOS: CSV, RIS, TXT, GDF]"
-
-        self.gerarRISdeMembros()
-        self.gerarCSVdeQualisdeGrupo()
-        self.gerarXMLdeGrupo()
-
-        # Salvamos alguns dados para análise posterior (com outras ferramentas)
-        prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
-
-        # (1) matrizes
-        self.salvarMatrizTXT(self.matrizDeAdjacencia, prefix + "matrizDeAdjacencia.txt")
-        self.salvarMatrizTXT(self.matrizDeFrequencia, prefix + "matrizDeFrequencia.txt")
-        self.salvarMatrizTXT(self.matrizDeFrequenciaNormalizada, prefix + "matrizDeFrequenciaNormalizada.txt")
-        # self.salvarMatrizXML(self.matrizDeAdjacencia, prefix+"matrizDeAdjacencia.xml")
-
-        # (2) listas de nomes, rótulos, ids
-        self.salvarListaTXT(self.nomes, prefix + "listaDeNomes.txt")
-        self.salvarListaTXT(self.rotulos, prefix + "labels_set.txt")
-        self.salvarListaTXT(self.ids, prefix + "listaDeIDs.txt")
-
-        # (3) medidas de authorRanks
-        self.salvarListaTXT(self.vectorRank, prefix + "authorRank.txt")
-
-        # (4) lista unica de colaboradores (orientadores, ou qualquer outro tipo de parceiros...)
-        rawColaboradores = list([])
-        for membro in self.listaDeMembros:
-            for idColaborador in membro.listaIDLattesColaboradoresUnica:
-                rawColaboradores.append(idColaborador)
-        rawColaboradores = list(set(rawColaboradores))
-        self.salvarListaTXT(rawColaboradores, prefix + "colaboradores.txt")
-
-        # (5) Geolocalizacoes
-        self.geolocalizacoes = list([])
-        for membro in self.listaDeMembros:
-            self.geolocalizacoes.append(str(membro.enderecoProfissionalLat) + "," + str(membro.enderecoProfissionalLon))
-        self.salvarListaTXT(self.geolocalizacoes, prefix + "listaDeGeolocalizacoes.txt")
-
-        # (6) arquivo GDF
-        self.gerarArquivoGDF(prefix + "rede.gdf")
-
-    def gerarArquivoGDF(self, nomeArquivo):
-        # Vêrtices
-        N = len(self.listaDeMembros)
-        string = "nodedef> name VARCHAR, id_lattes VARCHAR, label VARCHAR, rotulo VARCHAR, lat DOUBLE, lon DOUBLE, collaborationRank DOUBLE, producaoBibliografica DOUBLE, artigoEmPeriodico DOUBLE, livro DOUBLE, capituloDeLivro DOUBLE, trabalhoEmCongresso DOUBLE, resumoExpandido DOUBLE, resumo DOUBLE, color VARCHAR"
-        i = 0
-        for membro in self.listaDeMembros:
-            nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
-            string += "\n" + str(
-                i) + "," + membro.idLattes + "," + nomeCompleto + "," + membro.rotulo + "," + membro.enderecoProfissionalLat + "," + membro.enderecoProfissionalLon + ","
-            string += str(self.vectorRank[i]) + ","
-            string += str(len(membro.listaArtigoEmPeriodico) + len(membro.listaLivroPublicado) + len(
-                membro.listaCapituloDeLivroPublicado) + len(membro.listaTrabalhoCompletoEmCongresso) + len(
-                membro.listaResumoExpandidoEmCongresso) + len(membro.listaResumoEmCongresso)) + ","
-            string += str(len(membro.listaArtigoEmPeriodico)) + ","
-            string += str(len(membro.listaLivroPublicado)) + ","
-            string += str(len(membro.listaCapituloDeLivroPublicado)) + ","
-            string += str(len(membro.listaTrabalhoCompletoEmCongresso)) + ","
-            string += str(len(membro.listaResumoExpandidoEmCongresso)) + ","
-            string += str(len(membro.listaResumoEmCongresso)) + ","
-            string += "'" + self.HTMLColorToRGB(membro.rotuloCorBG) + "'"
-            i += 1
-
-        # Arestas
-        matriz = self.matrizDeAdjacencia
-
-        string += "\nedgedef> node1 VARCHAR, node2 VARCHAR, weight DOUBLE"
-        for i in range(0, N):
-            for j in range(i + 1, N):
-                if (i != j) and (matriz[i, j] > 0):
-                    string += '\n' + str(i) + ',' + str(j) + ',' + str(matriz[i, j])
-
-
-        # gerando o arquivo GDF
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-        arquivo.write(string)  # .encode("utf8","ignore"))
-        arquivo.close()
+        if errors:
+            print "\n\n[AVISO] Erro ao gerar XML para os lattes abaixo:"
+            for item in errors:
+                print "- [ID Lattes: " + item + "]"
 
     def HTMLColorToRGB(self, colorstring):
         colorstring = colorstring.strip()
@@ -268,19 +193,6 @@ class Grupo:
                     s += pub.csv().encode('utf8') + "\n"
         return s
 
-    def gerarRISdeMembros(self):
-        prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
-        s = ""
-        for membro in self.listaDeMembros:
-            s += membro.ris().encode('utf8') + "\n"
-        self.salvarArquivoGenerico(s, prefix + 'membros.ris')
-
-    def salvarArquivoGenerico(self, conteudo, nomeArquivo):
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-        arquivo.write(conteudo)
-        arquivo.close()
-
     def gerarMapaDeGeolocalizacao(self):
         if self.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
@@ -288,38 +200,10 @@ class Grupo:
     def gerarPaginasWeb(self):
         paginasWeb = GeradorDePaginasWeb(self)
 
-    def compilarListasDeItems(self):
-        self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
-
-        # Grafos de coautoria
-        self.compilador.criarMatrizesDeColaboracao()
-
-        [self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
-        self.vetorDeCoAutoria = self.matrizDeFrequencia.sum(
-            axis=1)  # suma das linhas = num. de items feitos em co-autoria (parceria) com outro membro do grupo
-        self.matrizDeFrequenciaNormalizada = self.matrizDeFrequencia.copy()
-
-        for i in range(0, self.numeroDeMembros()):
-            if not self.vetorDeCoAutoria[i] == 0:
-                self.matrizDeFrequenciaNormalizada[i, :] /= float(self.vetorDeCoAutoria[i])
-
-        # AuthorRank
-        authorRank = AuthorRank(self.matrizDeFrequenciaNormalizada, 100)
-        self.vectorRank = authorRank.vectorRank
-
-        # listas de nomes, rotulos e IDs
-        self.nomes = list([])
-        self.rotulos = list([])
-        self.ids = list([])
-        for membro in self.listaDeMembros:
-            self.nomes.append(membro.nomeCompleto)
-            self.rotulos.append(membro.rotulo)
-            self.ids.append(membro.idLattes)
-
     def identificarQualisEmPublicacoes(self):
         if self.obterParametro('global-identificar_publicacoes_com_qualis'):
             print "\n[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]"
-            for membro in self.listaDeMembros:
+            for membro in self.members_list.values():
                 self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
 
             # if self.diretorioCache:
@@ -330,74 +214,6 @@ class Grupo:
             self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
                                                    self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
                                                    self.compilador.listaCompletaResumoExpandidoEmCongresso)
-
-    def salvarListaTXT(self, lista, nomeArquivo):
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-
-        for i in range(0, len(lista)):
-            elemento = lista[i]
-            if type(elemento) == type(unicode()):
-                elemento = elemento.encode("utf8")
-            else:
-                elemento = str(elemento)
-            arquivo.write(elemento + '\n')
-        arquivo.close()
-
-    def salvarMatrizTXT(self, matriz, nomeArquivo):
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-        N = matriz.shape[0]
-
-        for i in range(0, N):
-            for j in range(0, N):
-                arquivo.write(str(matriz[i, j]) + ' ')
-            arquivo.write('\n')
-        arquivo.close()
-
-    def salvarMatrizXML(self, matriz, nomeArquivo):
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-
-        s = '<?xml version="1.0" encoding="UTF-8"?> \
-                \n<!--  An excerpt of an egocentric social network  --> \
-                \n<graphml xmlns="http://graphml.graphdrawing.org/xmlns"> \
-                \n<graph edgedefault="undirected"> \
-                \n<!-- data schema --> \
-                \n<key id="name" for="node" attr.name="name" attr.type="string"/> \
-                \n<key id="nickname" for="node" attr.name="nickname" attr.type="string"/> \
-                \n<key id="gender" for="node" attr.name="gender" attr.type="string"/> \
-                \n<key id="image" for="node" attr.name="image" attr.type="string"/> \
-                \n<key id="link" for="node" attr.name="link" attr.type="string"/> \
-                \n<key id="amount" for="edge" attr.name="amount" attr.type="int"/> \
-                \n<key id="pubs" for="node" attr.name="pubs" attr.type="int"/>'
-
-        for i in range(0, self.numeroDeMembros()):
-            membro = self.listaDeMembros[i]
-            s += '\n<!-- nodes --> \
-                    \n<node id="' + str(membro.idMembro) + '"> \
-                    \n<data key="name">' + membro.nomeCompleto + '</data> \
-                    \n<data key="nickname">' + membro.nomeEmCitacoesBibliograficas + '</data> \
-                    \n<data key="gender">' + membro.sexo[0].upper() + '</data> \
-                    \n<data key="image">' + membro.foto + '</data> \
-                    \n<data key="link">' + membro.url + '</data> \
-                    \n<data key="pubs">' + str(int(self.vetorDeCoAutoria[i])) + '</data> \
-                    \n</node>'
-
-        N = matriz.shape[0]
-        for i in range(0, N):
-            for j in range(0, N):
-                if matriz[i, j] > 0:
-                    s += '\n<!-- edges --> \
-                            \n<edge source="' + str(i) + '" target="' + str(j) + '"> \
-                            \n<data key="amount">' + str(matriz[i, j]) + '</data> \
-                            \n</edge>'
-
-        s += '\n</graph>\
-                \n</graphml>'
-
-        arquivo.write(s.encode('utf8'))
-        arquivo.close()
 
     def salvarVetorDeProducoes(self, vetor, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')
@@ -520,7 +336,7 @@ class Grupo:
     #     return len(self.members_list)
 
     def ordenarListaDeMembros(self, chave):
-        self.listaDeMembros.sort(key=operator.attrgetter(chave))  # ordenamos por nome
+        self.members_list.values().sort(key=operator.attrgetter(chave))  # ordenamos por nome
 
     def imprimirListaDeParametros(self):
         for par in self.listaDeParametros:  # .keys():
@@ -528,7 +344,7 @@ class Grupo:
         print
 
     def imprimirListaDeMembros(self):
-        for membro in self.listaDeMembros:
+        for membro in self.members_list.values():
             print membro
         print
 

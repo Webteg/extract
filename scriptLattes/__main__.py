@@ -240,7 +240,7 @@ def cli():
     if not ids_file_path:
         return -1
 
-    ids = read_list_file(ids_file_path)
+    ids_df = read_list_file(ids_file_path)
 
     qualis_de_congressos = None
     areas_qualis = None
@@ -252,7 +252,7 @@ def cli():
         if config['geral']['arquivo_areas_qualis']:
             areas_qualis = util.find_file(Path(config['geral']['arquivo_areas_qualis']), config_file_path)
 
-    group = Grupo(ids=ids,
+    group = Grupo(ids_df=ids_df,
                   desde_ano=config['geral']['itens_desde_o_ano'],
                   ate_ano=config['geral']['itens_ate_o_ano'],
                   qualis_de_congressos=qualis_de_congressos,
@@ -266,7 +266,7 @@ def cli():
         # obter/carregar
         if not arguments['--offline']:
             # download
-            for id_lattes in ids['identificador']:
+            for id_lattes in ids_df['identificador']:
                 if use_xml:
                     # TODO: tentar usar webservice do CNPq
                     raise "Download de CVs em XML ainda não implementado."
@@ -285,7 +285,7 @@ def cli():
                 logger.error(
                     "Opção --offline exige que um diretório de cache válido seja usado; verifique seu arquivo de configuração.")
                 return -1
-            for id_lattes in ids['identificador']:
+            for id_lattes in ids_df['identificador']:
                 if id_lattes == '0000000000000000':
                     # se o codigo for '0000000000000000' então serao considerados dados de pessoa estrangeira - sem Lattes.
                     # sera procurada a coautoria endogena com os outros membro.
@@ -329,9 +329,10 @@ def cli():
         else:
             group.extract_cvs_data(ParserLattesHTML, cvs_content['html'])  # obrigatorio
 
-    if arguments['process'] or arguments['report']:
+    if arguments['process'] or arguments['report'] or arguments['all']:
         # processar/carregar
-        group.compilarListasDeItems()  # obrigatorio
+        group.aggregate_data()
+        group.compilarListasDeItems(config['relatorio'])  # obrigatorio
         group.identificarQualisEmPublicacoes()  # obrigatorio
         group.calcularInternacionalizacao()  # obrigatorio
         # group.imprimirMatrizesDeFrequencia()

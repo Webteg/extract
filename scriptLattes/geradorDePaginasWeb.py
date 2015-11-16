@@ -2,19 +2,19 @@
 # encoding: utf-8
 # filename: geradorDePaginasWeb
 
-from collections import defaultdict
 import datetime
+import logging
 import os
 import re
 import unicodedata
-import logging
+from collections import defaultdict
 
 import pandas
 from pandas.core.indexing import IndexingError
 
-from charts.graficoDeInternacionalizacao import *
-from highcharts import *  # highcharts
 import membro
+from highcharts import *  # highcharts
+from report.charts.graficoDeInternacionalizacao import *
 
 logger = logging.getLogger('scriptLattes')
 
@@ -719,7 +719,7 @@ class GeradorDePaginasWeb:
 
                     producao_html = self.template_producao()
                     producao_html = producao_html.format(indice=indice_no_ano + 1,
-                                                         publicacao=publicacao.html(self.grupo.listaDeMembros))
+                                                         publicacao=publicacao.html(self.grupo.members_list.values()))
                     producoes_html += producao_html
                 producoes_html += '</table></div>'
 
@@ -1025,7 +1025,7 @@ class GeradorDePaginasWeb:
 
         elemento = 0
         tabela = {}
-        for membro in self.grupo.listaDeMembros:
+        for membro in self.grupo.members_list.values():
             elemento += 1
             bolsa = '(' + membro.bolsaProdutividade + ')' if membro.bolsaProdutividade else ''
             rotulo = membro.rotulo if not membro.rotulo == '[sem rotulo]' else ''
@@ -1168,7 +1168,7 @@ class GeradorDePaginasWeb:
 
         footer = u'<th>Área</th><th>Membro</th>'
 
-        producao_por_membro = self.producao_qualis_por_membro(self.grupo.listaDeMembros)
+        producao_por_membro = self.producao_qualis_por_membro(self.grupo.members_list.values())
 
         if producao_por_membro.empty:
             html += self.paginaBottom()
