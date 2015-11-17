@@ -176,18 +176,19 @@ class Membro:
         self.listaIDLattesColaboradoresUnica = set(self.listaIDLattesColaboradores)
 
         # Produção bibliográfica
-        self.listaArtigoEmPeriodico = parser.listaArtigoEmPeriodico
-        # TODO: testando refatoracao
+        # self.listaArtigoEmPeriodico = parser.listaArtigoEmPeriodico
         self.journal_papers.add_from_parser(parser.listaArtigoEmPeriodico)
+
         self.listaArtigoAceito = parser.listaArtigoAceito
 
-        self.listaTrabalhoCompletoEmCongresso = parser.listaTrabalhoCompletoEmCongresso
-        self.listaResumoExpandidoEmCongresso = parser.listaResumoExpandidoEmCongresso
-        self.listaResumoEmCongresso = parser.listaResumoEmCongresso
+        # self.listaTrabalhoCompletoEmCongresso = parser.listaTrabalhoCompletoEmCongresso
+        # self.listaResumoExpandidoEmCongresso = parser.listaResumoExpandidoEmCongresso
+        # self.listaResumoEmCongresso = parser.listaResumoEmCongresso
         self.event_papers.add_from_parser(parser.listaTrabalhoCompletoEmCongresso, EventPapers.Types.complete)
         self.event_papers.add_from_parser(parser.listaResumoExpandidoEmCongresso, EventPapers.Types.expanded_abstract)
         self.event_papers.add_from_parser(parser.listaResumoEmCongresso, EventPapers.Types.abstract)
 
+        # TODO: testando refatoracao até acima
         self.listaLivroPublicado = parser.listaLivroPublicado
         self.listaCapituloDeLivroPublicado = parser.listaCapituloDeLivroPublicado
         self.listaTextoEmJornalDeNoticia = parser.listaTextoEmJornalDeNoticia
@@ -505,7 +506,7 @@ class Membro:
         else:
             totals = [
                 (u'- Número de colaboradores (identificado)',       len(self.listaIDLattesColaboradoresUnica)),
-                (u'- Artigos completos publicados em periódicos',   len(self.listaArtigoEmPeriodico)),
+                (u'- Artigos completos publicados em periódicos',   len(self.journal_papers)),
                 (u'- Livros publicados/organizados ou edições',     len(self.listaLivroPublicado)),
                 (u'- Capítulos de livros publicados',               len(self.listaCapituloDeLivroPublicado)),
                 (u'- Textos em jornais de notícias/revistas',       len(self.listaTextoEmJornalDeNoticia)),

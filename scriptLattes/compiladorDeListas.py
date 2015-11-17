@@ -27,6 +27,8 @@ import operator
 import re
 
 from scipy import sparse
+import itertools
+
 
 class CompiladorDeListas:
     grupo = None
@@ -366,57 +368,61 @@ class CompiladorDeListas:
 
 
     def criarMatrizesDeColaboracao(self):
-        if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
-            self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)
-        if self.grupo.obterParametro('grafo-incluir_livro_publicado'):
-            self.matrizesLivroPublicado = self.criarMatrizes(self.listaCompletaLivroPublicado)
-        if self.grupo.obterParametro('grafo-incluir_capitulo_de_livro_publicado'):
-            self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
-        if self.grupo.obterParametro('grafo-incluir_texto_em_jornal_de_noticia'):
-            self.matrizesTextoEmJornalDeNoticia = self.criarMatrizes(self.listaCompletaTextoEmJornalDeNoticia)
-        if self.grupo.obterParametro('grafo-incluir_trabalho_completo_em_congresso'):
-            self.matrizesTrabalhoCompletoEmCongresso = self.criarMatrizes(self.listaCompletaTrabalhoCompletoEmCongresso)
-        if self.grupo.obterParametro('grafo-incluir_resumo_expandido_em_congresso'):
-            self.matrizesResumoExpandidoEmCongresso = self.criarMatrizes(self.listaCompletaResumoExpandidoEmCongresso)
-        if self.grupo.obterParametro('grafo-incluir_resumo_em_congresso'):
-            self.matrizesResumoEmCongresso = self.criarMatrizes(self.listaCompletaResumoEmCongresso)
-        if self.grupo.obterParametro('grafo-incluir_artigo_aceito_para_publicacao'):
-            self.matrizesArtigoAceito = self.criarMatrizes(self.listaCompletaArtigoAceito)
-        if self.grupo.obterParametro('grafo-incluir_apresentacao_de_trabalho'):
-            self.matrizesApresentacaoDeTrabalho = self.criarMatrizes(self.listaCompletaApresentacaoDeTrabalho)
-        if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_bibliografica'):
-            self.matrizesOutroTipoDeProducaoBibliografica = self.criarMatrizes(
-                self.listaCompletaOutroTipoDeProducaoBibliografica)
+        # FIXME: tratar opções
+        # if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
+        self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)
+        # if self.grupo.obterParametro('grafo-incluir_trabalho_completo_em_congresso'):
+        self.matrizesTrabalhoCompletoEmCongresso = self.criarMatrizes(self.listaCompletaTrabalhoCompletoEmCongresso)
+        # if self.grupo.obterParametro('grafo-incluir_resumo_expandido_em_congresso'):
+        self.matrizesResumoExpandidoEmCongresso = self.criarMatrizes(self.listaCompletaResumoExpandidoEmCongresso)
+        # if self.grupo.obterParametro('grafo-incluir_resumo_em_congresso'):
+        self.matrizesResumoEmCongresso = self.criarMatrizes(self.listaCompletaResumoEmCongresso)
 
-        if self.grupo.obterParametro('grafo-incluir_software_com_patente'):
-            self.matrizesSoftwareComPatente = self.criarMatrizes(self.listaCompletaSoftwareComPatente)
-        if self.grupo.obterParametro('grafo-incluir_software_sem_patente'):
-            self.matrizesSoftwareSemPatente = self.criarMatrizes(self.listaCompletaSoftwareSemPatente)
-        if self.grupo.obterParametro('grafo-incluir_produto_tecnologico'):
-            self.matrizesProdutoTecnologico = self.criarMatrizes(self.listaCompletaProdutoTecnologico)
-        if self.grupo.obterParametro('grafo-incluir_processo_ou_tecnica'):
-            self.matrizesProcessoOuTecnica = self.criarMatrizes(self.listaCompletaProcessoOuTecnica)
-        if self.grupo.obterParametro('grafo-incluir_trabalho_tecnico'):
-            self.matrizesTrabalhoTecnico = self.criarMatrizes(self.listaCompletaTrabalhoTecnico)
-        if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_tecnica'):
-            self.matrizesOutroTipoDeProducaoTecnica = self.criarMatrizes(self.listaCompletaOutroTipoDeProducaoTecnica)
+        # if self.grupo.obterParametro('grafo-incluir_artigo_aceito_para_publicacao'):
+        self.matrizesArtigoAceito = self.criarMatrizes(self.listaCompletaArtigoAceito)
+        # if self.grupo.obterParametro('grafo-incluir_livro_publicado'):
+        self.matrizesLivroPublicado = self.criarMatrizes(self.listaCompletaLivroPublicado)
+        # if self.grupo.obterParametro('grafo-incluir_capitulo_de_livro_publicado'):
+        self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
+        # if self.grupo.obterParametro('grafo-incluir_texto_em_jornal_de_noticia'):
+        self.matrizesTextoEmJornalDeNoticia = self.criarMatrizes(self.listaCompletaTextoEmJornalDeNoticia)
+        # if self.grupo.obterParametro('grafo-incluir_apresentacao_de_trabalho'):
+        self.matrizesApresentacaoDeTrabalho = self.criarMatrizes(self.listaCompletaApresentacaoDeTrabalho)
+        # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_bibliografica'):
+        self.matrizesOutroTipoDeProducaoBibliografica = self.criarMatrizes(self.listaCompletaOutroTipoDeProducaoBibliografica)
 
-        if self.grupo.obterParametro('grafo-incluir_patente'):
-            self.matrizesPatente = self.criarMatrizes(self.listaCompletaPatente)
-        if self.grupo.obterParametro('grafo-incluir_programa_computador'):
-            self.matrizesProgramaComputador = self.criarMatrizes(self.listaCompletaProgramaComputador)
-        if self.grupo.obterParametro('grafo-incluir_desenho_industrial'):
-            self.matrizesDesenhoIndustrial = self.criarMatrizes(self.listaCompletaDesenhoIndustrial)
+        # if self.grupo.obterParametro('grafo-incluir_software_com_patente'):
+        self.matrizesSoftwareComPatente = self.criarMatrizes(self.listaCompletaSoftwareComPatente)
+        # if self.grupo.obterParametro('grafo-incluir_software_sem_patente'):
+        self.matrizesSoftwareSemPatente = self.criarMatrizes(self.listaCompletaSoftwareSemPatente)
+        # if self.grupo.obterParametro('grafo-incluir_produto_tecnologico'):
+        self.matrizesProdutoTecnologico = self.criarMatrizes(self.listaCompletaProdutoTecnologico)
+        # if self.grupo.obterParametro('grafo-incluir_processo_ou_tecnica'):
+        self.matrizesProcessoOuTecnica = self.criarMatrizes(self.listaCompletaProcessoOuTecnica)
+        # if self.grupo.obterParametro('grafo-incluir_trabalho_tecnico'):
+        self.matrizesTrabalhoTecnico = self.criarMatrizes(self.listaCompletaTrabalhoTecnico)
+        # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_tecnica'):
+        self.matrizesOutroTipoDeProducaoTecnica = self.criarMatrizes(self.listaCompletaOutroTipoDeProducaoTecnica)
 
-        if self.grupo.obterParametro('grafo-incluir_producao_artistica'):
-            self.matrizesProducaoArtistica = self.criarMatrizes(self.listaCompletaProducaoArtistica)
+        # if self.grupo.obterParametro('grafo-incluir_patente'):
+        self.matrizesPatente = self.criarMatrizes(self.listaCompletaPatente)
+        # if self.grupo.obterParametro('grafo-incluir_programa_computador'):
+        self.matrizesProgramaComputador = self.criarMatrizes(self.listaCompletaProgramaComputador)
+        # if self.grupo.obterParametro('grafo-incluir_desenho_industrial'):
+        self.matrizesDesenhoIndustrial = self.criarMatrizes(self.listaCompletaDesenhoIndustrial)
 
-
-        # Criamos as matrizes de:
-        #  - (1) adjacência
-        #  - (2) frequencia
+        # if self.grupo.obterParametro('grafo-incluir_producao_artistica'):
+        self.matrizesProducaoArtistica = self.criarMatrizes(self.listaCompletaProducaoArtistica)
 
     def criarMatrizes(self, listaCompleta):
+        '''
+        Criamos as matrizes de:
+         - (1) adjacência
+         - (2) frequencia
+
+        :param listaCompleta:
+        :return:
+        '''
         # matriz1 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.int32)
         # matriz2 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.float32)
         matriz1 = sparse.lil_matrix((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()))
@@ -432,8 +438,11 @@ class CompiladorDeListas:
                     # Para todos os co-autores da publicacao:
                     # (1) atualizamos o contador de colaboracao (adjacencia)
                     # (2) incrementamos a 'frequencia' de colaboracao
-                    combinacoes = self.calcularCombinacoes(pub.idMembro)
-                    for c in combinacoes:
+                    for c in itertools.combinations(pub.idMembro, 2):
+                        # combinacoes 2 a 2 de todos os co-autores da publicação
+                        # exemplo:
+                        # lista = [0, 3, 1]
+                        # combinacoes = [[0,3], [0,1], [3,1]]
                         matriz1[c[0], c[1]] += 1
                         matriz1[c[1], c[0]] += 1
 
@@ -441,20 +450,6 @@ class CompiladorDeListas:
                         matriz2[c[1], c[0]] += 1.0 / (numeroDeCoAutores - 1)
 
         return [matriz1, matriz2]
-
-
-    # combinacoes 2 a 2 de todos os co-autores da publicação
-    # exemplo:
-    # lista = [0, 3, 1]
-    # combinacoes = [[0,3], [0,1], [3,1]]
-    def calcularCombinacoes(self, conjunto):
-        lista = list(conjunto)
-        combinacoes = []
-        for i in range(0, len(lista) - 1):
-            for j in range(i + 1, len(lista)):
-                combinacoes.append([lista[i], lista[j]])
-        return combinacoes
-
 
     def uniaoDeMatrizesDeColaboracao(self):
         ##matriz1 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.int32)

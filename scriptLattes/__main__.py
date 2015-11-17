@@ -344,6 +344,7 @@ def cli():
         # processar/carregar
         group.aggregate_data()
         group.compilarListasDeItems(config['relatorio'])  # obrigatorio
+
         if config['geral']['identificar_publicacoes_com_qualis']:
             group.identificarQualisEmPublicacoes()  # obrigatorio
         if config['relatorio']['incluir_internacionalizacao']:

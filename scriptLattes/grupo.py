@@ -15,7 +15,6 @@ from persist import cache
 from persist.cache import cache
 from qualis import qualis
 from report.charts.graficoDeBarras import GraficoDeBarras
-from report.charts.collaborationGraph import CollaborationGraph
 from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
 from report.geradorDeXML import GeradorDeXML
 
@@ -61,7 +60,8 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, ids_df, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+    def __init__(self, ids_df, group_id=1, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+        self.group_id = group_id
 
         if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
             desde_ano = str(datetime.datetime.now().year)
@@ -111,8 +111,8 @@ class Grupo:
                 logger.debug(u"{}".format(self.members_list[id_lattes]))
 
     def aggregate_data(self):
-        self.journal_papers = JournalPapers(id=1)  # TODO: define a group id
-        self.event_papers = EventPapers(id=1)  # TODO: define a group id
+        self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
+        self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
         for _, member in self.members_list.items():
             self.journal_papers.append(member.journal_papers)
             self.event_papers.append(member.event_papers)
