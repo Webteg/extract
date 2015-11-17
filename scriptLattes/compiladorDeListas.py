@@ -110,194 +110,160 @@ class CompiladorDeListas:
 
         # compilamos as producoes de todos os membros (separados por tipos)
         for membro in grupo.members_list.values():
-            self.listaCompletaArtigoEmPeriodico = self.compilarLista(membro.listaArtigoEmPeriodico,
-                                                                     self.listaCompletaArtigoEmPeriodico)
-            self.listaCompletaLivroPublicado = self.compilarLista(membro.listaLivroPublicado,
-                                                                  self.listaCompletaLivroPublicado)
-            self.listaCompletaCapituloDeLivroPublicado = self.compilarLista(membro.listaCapituloDeLivroPublicado,
-                                                                            self.listaCompletaCapituloDeLivroPublicado)
-            self.listaCompletaTextoEmJornalDeNoticia = self.compilarLista(membro.listaTextoEmJornalDeNoticia,
-                                                                          self.listaCompletaTextoEmJornalDeNoticia)
-            self.listaCompletaTrabalhoCompletoEmCongresso = self.compilarLista(membro.listaTrabalhoCompletoEmCongresso,
-                                                                               self.listaCompletaTrabalhoCompletoEmCongresso)
-            self.listaCompletaResumoExpandidoEmCongresso = self.compilarLista(membro.listaResumoExpandidoEmCongresso,
-                                                                              self.listaCompletaResumoExpandidoEmCongresso)
-            self.listaCompletaResumoEmCongresso = self.compilarLista(membro.listaResumoEmCongresso,
-                                                                     self.listaCompletaResumoEmCongresso)
-            self.listaCompletaArtigoAceito = self.compilarLista(membro.listaArtigoAceito,
-                                                                self.listaCompletaArtigoAceito)
-            self.listaCompletaApresentacaoDeTrabalho = self.compilarLista(membro.listaApresentacaoDeTrabalho,
-                                                                          self.listaCompletaApresentacaoDeTrabalho)
+            self.listaCompletaArtigoEmPeriodico = self.compilarLista(membro.listaArtigoEmPeriodico, self.listaCompletaArtigoEmPeriodico)
+            self.listaCompletaLivroPublicado = self.compilarLista(membro.listaLivroPublicado, self.listaCompletaLivroPublicado)
+            self.listaCompletaCapituloDeLivroPublicado = self.compilarLista(membro.listaCapituloDeLivroPublicado, self.listaCompletaCapituloDeLivroPublicado)
+            self.listaCompletaTextoEmJornalDeNoticia = self.compilarLista(membro.listaTextoEmJornalDeNoticia, self.listaCompletaTextoEmJornalDeNoticia)
+            self.listaCompletaTrabalhoCompletoEmCongresso = self.compilarLista(membro.listaTrabalhoCompletoEmCongresso, self.listaCompletaTrabalhoCompletoEmCongresso)
+            self.listaCompletaResumoExpandidoEmCongresso = self.compilarLista(membro.listaResumoExpandidoEmCongresso, self.listaCompletaResumoExpandidoEmCongresso)
+            self.listaCompletaResumoEmCongresso = self.compilarLista(membro.listaResumoEmCongresso, self.listaCompletaResumoEmCongresso)
+            self.listaCompletaArtigoAceito = self.compilarLista(membro.listaArtigoAceito, self.listaCompletaArtigoAceito)
+            self.listaCompletaApresentacaoDeTrabalho = self.compilarLista(membro.listaApresentacaoDeTrabalho, self.listaCompletaApresentacaoDeTrabalho)
             self.listaCompletaOutroTipoDeProducaoBibliografica = self.compilarLista(membro.listaOutroTipoDeProducaoBibliografica, self.listaCompletaOutroTipoDeProducaoBibliografica)
 
-            self.listaCompletaSoftwareComPatente = self.compilarLista(membro.listaSoftwareComPatente,
-                                                                      self.listaCompletaSoftwareComPatente)
-            self.listaCompletaSoftwareSemPatente = self.compilarLista(membro.listaSoftwareSemPatente,
-                                                                      self.listaCompletaSoftwareSemPatente)
-            self.listaCompletaProdutoTecnologico = self.compilarLista(membro.listaProdutoTecnologico,
-                                                                      self.listaCompletaProdutoTecnologico)
-            self.listaCompletaProcessoOuTecnica = self.compilarLista(membro.listaProcessoOuTecnica,
-                                                                     self.listaCompletaProcessoOuTecnica)
-            self.listaCompletaTrabalhoTecnico = self.compilarLista(membro.listaTrabalhoTecnico,
-                                                                   self.listaCompletaTrabalhoTecnico)
-            self.listaCompletaOutroTipoDeProducaoTecnica = self.compilarLista(membro.listaOutroTipoDeProducaoTecnica,
-                                                                              self.listaCompletaOutroTipoDeProducaoTecnica)
+            self.listaCompletaSoftwareComPatente = self.compilarLista(membro.listaSoftwareComPatente, self.listaCompletaSoftwareComPatente)
+            self.listaCompletaSoftwareSemPatente = self.compilarLista(membro.listaSoftwareSemPatente, self.listaCompletaSoftwareSemPatente)
+            self.listaCompletaProdutoTecnologico = self.compilarLista(membro.listaProdutoTecnologico, self.listaCompletaProdutoTecnologico)
+            self.listaCompletaProcessoOuTecnica = self.compilarLista(membro.listaProcessoOuTecnica, self.listaCompletaProcessoOuTecnica)
+            self.listaCompletaTrabalhoTecnico = self.compilarLista(membro.listaTrabalhoTecnico, self.listaCompletaTrabalhoTecnico)
+            self.listaCompletaOutroTipoDeProducaoTecnica = self.compilarLista(membro.listaOutroTipoDeProducaoTecnica, self.listaCompletaOutroTipoDeProducaoTecnica)
 
             self.listaCompletaPatente = self.compilarLista(membro.listaPatente, self.listaCompletaPatente)
-            self.listaCompletaProgramaComputador = self.compilarLista(membro.listaProgramaComputador,
-                                                                      self.listaCompletaProgramaComputador)
-            self.listaCompletaDesenhoIndustrial = self.compilarLista(membro.listaDesenhoIndustrial,
-                                                                     self.listaCompletaDesenhoIndustrial)
+            self.listaCompletaProgramaComputador = self.compilarLista(membro.listaProgramaComputador, self.listaCompletaProgramaComputador)
+            self.listaCompletaDesenhoIndustrial = self.compilarLista(membro.listaDesenhoIndustrial, self.listaCompletaDesenhoIndustrial)
 
-            self.listaCompletaProducaoArtistica = self.compilarLista(membro.listaProducaoArtistica,
-                                                                     self.listaCompletaProducaoArtistica)
+            self.listaCompletaProducaoArtistica = self.compilarLista(membro.listaProducaoArtistica, self.listaCompletaProducaoArtistica)
 
-            self.listaCompletaOASupervisaoDePosDoutorado = self.compilarLista(membro.listaOASupervisaoDePosDoutorado,
-                                                                              self.listaCompletaOASupervisaoDePosDoutorado)
-            self.listaCompletaOATeseDeDoutorado = self.compilarLista(membro.listaOATeseDeDoutorado,
-                                                                     self.listaCompletaOATeseDeDoutorado)
-            self.listaCompletaOADissertacaoDeMestrado = self.compilarLista(membro.listaOADissertacaoDeMestrado,
-                                                                           self.listaCompletaOADissertacaoDeMestrado)
-            self.listaCompletaOAMonografiaDeEspecializacao = self.compilarLista(
-                membro.listaOAMonografiaDeEspecializacao, self.listaCompletaOAMonografiaDeEspecializacao)
+            self.listaCompletaOASupervisaoDePosDoutorado = self.compilarLista(membro.listaOASupervisaoDePosDoutorado, self.listaCompletaOASupervisaoDePosDoutorado)
+            self.listaCompletaOATeseDeDoutorado = self.compilarLista(membro.listaOATeseDeDoutorado, self.listaCompletaOATeseDeDoutorado)
+            self.listaCompletaOADissertacaoDeMestrado = self.compilarLista(membro.listaOADissertacaoDeMestrado, self.listaCompletaOADissertacaoDeMestrado)
+            self.listaCompletaOAMonografiaDeEspecializacao = self.compilarLista(membro.listaOAMonografiaDeEspecializacao, self.listaCompletaOAMonografiaDeEspecializacao)
             self.listaCompletaOATCC = self.compilarLista(membro.listaOATCC, self.listaCompletaOATCC)
-            self.listaCompletaOAIniciacaoCientifica = self.compilarLista(membro.listaOAIniciacaoCientifica,
-                                                                         self.listaCompletaOAIniciacaoCientifica)
-            self.listaCompletaOAOutroTipoDeOrientacao = self.compilarLista(membro.listaOAOutroTipoDeOrientacao,
-                                                                           self.listaCompletaOAOutroTipoDeOrientacao)
+            self.listaCompletaOAIniciacaoCientifica = self.compilarLista(membro.listaOAIniciacaoCientifica, self.listaCompletaOAIniciacaoCientifica)
+            self.listaCompletaOAOutroTipoDeOrientacao = self.compilarLista(membro.listaOAOutroTipoDeOrientacao, self.listaCompletaOAOutroTipoDeOrientacao)
 
-            self.listaCompletaOCSupervisaoDePosDoutorado = self.compilarLista(membro.listaOCSupervisaoDePosDoutorado,
-                                                                              self.listaCompletaOCSupervisaoDePosDoutorado)
-            self.listaCompletaOCTeseDeDoutorado = self.compilarLista(membro.listaOCTeseDeDoutorado,
-                                                                     self.listaCompletaOCTeseDeDoutorado)
-            self.listaCompletaOCDissertacaoDeMestrado = self.compilarLista(membro.listaOCDissertacaoDeMestrado,
-                                                                           self.listaCompletaOCDissertacaoDeMestrado)
-            self.listaCompletaOCMonografiaDeEspecializacao = self.compilarLista(
-                membro.listaOCMonografiaDeEspecializacao, self.listaCompletaOCMonografiaDeEspecializacao)
+            self.listaCompletaOCSupervisaoDePosDoutorado = self.compilarLista(membro.listaOCSupervisaoDePosDoutorado, self.listaCompletaOCSupervisaoDePosDoutorado)
+            self.listaCompletaOCTeseDeDoutorado = self.compilarLista(membro.listaOCTeseDeDoutorado, self.listaCompletaOCTeseDeDoutorado)
+            self.listaCompletaOCDissertacaoDeMestrado = self.compilarLista(membro.listaOCDissertacaoDeMestrado, self.listaCompletaOCDissertacaoDeMestrado)
+            self.listaCompletaOCMonografiaDeEspecializacao = self.compilarLista(membro.listaOCMonografiaDeEspecializacao, self.listaCompletaOCMonografiaDeEspecializacao)
             self.listaCompletaOCTCC = self.compilarLista(membro.listaOCTCC, self.listaCompletaOCTCC)
-            self.listaCompletaOCIniciacaoCientifica = self.compilarLista(membro.listaOCIniciacaoCientifica,
-                                                                         self.listaCompletaOCIniciacaoCientifica)
-            self.listaCompletaOCOutroTipoDeOrientacao = self.compilarLista(membro.listaOCOutroTipoDeOrientacao,
-                                                                           self.listaCompletaOCOutroTipoDeOrientacao)
+            self.listaCompletaOCIniciacaoCientifica = self.compilarLista(membro.listaOCIniciacaoCientifica, self.listaCompletaOCIniciacaoCientifica)
+            self.listaCompletaOCOutroTipoDeOrientacao = self.compilarLista(membro.listaOCOutroTipoDeOrientacao, self.listaCompletaOCOutroTipoDeOrientacao)
 
-            self.listaCompletaPremioOuTitulo = self.compilarLista(membro.listaPremioOuTitulo,
-                                                                  self.listaCompletaPremioOuTitulo)
+            self.listaCompletaPremioOuTitulo = self.compilarLista(membro.listaPremioOuTitulo, self.listaCompletaPremioOuTitulo)
             # self.listaCompletaProjetoDePesquisa           = self.compilarListaDeProjetos(membro.listaProjetoDePesquisa, self.listaCompletaProjetoDePesquisa)
-            self.listaCompletaProjetoDePesquisa = self.compilarLista(membro.listaProjetoDePesquisa,
-                                                                     self.listaCompletaProjetoDePesquisa)
+            self.listaCompletaProjetoDePesquisa = self.compilarLista(membro.listaProjetoDePesquisa, self.listaCompletaProjetoDePesquisa)
 
-            self.listaCompletaParticipacaoEmEvento = self.compilarLista(membro.listaParticipacaoEmEvento,
-                                                                        self.listaCompletaParticipacaoEmEvento)
-            self.listaCompletaOrganizacaoDeEvento = self.compilarLista(membro.listaOrganizacaoDeEvento,
-                                                                       self.listaCompletaOrganizacaoDeEvento)
+            self.listaCompletaParticipacaoEmEvento = self.compilarLista(membro.listaParticipacaoEmEvento, self.listaCompletaParticipacaoEmEvento)
+            self.listaCompletaOrganizacaoDeEvento = self.compilarLista(membro.listaOrganizacaoDeEvento, self.listaCompletaOrganizacaoDeEvento)
 
         # ---------------------------------------------------------------------------
         # compilamos as producoes de todos os tipos
         # STOPED HERE!!!
-        if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaArtigoEmPeriodico,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_livro_publicado'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaLivroPublicado, self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_capitulo_de_livro_publicado'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaCapituloDeLivroPublicado,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_texto_em_jornal_de_noticia'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaTextoEmJornalDeNoticia,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_trabalho_completo_em_congresso'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaTrabalhoCompletoEmCongresso,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_resumo_expandido_em_congresso'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaResumoExpandidoEmCongresso,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_resumo_em_congresso'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaResumoEmCongresso,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_artigo_aceito_para_publicacao'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaArtigoAceito, self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_apresentacao_de_trabalho'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaApresentacaoDeTrabalho,
-                                                                self.listaCompletaPB)
-        if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_bibliografica'):
-            self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaOutroTipoDeProducaoBibliografica,
-                                                                self.listaCompletaPB)
-
-        if self.grupo.obterParametro('relatorio-incluir_software_com_patente'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaSoftwareComPatente,
-                                                                self.listaCompletaPT)
-        if self.grupo.obterParametro('relatorio-incluir_software_sem_patente'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaSoftwareSemPatente,
-                                                                self.listaCompletaPT)
-        if self.grupo.obterParametro('relatorio-incluir_produto_tecnologico'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaProdutoTecnologico,
-                                                                self.listaCompletaPT)
-        if self.grupo.obterParametro('relatorio-incluir_processo_ou_tecnica'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaProcessoOuTecnica,
-                                                                self.listaCompletaPT)
-        if self.grupo.obterParametro('relatorio-incluir_trabalho_tecnico'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaTrabalhoTecnico, self.listaCompletaPT)
-        if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_tecnica'):
-            self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaOutroTipoDeProducaoTecnica,
-                                                                self.listaCompletaPT)
-
-        if self.grupo.obterParametro('relatorio-incluir_patente'):
-            self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaPatente, self.listaCompletaPR)
-        if self.grupo.obterParametro('relatorio-incluir_programa_computador'):
-            self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaProgramaComputador,
-                                                                self.listaCompletaPR)
-        if self.grupo.obterParametro('relatorio-incluir_desenho_industrial'):
-            self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaDesenhoIndustrial,
-                                                                self.listaCompletaPR)
-
-        if self.grupo.obterParametro('relatorio-incluir_producao_artistica'):
-            self.listaCompletaPA = self.compilarListasCompletas(self.listaCompletaProducaoArtistica,
-                                                                self.listaCompletaPA)
-
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_pos_doutorado'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOASupervisaoDePosDoutorado,
-                                                                self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_doutorado'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOATeseDeDoutorado,
-                                                                self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_mestrado'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOADissertacaoDeMestrado,
-                                                                self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_monografia_de_especializacao'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAMonografiaDeEspecializacao,
-                                                                self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_tcc'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOATCC, self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_iniciacao_cientifica'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAIniciacaoCientifica,
-                                                                self.listaCompletaOA)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_outro_tipo'):
-            self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAOutroTipoDeOrientacao,
-                                                                self.listaCompletaOA)
-
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_pos_doutorado'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCSupervisaoDePosDoutorado,
-                                                                self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_doutorado'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCTeseDeDoutorado,
-                                                                self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_mestrado'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCDissertacaoDeMestrado,
-                                                                self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_monografia_de_especializacao'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCMonografiaDeEspecializacao,
-                                                                self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_tcc'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCTCC, self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_iniciacao_cientifica'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCIniciacaoCientifica,
-                                                                self.listaCompletaOC)
-        if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_outro_tipo'):
-            self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCOutroTipoDeOrientacao,
-                                                                self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaArtigoEmPeriodico,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_livro_publicado'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaLivroPublicado, self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_capitulo_de_livro_publicado'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaCapituloDeLivroPublicado,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_texto_em_jornal_de_noticia'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaTextoEmJornalDeNoticia,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_trabalho_completo_em_congresso'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaTrabalhoCompletoEmCongresso,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_resumo_expandido_em_congresso'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaResumoExpandidoEmCongresso,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_resumo_em_congresso'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaResumoEmCongresso,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_artigo_aceito_para_publicacao'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaArtigoAceito, self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_apresentacao_de_trabalho'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaApresentacaoDeTrabalho,
+        #                                                         self.listaCompletaPB)
+        # if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_bibliografica'):
+        #     self.listaCompletaPB = self.compilarListasCompletas(self.listaCompletaOutroTipoDeProducaoBibliografica,
+        #                                                         self.listaCompletaPB)
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_software_com_patente'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaSoftwareComPatente,
+        #                                                         self.listaCompletaPT)
+        # if self.grupo.obterParametro('relatorio-incluir_software_sem_patente'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaSoftwareSemPatente,
+        #                                                         self.listaCompletaPT)
+        # if self.grupo.obterParametro('relatorio-incluir_produto_tecnologico'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaProdutoTecnologico,
+        #                                                         self.listaCompletaPT)
+        # if self.grupo.obterParametro('relatorio-incluir_processo_ou_tecnica'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaProcessoOuTecnica,
+        #                                                         self.listaCompletaPT)
+        # if self.grupo.obterParametro('relatorio-incluir_trabalho_tecnico'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaTrabalhoTecnico, self.listaCompletaPT)
+        # if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_tecnica'):
+        #     self.listaCompletaPT = self.compilarListasCompletas(self.listaCompletaOutroTipoDeProducaoTecnica,
+        #                                                         self.listaCompletaPT)
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_patente'):
+        #     self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaPatente, self.listaCompletaPR)
+        # if self.grupo.obterParametro('relatorio-incluir_programa_computador'):
+        #     self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaProgramaComputador,
+        #                                                         self.listaCompletaPR)
+        # if self.grupo.obterParametro('relatorio-incluir_desenho_industrial'):
+        #     self.listaCompletaPR = self.compilarListasCompletas(self.listaCompletaDesenhoIndustrial,
+        #                                                         self.listaCompletaPR)
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_producao_artistica'):
+        #     self.listaCompletaPA = self.compilarListasCompletas(self.listaCompletaProducaoArtistica,
+        #                                                         self.listaCompletaPA)
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_pos_doutorado'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOASupervisaoDePosDoutorado,
+        #                                                         self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_doutorado'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOATeseDeDoutorado,
+        #                                                         self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_mestrado'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOADissertacaoDeMestrado,
+        #                                                         self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_monografia_de_especializacao'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAMonografiaDeEspecializacao,
+        #                                                         self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_tcc'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOATCC, self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_iniciacao_cientifica'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAIniciacaoCientifica,
+        #                                                         self.listaCompletaOA)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_outro_tipo'):
+        #     self.listaCompletaOA = self.compilarListasCompletas(self.listaCompletaOAOutroTipoDeOrientacao,
+        #                                                         self.listaCompletaOA)
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_pos_doutorado'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCSupervisaoDePosDoutorado,
+        #                                                         self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_doutorado'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCTeseDeDoutorado,
+        #                                                         self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_mestrado'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCDissertacaoDeMestrado,
+        #                                                         self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_monografia_de_especializacao'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCMonografiaDeEspecializacao,
+        #                                                         self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_tcc'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCTCC, self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_iniciacao_cientifica'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCIniciacaoCientifica,
+        #                                                         self.listaCompletaOC)
+        # if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_outro_tipo'):
+        #     self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCOutroTipoDeOrientacao,
+        #                                                         self.listaCompletaOC)
 
         for membro in grupo.members_list.values():
-            if membro.idLattes == '0000000000000000':
+            if membro.id_lattes == '0000000000000000':
                 print ":: Processando coautor sem CV-Lattes" + membro.nomeInicial
 
                 self.adicionarCoautorNaLista(self.listaCompletaArtigoEmPeriodico, membro)

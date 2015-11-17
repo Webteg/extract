@@ -21,7 +21,8 @@
 #  junto com este programa, se não, escreva para a Fundação do Software
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-from data_tables.bibliographic_productions.journal_papers import JournalPapers
+from data_tables.bibliographical_production.event_papers import EventPapers
+from data_tables.bibliographical_production.journal_papers import JournalPapers
 from extract.parserLattesXML import *
 from report.charts.geolocalizador import *
 
@@ -119,7 +120,9 @@ class Membro:
         self.rotulo = rotulo
 
         self.journal_papers = JournalPapers(self.id_lattes)
+        self.event_papers = EventPapers(self.id_lattes)
 
+        # replaced by util.get_lattes_url
         # p = re.compile('[a-zA-Z]+')
         # if p.match(str(identificador)):
         #     self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
@@ -176,14 +179,18 @@ class Membro:
         self.listaArtigoEmPeriodico = parser.listaArtigoEmPeriodico
         # TODO: testando refatoracao
         self.journal_papers.add_from_parser(parser.listaArtigoEmPeriodico)
+        self.listaArtigoAceito = parser.listaArtigoAceito
+
+        self.listaTrabalhoCompletoEmCongresso = parser.listaTrabalhoCompletoEmCongresso
+        self.listaResumoExpandidoEmCongresso = parser.listaResumoExpandidoEmCongresso
+        self.listaResumoEmCongresso = parser.listaResumoEmCongresso
+        self.event_papers.add_from_parser(parser.listaTrabalhoCompletoEmCongresso, EventPapers.Types.complete)
+        self.event_papers.add_from_parser(parser.listaResumoExpandidoEmCongresso, EventPapers.Types.expanded_abstract)
+        self.event_papers.add_from_parser(parser.listaResumoEmCongresso, EventPapers.Types.abstract)
 
         self.listaLivroPublicado = parser.listaLivroPublicado
         self.listaCapituloDeLivroPublicado = parser.listaCapituloDeLivroPublicado
         self.listaTextoEmJornalDeNoticia = parser.listaTextoEmJornalDeNoticia
-        self.listaTrabalhoCompletoEmCongresso = parser.listaTrabalhoCompletoEmCongresso
-        self.listaResumoExpandidoEmCongresso = parser.listaResumoExpandidoEmCongresso
-        self.listaResumoEmCongresso = parser.listaResumoEmCongresso
-        self.listaArtigoAceito = parser.listaArtigoAceito
         self.listaApresentacaoDeTrabalho = parser.listaApresentacaoDeTrabalho
         self.listaOutroTipoDeProducaoBibliografica = parser.listaOutroTipoDeProducaoBibliografica
 

@@ -39,6 +39,8 @@ from docopt import docopt
 from configobj import ConfigObj
 from pathlib import Path
 
+from report.charts.collaborationGraph import CollaborationGraph
+from report.file_generator import salvarListaTXT, save_list_txt
 from scriptLattes.log import configure_stream
 from fetch.download_html import download_html
 from extract.parserLattesHTML import ParserLattesHTML
@@ -236,6 +238,15 @@ def cli():
         store_path = util.resolve_file_path("store.h5", config_file_path)
         store = Store(store_path)
 
+    # configure output directory (for report and some steps in processing)
+    output_directory = None
+    if config['geral'].get('diretorio_de_saida'):
+        output_directory = util.resolve_file_path(config['geral'].get('diretorio_de_saida'), config_file_path)
+        if output_directory.exists() and not output_directory.is_dir():
+            logger.error("Configuração do diretório de saída não aponta para um diretório: '{}'.".format(output_directory))
+        if not output_directory.exists():
+            output_directory.mkdir(parents=True)
+
     ids_file_path = util.find_file(Path(config['geral']['arquivo_de_entrada']), config_file_path)
     if not ids_file_path:
         return -1
@@ -333,12 +344,25 @@ def cli():
         # processar/carregar
         group.aggregate_data()
         group.compilarListasDeItems(config['relatorio'])  # obrigatorio
-        group.identificarQualisEmPublicacoes()  # obrigatorio
-        group.calcularInternacionalizacao()  # obrigatorio
+        if config['geral']['identificar_publicacoes_com_qualis']:
+            group.identificarQualisEmPublicacoes()  # obrigatorio
+        if config['relatorio']['incluir_internacionalizacao']:
+            lista_doi = group.calcularInternacionalizacao()  # obrigatorio
+            if lista_doi and output_directory:
+                prefix = config['geral']['prefixo'] if config['geral'].get('prefixo') else ''
+                file_path = output_directory / (prefix + 'internacionalizacao.txt')
+                save_list_txt(lista_doi, file_path)
+
         # group.imprimirMatrizesDeFrequencia()
 
     if arguments['report']:
-        group.gerarGrafosDeColaboracoes()  # obrigatorio
+        # group.gerarGrafosDeColaboracoes()  # obrigatorio
+        if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
+            collaboration_graph = CollaborationGraph(group, output_directory,
+                                                     use_labels=config['grafo'].get('considerar_rotulos_dos_membros_do_grupo'),
+                                                     show_all_nodes=config['grafo'].get('mostrar_todos_os_nos_do_grafo'),
+                                                     weight_collaborations=config['grafo'].get('mostrar_aresta_proporcional_ao_numero_de_colaboracoes'))
+
         # group.gerarGraficosDeBarras() # java charts
         group.gerarMapaDeGeolocalizacao()  # obrigatorio
         group.gerarPaginasWeb()  # obrigatorio

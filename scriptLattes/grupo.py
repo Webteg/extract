@@ -6,13 +6,16 @@ import logging
 
 from authorRank import AuthorRank
 from compiladorDeListas import CompiladorDeListas
-from data_tables.bibliographic_productions.journal_papers import JournalPapers
+from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
+from data_tables.bibliographical_production.event_papers import EventPapers
+from data_tables.bibliographical_production.journal_papers import JournalPapers
 from geradorDePaginasWeb import GeradorDePaginasWeb
 from membro import Membro
 from persist import cache
 from persist.cache import cache
 from qualis import qualis
 from report.charts.graficoDeBarras import GraficoDeBarras
+from report.charts.collaborationGraph import CollaborationGraph
 from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
 from report.geradorDeXML import GeradorDeXML
 
@@ -49,7 +52,6 @@ class Grupo:
     matrizDeFrequencia = None
     matrizDeFrequenciaNormalizada = None
     vetorDeCoAutoria = None
-    grafosDeColaboracoes = None
     mapaDeGeolocalizacao = None
 
     vectorRank = None
@@ -82,6 +84,7 @@ class Grupo:
                                                           row['rotulo'], self.items_desde_ano, self.items_ate_ano)
 
         self.ids_df = ids_df
+        # XXX: following lines replaced by property method below
         # self.labels_set = ids_df['rotulo'].unique()
         # self.labels_set.sort()
         # self.listaDeRotulosCores = [''] * len(self.labels_set)
@@ -109,9 +112,12 @@ class Grupo:
 
     def aggregate_data(self):
         self.journal_papers = JournalPapers(id=1)  # TODO: define a group id
+        self.event_papers = EventPapers(id=1)  # TODO: define a group id
         for _, member in self.members_list.items():
             self.journal_papers.append(member.journal_papers)
+            self.event_papers.append(member.event_papers)
         self.journal_papers.group_similar()
+        self.event_papers.group_similar()
 
     # REFATORADO ATE AQUI *********************************************************************************************
 
@@ -201,19 +207,18 @@ class Grupo:
         paginasWeb = GeradorDePaginasWeb(self)
 
     def identificarQualisEmPublicacoes(self):
-        if self.obterParametro('global-identificar_publicacoes_com_qualis'):
-            print "\n[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]"
-            for membro in self.members_list.values():
-                self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
+        print "\n[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]"
+        for membro in self.members_list.values():
+            self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
 
-            # if self.diretorioCache:
-            filename = (self.diretorioCache or '/tmp') + '/qualis.data'
-            # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
-            self.qualis.qextractor.save_data(filename)
+        # if self.diretorioCache:
+        filename = (self.diretorioCache or '/tmp') + '/qualis.data'
+        # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
+        self.qualis.qextractor.save_data(filename)
 
-            self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
-                                                   self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-                                                   self.compilador.listaCompletaResumoExpandidoEmCongresso)
+        self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
+                                               self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
+                                               self.compilador.listaCompletaResumoExpandidoEmCongresso)
 
     def salvarVetorDeProducoes(self, vetor, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')
@@ -225,18 +230,6 @@ class Grupo:
             for j in range(0, len(pAnos)):
                 string += str(pAnos[j]) + ',' + str(pQuantidades[j]) + ';'
         arquivo.write(string)
-        arquivo.close()
-
-    def salvarListaInternalizacaoTXT(self, listaDoiValido, nomeArquivo):
-        dir = self.obterParametro('global-diretorio_de_saida')
-        arquivo = open(dir + "/" + nomeArquivo, 'w')
-        for i in range(0, len(listaDoiValido)):
-            elemento = listaDoiValido[i]
-            if type(elemento) == type(unicode()):
-                elemento = elemento.encode("utf8")
-            else:
-                elemento = str(elemento)
-            arquivo.write(elemento + '\n')
         arquivo.close()
 
     def gerarGraficosDeBarras(self):
@@ -300,27 +293,15 @@ class Grupo:
         prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
         self.salvarVetorDeProducoes(gBarra.obterVetorDeProducoes(), prefix + 'vetorDeProducoes.txt')
 
-    def gerarGrafosDeColaboracoes(self):
-        if self.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):
-            self.grafosDeColaboracoes = GrafoDeColaboracoes(self, self.obterParametro('global-diretorio_de_saida'))
-        print "\n[ROTULOS]"
-        print "- " + str(self.labels_set)
-        print "- " + str(self.listaDeRotulosCores)
-
     def gerarGraficoDeProporcoes(self):
         if self.obterParametro('relatorio-incluir_grafico_de_proporcoes_bibliograficas'):
             gProporcoes = GraficoDeProporcoes(self, self.obterParametro('global-diretorio_de_saida'))
 
     def calcularInternacionalizacao(self):
-        if self.obterParametro('relatorio-incluir_internacionalizacao'):
-            print "\n[ANALISANDO INTERNACIONALIZACAO]"
-            self.analisadorDePublicacoes = AnalisadorDePublicacoes(self)
-            self.listaDePublicacoesEinternacionalizacao = self.analisadorDePublicacoes.analisarInternacionalizacaoNaCoautoria()
-            if self.analisadorDePublicacoes.listaDoiValido is not None:
-                prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro(
-                    'global-prefixo') == '' else ''
-                self.salvarListaInternalizacaoTXT(self.analisadorDePublicacoes.listaDoiValido,
-                                                  prefix + 'internacionalizacao.txt')
+        print "\n[ANALISANDO INTERNACIONALIZACAO]"
+        self.analisadorDePublicacoes = AnalisadorDePublicacoes(self)
+        self.listaDePublicacoesEinternacionalizacao = self.analisadorDePublicacoes.analisarInternacionalizacaoNaCoautoria()
+        return self.analisadorDePublicacoes.listaDoiValido
 
     def imprimirListasCompletas(self):
         self.compilador.imprimirListasCompletas()
@@ -362,5 +343,5 @@ class Grupo:
             #
             #             return self.listaDeParametros[i][1]
 
-            # def atribuirCoNoRotulo(self, indice, cor):
-            #     self.listaDeRotulosCores[indice] = cor
+    # def atribuirCoNoRotulo(self, indice, cor):
+    #     self.listaDeRotulosCores[indice] = cor

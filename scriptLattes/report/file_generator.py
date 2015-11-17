@@ -1,3 +1,5 @@
+from pathlib import Path
+
 
 def gerarArquivosTemporarios(group):
     print "\n[CRIANDO ARQUIVOS TEMPORARIOS: CSV, RIS, TXT, GDF]"
@@ -18,6 +20,7 @@ def gerarArquivosTemporarios(group):
     # self.salvarMatrizXML(self.matrizDeAdjacencia, prefix+"matrizDeAdjacencia.xml")
 
     # (2) listas de nomes, rótulos, ids
+    # FIXME: acertar método correto para salvar (save_list_txt)
     salvarListaTXT(group.nomes, prefix + "listaDeNomes.txt")
     salvarListaTXT(group.rotulos, prefix + "labels_set.txt")
     salvarListaTXT(group.ids, prefix + "listaDeIDs.txt")
@@ -69,7 +72,6 @@ def gerarCSVdeQualisdeGrupo(grupo):
     s += self.imprimeCSVListaGrupal(self.compilador.listaCompletaResumoExpandidoEmCongresso)
     self.salvarArquivoGenerico(s, prefix + 'publicacoesDoGrupo.csv')
 
-
     def gerarArquivoGDF(self, nomeArquivo):
         # Vêrtices
         N = len(grupo.members_list.values())
@@ -101,7 +103,6 @@ def gerarCSVdeQualisdeGrupo(grupo):
                 if (i != j) and (matriz[i, j] > 0):
                     string += '\n' + str(i) + ',' + str(j) + ',' + str(matriz[i, j])
 
-
         # gerando o arquivo GDF
         dir = self.obterParametro('global-diretorio_de_saida')
         arquivo = open(dir + "/" + nomeArquivo, 'w')
@@ -115,10 +116,21 @@ def salvarArquivoGenerico(conteudo, nomeArquivo):
     arquivo.write(conteudo)
     arquivo.close()
 
+
+def save_list_txt(self, a_list, file_path):
+    assert isinstance(file_path, Path)
+    with file_path.open('w') as f:
+        for element in a_list:
+            if isinstance(element, unicode):
+                element = element.encode("utf8")
+            else:
+                element = str(element)
+            f.write(element + '\n')
+
+
 def salvarListaTXT(self, lista, nomeArquivo):
     dir = self.obterParametro('global-diretorio_de_saida')
     arquivo = open(dir + "/" + nomeArquivo, 'w')
-
     for i in range(0, len(lista)):
         elemento = lista[i]
         if type(elemento) == type(unicode()):
@@ -127,6 +139,7 @@ def salvarListaTXT(self, lista, nomeArquivo):
             elemento = str(elemento)
         arquivo.write(elemento + '\n')
     arquivo.close()
+
 
 def salvarMatrizTXT(self, matriz, nomeArquivo):
     dir = self.obterParametro('global-diretorio_de_saida')
@@ -138,6 +151,7 @@ def salvarMatrizTXT(self, matriz, nomeArquivo):
             arquivo.write(str(matriz[i, j]) + ' ')
         arquivo.write('\n')
     arquivo.close()
+
 
 def salvarMatrizXML(self, matriz, nomeArquivo):
     dir = self.obterParametro('global-diretorio_de_saida')

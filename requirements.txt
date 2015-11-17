@@ -1,3 +1,4 @@
+PIL
 docopt
 configobj == 5.0.6
 setuptools

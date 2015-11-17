@@ -3,6 +3,7 @@
 import logging
 import os
 import pkgutil
+import re
 import shutil
 import sys
 
@@ -168,3 +169,11 @@ def criarDiretorio(dir):
             print "[ERRO] Você conta com as permissões de escrita? \n"
             return 0
     return 1
+
+
+def get_lattes_url(lattes_id):
+    p = re.compile('[a-zA-Z]+')
+    if p.match(str(lattes_id)):
+        return 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(lattes_id)
+    else:
+        return 'http://lattes.cnpq.br/{}'.format(lattes_id)
