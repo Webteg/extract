@@ -400,14 +400,20 @@ class CompiladorDeListas:
 
     def criarMatrizesDeColaboracao(self):
         # FIXME: tratar opções
+        self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
         # if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
-        self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)
+        # self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)
+        self.matrizesArtigoEmPeriodico = self.grupo.journal_papers.get_co_authorship_frequency_matrix()
+
         # if self.grupo.obterParametro('grafo-incluir_trabalho_completo_em_congresso'):
         self.matrizesTrabalhoCompletoEmCongresso = self.criarMatrizes(self.listaCompletaTrabalhoCompletoEmCongresso)
+
         # if self.grupo.obterParametro('grafo-incluir_resumo_expandido_em_congresso'):
         self.matrizesResumoExpandidoEmCongresso = self.criarMatrizes(self.listaCompletaResumoExpandidoEmCongresso)
+
         # if self.grupo.obterParametro('grafo-incluir_resumo_em_congresso'):
         self.matrizesResumoEmCongresso = self.criarMatrizes(self.listaCompletaResumoEmCongresso)
+
 
         # if self.grupo.obterParametro('grafo-incluir_artigo_aceito_para_publicacao'):
         self.matrizesArtigoAceito = self.criarMatrizes(self.listaCompletaArtigoAceito)
@@ -448,7 +454,7 @@ class CompiladorDeListas:
 
     @staticmethod
     def create_frequency_matrix(group):
-        pass
+        group.journal_papers
 
     def criarMatrizes(self, listaCompleta):
         '''
@@ -467,6 +473,7 @@ class CompiladorDeListas:
         for k in sorted(listaCompleta.keys(), reverse=True):
             for pub in listaCompleta[k]:
 
+                # FIXME: usar member_index, não id, porque agora o id é o id Lattes
                 numeroDeCoAutores = len(pub.idMembro)
                 if numeroDeCoAutores > 1:
                     # Para todos os co-autores da publicacao:

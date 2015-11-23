@@ -30,7 +30,6 @@ import pygraphviz  # TODO: replace with graph_tool
 # import Image
 from PIL import Image
 from pathlib import Path
-
 from grupo import Grupo
 from util.util import get_lattes_url
 
@@ -88,7 +87,8 @@ class CollaborationGraph:
         self.co_authorship_weighted.draw(path=str(output_directory / 'grafoDeColaboracoesComPesos.dot'), format='dot')
         self.co_authorship_weighted_CMAPX = self.co_authorship_weighted.draw(format='cmapx')
 
-        self.co_authorship_normalized = self.create_co_authorship_normalized_graph(group, show_all_nodes=show_all_nodes, weight_collaborations=weight_collaborations)
+        self.co_authorship_normalized = self.create_co_authorship_normalized_graph(group, show_all_nodes=show_all_nodes,
+                                                                                   weight_collaborations=weight_collaborations)
         self.co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.png'), format='png')
         self.co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.dot'), format='dot')
         self.co_authorship_normalized_CMAPX = self.co_authorship_normalized.draw(format='cmapx')
@@ -99,9 +99,9 @@ class CollaborationGraph:
         # self.grafoDeCoAutoriaCompletaCMAPX = self.grafoDeCoAutoriaCompleta.draw(format='cmapx')
 
         # Criamos um thumbnail do grafo sem pesos
-        im = Image.open(output_directory + '/grafoDeColaboracoesSemPesos.png')
+        im = Image.open(str(output_directory / 'grafoDeColaboracoesSemPesos.png'))
         im.thumbnail((400, 400))
-        im.save(output_directory + '/grafoDeColaboracoesSemPesos-t.png')
+        im.save(str(output_directory / 'grafoDeColaboracoesSemPesos-t.png'))
 
     def create_co_authorship_unweighted_graph(self, group, show_all_nodes=False):
         assert isinstance(group, Grupo)
