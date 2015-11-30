@@ -10,6 +10,8 @@ import unicodedata
 from collections import defaultdict
 
 import pandas
+from jinja2.environment import Environment
+from jinja2.loaders import PackageLoader
 from pandas.core.indexing import IndexingError
 
 import membro
@@ -29,9 +31,15 @@ class GeradorDePaginasWeb:
     def __init__(self, grupo):
         self.grupo = grupo
         self.version = '9.0.0'
-        self.dir = self.grupo.obterParametro('global-diretorio_de_saida')
+        # self.dir = self.grupo.obterParametro('global-diretorio_de_saida')
+
+        self.jinja = Environment(loader=PackageLoader('scriptLattes', 'templates'))
+
+        index_template = self.jinja.get_template('index.html')
+        print(index_template.render(teste="Olá mundo"))
 
         if self.grupo.obterParametro('global-criar_paginas_jsp'):
+            raise "Formato JSP não mais suportado"
             self.extensaoPagina = '.jsp'
             self.html1 = '<%@ page language="java" contentType="text/html; charset=ISO8859-1" pageEncoding="ISO8859-1"%> <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core"%> <f:verbatim>'
             self.html2 = '</f:verbatim>'
@@ -41,6 +49,7 @@ class GeradorDePaginasWeb:
             self.html2 = '</html>'
 
         # geracao de arquivo RIS com as publicacoes
+        # FIXME: mover para fora daqui
         if self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
             prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
                 'global-prefixo') == '' else ''
@@ -76,9 +85,6 @@ class GeradorDePaginasWeb:
 
         # final do fim!
         self.gerarPaginaPrincipal()
-
-        if self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
-            self.arquivoRis.close()
 
 
     def gerarPaginaPrincipal(self):
@@ -681,8 +687,7 @@ class GeradorDePaginasWeb:
     def gerar_pagina_de_producoes(self, lista_completa, titulo_pagina, prefixo, ris=False):
         totais_qualis = ""
         if self.grupo.obterParametro('global-identificar_publicacoes_com_qualis'):
-            if self.grupo.obterParametro(
-                    'global-arquivo_qualis_de_periodicos'):  # FIXME: nao está mais sendo usado agora que há qualis online
+            if self.grupo.obterParametro('global-arquivo_qualis_de_periodicos'):  # FIXME: nao está mais sendo usado agora que há qualis online
                 if prefixo == 'PB0':
                     totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB0)
             if self.grupo.obterParametro('global-arquivo_qualis_de_congressos'):
@@ -845,13 +850,13 @@ class GeradorDePaginasWeb:
 
         s = self.pagina_top()
         s += '\n<h3>Grafo de colabora&ccedil;&otilde;es</h3> \
-        <a href=membros' + self.extensaoPagina + '>' + str(self.grupo.numeroDeMembros()) + ' curriculos Lattes</a> foram considerados, \
+        <a href=membros' + self.extensaoPagina + '>' + str(len(self.grupo)) + ' curriculos Lattes</a> foram considerados, \
         gerando os seguintes grafos de colabora&ccedil;&otilde;es encontradas com base nas produ&ccedil;&otilde;es: <i>' + lista + '</i>. <br><p>'.decode(
             "utf8")
 
         prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
             'global-prefixo') == '' else ''
-        # s+='Veja <a href="grafoDeColaboracoesInterativo'+self.extensaoPagina+'?entradaScriptLattes=./'+prefix+'matrizDeAdjacencia.xml">na seguinte página</a> uma versão interativa do grafo de colabora&ccedil;&otilde;es.<br><p><br><p>'.decode("utf8")
+        # s+='Veja <a href="grafoDeColaboracoesInterativo'+self.extensaoPagina+'?entradaScriptLattes=./'+prefix+'co_authorship_adjacency_matrix.xml">na seguinte página</a> uma versão interativa do grafo de colabora&ccedil;&otilde;es.<br><p><br><p>'.decode("utf8")
 
         s += '\nClique no nome dentro do vértice para visualizar o currículo Lattes. Para cada nó: o valor entre colchetes indica o número \
         de produ&ccedil;&otilde;es feitas em colabora&ccedil;&atilde;o apenas com os outros membros do próprio grupo. <br>'.decode(
@@ -888,7 +893,7 @@ class GeradorDePaginasWeb:
                 <br>Esta medida é similar ao <i>PageRank</i> para grafos direcionais (com pesos).<br><p>'.decode("utf8")
 
             ranks, autores, rotulos = zip(
-                *sorted(zip(self.grupo.vectorRank, self.grupo.nomes, self.grupo.rotulos), reverse=True))
+                *sorted(zip(self.grupo.author_rank_vector, self.grupo.nomes, self.grupo.rotulos), reverse=True))
 
             s += '<table border=1><tr> <td><i><b>Collaboration Rank</b></i></td> <td><b>Membro</b></td> </tr>'
             for i in range(0, len(ranks)):

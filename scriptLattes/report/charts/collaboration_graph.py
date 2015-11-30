@@ -1,11 +1,15 @@
 #!/usr/bin/python
 # encoding: utf-8
 # filename: grafoDeColaboracoes.py
+# filename: collaboration_graph.py
 #
-#  scriptLattes V8
-#  Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
-#  http://scriptlattes.sourceforge.net/
+# scriptLattes V8
+# Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.
+# http://scriptlattes.sourceforge.net/
 #
+# scriptLattes 9.0.0
+# Copyright 2015: Fabio Kepler <fabio@kepler.pro.br>
+# http://bitbucket.org/scriptlattes/scriptlattes
 #
 #  Este programa é um software livre; você pode redistribui-lo e/ou
 #  modifica-lo dentro dos termos da Licença Pública Geral GNU como
@@ -20,8 +24,6 @@
 #  Você deve ter recebido uma cópia da Licença Pública Geral GNU
 #  junto com este programa, se não, escreva para a Fundação do Software
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Fabio Kepler, 2015
 #
 
 import logging
@@ -62,36 +64,40 @@ def abbreviate_name(name):
 
 
 class CollaborationGraph:
-    def __init__(self, group, output_directory, use_labels=False, show_all_nodes=False, weight_collaborations=False):
+    def __init__(self, group):
+        assert isinstance(group, Grupo)
+        self.group = group
+
+    def create_all(self, output_directory, use_labels=False, show_all_nodes=False, weight_collaborations=False):
         assert isinstance(output_directory, Path)
 
         # atribuicao de cores nos vértices
         fg_node_color = '#FFFFFF'
         bg_node_color = '#17272B'
-        self.members_color_map = {}
-        for member_id, member in group.members_list.items():
+        members_color_map = {}
+        for member_id, member in self.group.members_list.items():
             if use_labels:
-                fg_node_color, bg_node_color = self.get_cool_color(group.labels_set.index(member.rotulo))
-            self.members_color_map[member_id] = (fg_node_color, bg_node_color)
+                fg_node_color, bg_node_color = self.get_cool_color(self.group.labels_set.index(member.rotulo))
+            members_color_map[member_id] = (fg_node_color, bg_node_color)
             # self.grupo.atribuirCoNoRotulo(indice, corDoNoBG)
             # membro.rotuloCorFG = fg_node_color
             # membro.rotuloCorBG = bg_node_color
 
-        self.co_authorship_unweighted = self.create_co_authorship_unweighted_graph(group, show_all_nodes=show_all_nodes)
-        self.co_authorship_unweighted.draw(path=str(output_directory / 'grafoDeColaboracoesSemPesos.png'), format='png')
-        self.co_authorship_unweighted.draw(path=str(output_directory / 'grafoDeColaboracoesSemPesos.dot'), format='dot')
-        self.co_authorship_unweighted_CMAPX = self.co_authorship_unweighted.draw(format='cmapx')
+        co_authorship_unweighted = self.create_co_authorship_unweighted_graph(members_color_map, show_all_nodes=show_all_nodes)
+        co_authorship_unweighted.draw(path=str(output_directory / 'grafoDeColaboracoesSemPesos.png'), format='png')
+        co_authorship_unweighted.draw(path=str(output_directory / 'grafoDeColaboracoesSemPesos.dot'), format='dot')
+        co_authorship_unweighted_CMAPX = co_authorship_unweighted.draw(format='cmapx')
 
-        self.co_authorship_weighted = self.create_co_authorship_weighted_graph(group, show_all_nodes=show_all_nodes)
-        self.co_authorship_weighted.draw(path=str(output_directory / 'grafoDeColaboracoesComPesos.png'), format='png')
-        self.co_authorship_weighted.draw(path=str(output_directory / 'grafoDeColaboracoesComPesos.dot'), format='dot')
-        self.co_authorship_weighted_CMAPX = self.co_authorship_weighted.draw(format='cmapx')
+        co_authorship_weighted = self.create_co_authorship_weighted_graph(members_color_map, show_all_nodes=show_all_nodes)
+        co_authorship_weighted.draw(path=str(output_directory / 'grafoDeColaboracoesComPesos.png'), format='png')
+        co_authorship_weighted.draw(path=str(output_directory / 'grafoDeColaboracoesComPesos.dot'), format='dot')
+        co_authorship_weighted_CMAPX = co_authorship_weighted.draw(format='cmapx')
 
-        self.co_authorship_normalized = self.create_co_authorship_normalized_graph(group, show_all_nodes=show_all_nodes,
-                                                                                   weight_collaborations=weight_collaborations)
-        self.co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.png'), format='png')
-        self.co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.dot'), format='dot')
-        self.co_authorship_normalized_CMAPX = self.co_authorship_normalized.draw(format='cmapx')
+        co_authorship_normalized = self.create_co_authorship_normalized_graph(members_color_map, show_all_nodes=show_all_nodes,
+                                                                              weight_collaborations=weight_collaborations)
+        co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.png'), format='png')
+        co_authorship_normalized.draw(path=str(output_directory / 'grafoDeColaboracoesNormalizado.dot'), format='dot')
+        co_authorship_normalized_CMAPX = co_authorship_normalized.draw(format='cmapx')
 
         # self.grafoDeCoAutoriaCompleta = self.criarGrafoDeCoAutoriaCompleta()
         # self.grafoDeCoAutoriaCompleta.draw(path='grafoDeColaboracoesCompleto.png', format='png')
@@ -103,8 +109,7 @@ class CollaborationGraph:
         im.thumbnail((400, 400))
         im.save(str(output_directory / 'grafoDeColaboracoesSemPesos-t.png'))
 
-    def create_co_authorship_unweighted_graph(self, group, show_all_nodes=False):
-        assert isinstance(group, Grupo)
+    def create_co_authorship_unweighted_graph(self, members_color_map, show_all_nodes=False):
         logger.info("[CRIANDO GRAFOS DE COLABORACOES SEM PESOS]")
 
         graph = pygraphviz.AGraph(directed=False, overlap="False", id="grafo1", name="grafo1")
@@ -113,19 +118,18 @@ class CollaborationGraph:
         graph.node_attr['style'] = 'filled'
 
         # Inserimos os nos
-        self.add_nodes(graph, group, show_all_nodes)
+        self.add_nodes(graph, show_all_nodes, members_color_map)
 
         # Inserimos as arestas
-        for i in range(len(group.members_list) - 1):
-            for j in range(i, len(group.members_list)):
-                if group.matrizDeAdjacencia[i, j] > 0:  # TODO: check after future refactoring
+        for i in range(len(self.group.members_list) - 1):
+            for j in range(i, len(self.group.members_list)):
+                if self.group.co_authorship_adjacency_matrix[i, j] > 0:
                     graph.add_edge(i, j)
 
         graph.layout('dot')  # circo dot neato
         return graph
 
-    def create_co_authorship_weighted_graph(self, group, show_all_nodes=False):
-        assert isinstance(group, Grupo)
+    def create_co_authorship_weighted_graph(self, members_color_map, show_all_nodes=False):
         logger.info("[CRIANDO GRAFOS DE COLABORACOES COM PESOS]")
 
         graph = pygraphviz.AGraph(directed=False, overlap="False", id="grafo2", name="grafo2")
@@ -134,19 +138,18 @@ class CollaborationGraph:
         graph.node_attr['style'] = 'filled'
 
         # Inserimos os nos
-        self.add_nodes(graph, group, show_all_nodes)
+        self.add_nodes(graph, show_all_nodes, members_color_map)
 
         # Inserimos as arestas
-        for i in range(len(group.members_list) - 1):
-            for j in range(i, len(group.members_list)):
-                if group.matrizDeAdjacencia[i, j] > 0:  # TODO: check after future refactoring
-                    graph.add_edge(i, j, label=str(group.matrizDeAdjacencia[i, j]), fontsize='8')
+        for i in range(len(self.group.members_list) - 1):
+            for j in range(i, len(self.group.members_list)):
+                if self.group.co_authorship_adjacency_matrix[i, j] > 0:
+                    graph.add_edge(i, j, label=str(self.group.co_authorship_adjacency_matrix[i, j]), fontsize='8')
 
         graph.layout('dot')  # circo dot neato
         return graph
 
-    def create_co_authorship_normalized_graph(self, group, show_all_nodes=False, weight_collaborations=False):
-        assert isinstance(group, Grupo)
+    def create_co_authorship_normalized_graph(self, members_color_map, show_all_nodes=False, weight_collaborations=False):
         logger.info("[CRIANDO GRAFOS DE COLABORACOES NORMALIZADO]")
 
         graph = pygraphviz.AGraph(directed=True, overlap="False", id="grafo3", name="grafo3")
@@ -155,12 +158,12 @@ class CollaborationGraph:
         graph.node_attr['style'] = 'filled'
 
         # Inserimos os nos: This is SPARTA!!!
-        self.add_nodes(graph, group, show_all_nodes)
+        self.add_nodes(graph, show_all_nodes, members_color_map)
 
         # Inserimos as arestas
-        for i in range(len(group.members_list)):
-            for j in range(len(group.members_list)):
-                normalized_freq = round(self.grupo.matrizDeFrequenciaNormalizada[i, j], 2)
+        for i in range(len(self.group.members_list)):
+            for j in range(len(self.group.members_list)):
+                normalized_freq = round(self.group.co_authorship_normalized_weighted_matrix[i, j], 2)
                 if normalized_freq > 0:
                     if weight_collaborations:
                         width = str(0.5 + 3 * normalized_freq)
@@ -181,10 +184,10 @@ class CollaborationGraph:
     #     grafo.node_attr['style'] = 'filled'
     #
     #     # Inserimos os nos
-    #     for m in range(0, self.grupo.numeroDeMembros()):
+    #     for m in range(0, len(self.grupo)):
     #         membro = self.grupo.members_list.values()[m]
     #         nome = abbreviate_name(membro.nomeCompleto).encode('utf8') + " [" + str(
-    #             int(self.grupo.vetorDeCoAutoria[m])) + "]"
+    #             int(self.grupo.co_authorship_vector[m])) + "]"
     #
     #         if self.grupo.obterParametro('grafo-considerar_rotulos_dos_membros_do_grupo'):
     #             indice = self.grupo.listaDeRotulos.index(membro.rotulo)
@@ -196,7 +199,7 @@ class CollaborationGraph:
     #             corDoNoFG = '#FFFFFF'
     #             corDoNoBG = '#003399'
     #
-    #         if self.grupo.vetorDeCoAutoria[m] > 0 or self.grupo.obterParametro('grafo-mostrar_todos_os_nos_do_grafo'):
+    #         if self.grupo.co_authorship_vector[m] > 0 or self.grupo.obterParametro('grafo-mostrar_todos_os_nos_do_grafo'):
     #             grafo.add_node(membro.idMembro, label=nome, fontcolor=corDoNoFG, color=corDoNoBG, height="0.2",
     #                            URL=membro.url, root='True')
     #
@@ -211,25 +214,25 @@ class CollaborationGraph:
     #                     grafo.add_edge(idColaborador, membro.idMembro)
     #
     #     # Inserimos as arestas
-    #     for i in range(0, self.grupo.numeroDeMembros() - 1):
-    #         for j in range(i, self.grupo.numeroDeMembros()):
-    #             if self.grupo.matrizDeFrequenciaNormalizada[i, j] > 0:
+    #     for i in range(0, len(self.grupo) - 1):
+    #         for j in range(i, len(self.grupo)):
+    #             if self.grupo.co_authorship_normalized_weighted_matrix[i, j] > 0:
     #                 grafo.add_edge(i, j)
     #
     #     # grafo.layout('twopi')
     #     grafo.layout('circo')
     #     return grafo
 
-    def add_nodes(self, graph, group, show_all_nodes):
-        for m, (member_id, member) in enumerate(group.members_list.items()):
-            name = abbreviate_name(member.nome) + " [" + str(int(group.vetorDeCoAutoria[m])) + "]"
-            if group.vetorDeCoAutoria[m] > 0 or show_all_nodes:
+    def add_nodes(self, graph, show_all_nodes, members_color_map):
+        for m, (member_id, member) in enumerate(self.group.members_list.items()):
+            name = abbreviate_name(member.nome) + " [" + str(int(self.group.co_authorship_vector[m])) + "]"
+            if self.group.co_authorship_vector[m] > 0 or show_all_nodes:
                 try:
-                    graph.add_node(member_id, label=name, fontcolor=self.members_color_map[member_id][0], color=self.members_color_map[member_id][1],
+                    graph.add_node(member_id, label=name, fontcolor=members_color_map[member_id][0], color=members_color_map[member_id][1],
                                    height="0.2", URL=get_lattes_url(member.id_lattes))
                 except:
-                    graph.add_node(member.idMembro, label=name.encode('utf8'), fontcolor=self.members_color_map[member_id][0],
-                                   color=self.members_color_map[member_id][1], height="0.2", URL=get_lattes_url(member.id_lattes))
+                    graph.add_node(member.idMembro, label=name.encode('utf8'), fontcolor=members_color_map[member_id][0],
+                                   color=members_color_map[member_id][1], height="0.2", URL=get_lattes_url(member.id_lattes))
 
     @staticmethod
     def get_cool_color(index):

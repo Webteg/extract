@@ -111,7 +111,9 @@ class CompiladorDeListas:
         self.listaCompletaOrganizacaoDeEvento = {}
 
         # compilamos as producoes de todos os membros (separados por tipos)
-        grupo.aggregate_data()
+
+        # grupo.aggregate_data()  # XXX: está no caller desta classe
+
         for membro in grupo.members_list.values():
             # self.listaCompletaArtigoEmPeriodico = self.compilarLista(membro.listaArtigoEmPeriodico, self.listaCompletaArtigoEmPeriodico)
             # self.listaCompletaTrabalhoCompletoEmCongresso = self.compilarLista(membro.listaTrabalhoCompletoEmCongresso, self.listaCompletaTrabalhoCompletoEmCongresso)
@@ -299,6 +301,7 @@ class CompiladorDeListas:
         self.listaCompletaOC = self.compilarListasCompletas(self.listaCompletaOCOutroTipoDeOrientacao,
                                                             self.listaCompletaOC)
 
+        # FIXME: incluir em group.aggregate_data()
         for membro in grupo.members_list.values():
             if membro.id_lattes == '0000000000000000':
                 print ":: Processando coautor sem CV-Lattes" + membro.nomeInicial
@@ -399,104 +402,103 @@ class CompiladorDeListas:
         return listaTotal
 
     def criarMatrizesDeColaboracao(self):
+        # FIXME: lógica movida para o caller (Group)
         # FIXME: tratar opções
-        self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
+        raise "método inutilizado"
+        self.matrizesArtigoEmPeriodico = self.create_adjacency_and_weighted_matrices(self.grupo.members_indices, self.grupo.journal_papers.co_authors_list())
+        self.matrizesTrabalhoCompletoEmCongresso = self.create_adjacency_and_weighted_matrices(self.grupo.members_indices, self.grupo.event_papers.co_authors_list())
+
         # if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
         # self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)
-        self.matrizesArtigoEmPeriodico = self.grupo.journal_papers.get_co_authorship_frequency_matrix()
 
         # if self.grupo.obterParametro('grafo-incluir_trabalho_completo_em_congresso'):
-        self.matrizesTrabalhoCompletoEmCongresso = self.criarMatrizes(self.listaCompletaTrabalhoCompletoEmCongresso)
+        # self.matrizesTrabalhoCompletoEmCongresso = self.criarMatrizes(self.listaCompletaTrabalhoCompletoEmCongresso)
 
         # if self.grupo.obterParametro('grafo-incluir_resumo_expandido_em_congresso'):
-        self.matrizesResumoExpandidoEmCongresso = self.criarMatrizes(self.listaCompletaResumoExpandidoEmCongresso)
+        # self.matrizesResumoExpandidoEmCongresso = self.criarMatrizes(self.listaCompletaResumoExpandidoEmCongresso)
 
         # if self.grupo.obterParametro('grafo-incluir_resumo_em_congresso'):
-        self.matrizesResumoEmCongresso = self.criarMatrizes(self.listaCompletaResumoEmCongresso)
+        # self.matrizesResumoEmCongresso = self.criarMatrizes(self.listaCompletaResumoEmCongresso)
 
 
-        # if self.grupo.obterParametro('grafo-incluir_artigo_aceito_para_publicacao'):
-        self.matrizesArtigoAceito = self.criarMatrizes(self.listaCompletaArtigoAceito)
-        # if self.grupo.obterParametro('grafo-incluir_livro_publicado'):
-        self.matrizesLivroPublicado = self.criarMatrizes(self.listaCompletaLivroPublicado)
-        # if self.grupo.obterParametro('grafo-incluir_capitulo_de_livro_publicado'):
-        self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
-        # if self.grupo.obterParametro('grafo-incluir_texto_em_jornal_de_noticia'):
-        self.matrizesTextoEmJornalDeNoticia = self.criarMatrizes(self.listaCompletaTextoEmJornalDeNoticia)
-        # if self.grupo.obterParametro('grafo-incluir_apresentacao_de_trabalho'):
-        self.matrizesApresentacaoDeTrabalho = self.criarMatrizes(self.listaCompletaApresentacaoDeTrabalho)
-        # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_bibliografica'):
-        self.matrizesOutroTipoDeProducaoBibliografica = self.criarMatrizes(
-            self.listaCompletaOutroTipoDeProducaoBibliografica)
+        # # if self.grupo.obterParametro('grafo-incluir_artigo_aceito_para_publicacao'):
+        # self.matrizesArtigoAceito = self.criarMatrizes(self.listaCompletaArtigoAceito)
+        # # if self.grupo.obterParametro('grafo-incluir_livro_publicado'):
+        # self.matrizesLivroPublicado = self.criarMatrizes(self.listaCompletaLivroPublicado)
+        # # if self.grupo.obterParametro('grafo-incluir_capitulo_de_livro_publicado'):
+        # self.matrizesCapituloDeLivroPublicado = self.criarMatrizes(self.listaCompletaCapituloDeLivroPublicado)
+        # # if self.grupo.obterParametro('grafo-incluir_texto_em_jornal_de_noticia'):
+        # self.matrizesTextoEmJornalDeNoticia = self.criarMatrizes(self.listaCompletaTextoEmJornalDeNoticia)
+        # # if self.grupo.obterParametro('grafo-incluir_apresentacao_de_trabalho'):
+        # self.matrizesApresentacaoDeTrabalho = self.criarMatrizes(self.listaCompletaApresentacaoDeTrabalho)
+        # # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_bibliografica'):
+        # self.matrizesOutroTipoDeProducaoBibliografica = self.criarMatrizes(
+        #     self.listaCompletaOutroTipoDeProducaoBibliografica)
+        #
+        # # if self.grupo.obterParametro('grafo-incluir_software_com_patente'):
+        # self.matrizesSoftwareComPatente = self.criarMatrizes(self.listaCompletaSoftwareComPatente)
+        # # if self.grupo.obterParametro('grafo-incluir_software_sem_patente'):
+        # self.matrizesSoftwareSemPatente = self.criarMatrizes(self.listaCompletaSoftwareSemPatente)
+        # # if self.grupo.obterParametro('grafo-incluir_produto_tecnologico'):
+        # self.matrizesProdutoTecnologico = self.criarMatrizes(self.listaCompletaProdutoTecnologico)
+        # # if self.grupo.obterParametro('grafo-incluir_processo_ou_tecnica'):
+        # self.matrizesProcessoOuTecnica = self.criarMatrizes(self.listaCompletaProcessoOuTecnica)
+        # # if self.grupo.obterParametro('grafo-incluir_trabalho_tecnico'):
+        # self.matrizesTrabalhoTecnico = self.criarMatrizes(self.listaCompletaTrabalhoTecnico)
+        # # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_tecnica'):
+        # self.matrizesOutroTipoDeProducaoTecnica = self.criarMatrizes(self.listaCompletaOutroTipoDeProducaoTecnica)
+        #
+        # # if self.grupo.obterParametro('grafo-incluir_patente'):
+        # self.matrizesPatente = self.criarMatrizes(self.listaCompletaPatente)
+        # # if self.grupo.obterParametro('grafo-incluir_programa_computador'):
+        # self.matrizesProgramaComputador = self.criarMatrizes(self.listaCompletaProgramaComputador)
+        # # if self.grupo.obterParametro('grafo-incluir_desenho_industrial'):
+        # self.matrizesDesenhoIndustrial = self.criarMatrizes(self.listaCompletaDesenhoIndustrial)
+        #
+        # # if self.grupo.obterParametro('grafo-incluir_producao_artistica'):
+        # self.matrizesProducaoArtistica = self.criarMatrizes(self.listaCompletaProducaoArtistica)
 
-        # if self.grupo.obterParametro('grafo-incluir_software_com_patente'):
-        self.matrizesSoftwareComPatente = self.criarMatrizes(self.listaCompletaSoftwareComPatente)
-        # if self.grupo.obterParametro('grafo-incluir_software_sem_patente'):
-        self.matrizesSoftwareSemPatente = self.criarMatrizes(self.listaCompletaSoftwareSemPatente)
-        # if self.grupo.obterParametro('grafo-incluir_produto_tecnologico'):
-        self.matrizesProdutoTecnologico = self.criarMatrizes(self.listaCompletaProdutoTecnologico)
-        # if self.grupo.obterParametro('grafo-incluir_processo_ou_tecnica'):
-        self.matrizesProcessoOuTecnica = self.criarMatrizes(self.listaCompletaProcessoOuTecnica)
-        # if self.grupo.obterParametro('grafo-incluir_trabalho_tecnico'):
-        self.matrizesTrabalhoTecnico = self.criarMatrizes(self.listaCompletaTrabalhoTecnico)
-        # if self.grupo.obterParametro('grafo-incluir_outro_tipo_de_producao_tecnica'):
-        self.matrizesOutroTipoDeProducaoTecnica = self.criarMatrizes(self.listaCompletaOutroTipoDeProducaoTecnica)
-
-        # if self.grupo.obterParametro('grafo-incluir_patente'):
-        self.matrizesPatente = self.criarMatrizes(self.listaCompletaPatente)
-        # if self.grupo.obterParametro('grafo-incluir_programa_computador'):
-        self.matrizesProgramaComputador = self.criarMatrizes(self.listaCompletaProgramaComputador)
-        # if self.grupo.obterParametro('grafo-incluir_desenho_industrial'):
-        self.matrizesDesenhoIndustrial = self.criarMatrizes(self.listaCompletaDesenhoIndustrial)
-
-        # if self.grupo.obterParametro('grafo-incluir_producao_artistica'):
-        self.matrizesProducaoArtistica = self.criarMatrizes(self.listaCompletaProducaoArtistica)
-
-    @staticmethod
-    def create_frequency_matrix(group):
-        group.journal_papers
-
-    def criarMatrizes(self, listaCompleta):
-        '''
-        Criamos as matrizes de:
-         - (1) adjacência
-         - (2) frequencia
-
-        :param listaCompleta:
-        :return:
-        '''
-        # matriz1 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.int32)
-        # matriz2 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.float32)
-        adjacency_matrix = sparse.lil_matrix((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()))
-        frequency_matrix = sparse.lil_matrix((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()))
-
-        for k in sorted(listaCompleta.keys(), reverse=True):
-            for pub in listaCompleta[k]:
-
-                # FIXME: usar member_index, não id, porque agora o id é o id Lattes
-                numeroDeCoAutores = len(pub.idMembro)
-                if numeroDeCoAutores > 1:
-                    # Para todos os co-autores da publicacao:
-                    # (1) atualizamos o contador de colaboracao (adjacencia)
-                    # (2) incrementamos a 'frequencia' de colaboracao
-                    for c in itertools.combinations(pub.idMembro, 2):
-                        # combinacoes 2 a 2 de todos os co-autores da publicação
-                        # exemplo:
-                        # lista = [0, 3, 1]
-                        # combinacoes = [[0,3], [0,1], [3,1]]
-                        adjacency_matrix[c[0], c[1]] += 1
-                        adjacency_matrix[c[1], c[0]] += 1
-
-                        frequency_matrix[c[0], c[1]] += 1.0 / (numeroDeCoAutores - 1)
-                        frequency_matrix[c[1], c[0]] += 1.0 / (numeroDeCoAutores - 1)
-
-        return [adjacency_matrix, frequency_matrix]
+    # def criarMatrizes(self, listaCompleta):
+    #     '''
+    #     Criamos as matrizes de:
+    #      - (1) adjacência
+    #      - (2) frequencia
+    #
+    #     :param listaCompleta:
+    #     :return:
+    #     '''
+    #     # matriz1 = numpy.zeros((len(self.grupo), len(self.grupo)), dtype=numpy.int32)
+    #     # matriz2 = numpy.zeros((len(self.grupo), len(self.grupo)), dtype=numpy.float32)
+    #     adjacency_matrix = sparse.lil_matrix((len(self.grupo), len(self.grupo)))
+    #     frequency_matrix = sparse.lil_matrix((len(self.grupo), len(self.grupo)))
+    #
+    #     for k in sorted(listaCompleta.keys(), reverse=True):
+    #         for pub in listaCompleta[k]:
+    #
+    #             # FIXME: usar member_index, não id, porque agora o id é o id Lattes
+    #             numeroDeCoAutores = len(pub.idMembro)
+    #             if numeroDeCoAutores > 1:
+    #                 # Para todos os co-autores da publicacao:
+    #                 # (1) atualizamos o contador de colaboracao (adjacencia)
+    #                 # (2) incrementamos a 'frequencia' de colaboracao
+    #                 for c in itertools.combinations(pub.idMembro, 2):
+    #                     # combinacoes 2 a 2 de todos os co-autores da publicação
+    #                     # exemplo:
+    #                     # lista = [0, 3, 1]
+    #                     # combinacoes = [[0,3], [0,1], [3,1]]
+    #                     adjacency_matrix[c[0], c[1]] += 1
+    #                     adjacency_matrix[c[1], c[0]] += 1
+    #
+    #                     frequency_matrix[c[0], c[1]] += 1.0 / (numeroDeCoAutores - 1)
+    #                     frequency_matrix[c[1], c[0]] += 1.0 / (numeroDeCoAutores - 1)
+    #
+    #     return [adjacency_matrix, frequency_matrix]
 
     def uniaoDeMatrizesDeColaboracao(self):
-        ##matriz1 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.int32)
-        ##matriz2 = numpy.zeros((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()), dtype=numpy.float32)
-        matriz1 = sparse.lil_matrix((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()))
-        matriz2 = sparse.lil_matrix((self.grupo.numeroDeMembros(), self.grupo.numeroDeMembros()))
+        ##matriz1 = numpy.zeros((len(self.grupo), len(self.grupo)), dtype=numpy.int32)
+        ##matriz2 = numpy.zeros((len(self.grupo), len(self.grupo)), dtype=numpy.float32)
+        matriz1 = sparse.lil_matrix((len(self.grupo), len(self.grupo)))
+        matriz2 = sparse.lil_matrix((len(self.grupo), len(self.grupo)))
 
         if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
             matriz1 += self.matrizesArtigoEmPeriodico[0]

@@ -1,3 +1,4 @@
+jinja2
 PIL
 docopt
 configobj == 5.0.6

@@ -31,23 +31,26 @@ Other:
 """
 
 from __future__ import absolute_import, unicode_literals
+
 import logging
 import sys
-import pandas
 
-from docopt import docopt
+import pandas
 from configobj import ConfigObj
+from docopt import docopt
 from pathlib import Path
 
-from report.charts.collaborationGraph import CollaborationGraph
-from report.file_generator import salvarListaTXT, save_list_txt
-from scriptLattes.log import configure_stream
-from fetch.download_html import download_html
+import report
 from extract.parserLattesHTML import ParserLattesHTML
 from extract.parserLattesXML import ParserLattesXML
+from fetch.download_html import download_html
+from grupo import Grupo
 from persist.cache import cache
 from persist.store import Store
-from grupo import Grupo
+from report import file_generator
+from report.charts.collaboration_graph import CollaborationGraph
+from report.file_generator import save_list_txt
+from scriptLattes.log import configure_stream
 from scriptLattes.util import util, config_migrator
 from validate import Validator
 
@@ -342,32 +345,35 @@ def cli():
 
     if arguments['process'] or arguments['report'] or arguments['all']:
         # processar/carregar
-        # group.aggregate_data()
-        group.compilarListasDeItems(config['relatorio'])  # obrigatorio
+        # group.compilarListasDeItems(config['relatorio'])  # obrigatorio
+        group.aggregate_data()
+        group.create_colaboration_matrices()
 
         if config['geral']['identificar_publicacoes_com_qualis']:
             group.identificarQualisEmPublicacoes()  # obrigatorio
-        if config['relatorio']['incluir_internacionalizacao']:
-            lista_doi = group.calcularInternacionalizacao()  # obrigatorio
-            if lista_doi and output_directory:
-                prefix = config['geral']['prefixo'] if config['geral'].get('prefixo') else ''
-                file_path = output_directory / (prefix + 'internacionalizacao.txt')
-                save_list_txt(lista_doi, file_path)
+
+        # TODO: decidir se é aqui ou em report
+        if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
+            collaboration_graph = CollaborationGraph(group)
+            collaboration_graph.create_all(output_directory,
+                                           use_labels=config['grafo'].get('considerar_rotulos_dos_membros_do_grupo'),
+                                           show_all_nodes=config['grafo'].get('mostrar_todos_os_nos_do_grafo'),
+                                           weight_collaborations=config['grafo'].get('mostrar_aresta_proporcional_ao_numero_de_colaboracoes'))
+
+    if arguments['report']:
+        # if config['relatorio']['incluir_internacionalizacao']:
+        #     lista_doi = group.calcularInternacionalizacao()  # obrigatorio
+        #     if lista_doi and output_directory:
+        #         prefix = config['geral']['prefixo'] if config['geral'].get('prefixo') else ''
+        #         file_path = output_directory / (prefix + 'internacionalizacao.txt')
+        #         save_list_txt(lista_doi, file_path)
 
         # group.imprimirMatrizesDeFrequencia()
 
-    if arguments['report']:
-        # group.gerarGrafosDeColaboracoes()  # obrigatorio
-        if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
-            collaboration_graph = CollaborationGraph(group, output_directory,
-                                                     use_labels=config['grafo'].get('considerar_rotulos_dos_membros_do_grupo'),
-                                                     show_all_nodes=config['grafo'].get('mostrar_todos_os_nos_do_grafo'),
-                                                     weight_collaborations=config['grafo'].get('mostrar_aresta_proporcional_ao_numero_de_colaboracoes'))
-
-        # group.gerarGraficosDeBarras() # java charts
-        group.gerarMapaDeGeolocalizacao()  # obrigatorio
+        # # group.gerarGraficosDeBarras() # java charts
+        # group.gerarMapaDeGeolocalizacao()  # obrigatorio
         group.gerarPaginasWeb()  # obrigatorio
-        group.gerarArquivosTemporarios()  # obrigatorio
+        report.file_generator.gerarArquivosTemporarios(group)  # obrigatorio
 
         if 'diretorio_de_saida' in config['geral']:
             output_dir = util.resolve_file_path(config['geral']['diretorio_de_saida'], config_file_path)

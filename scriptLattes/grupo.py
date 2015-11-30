@@ -4,15 +4,16 @@
 import datetime
 import logging
 
-from authorRank import AuthorRank
-from compiladorDeListas import CompiladorDeListas
+from scipy import sparse
+
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from geradorDePaginasWeb import GeradorDePaginasWeb
 from membro import Membro
-from persist import cache
 from persist.cache import cache
+from process.authorRank import AuthorRank
+from process.compiladorDeListas import CompiladorDeListas
 from qualis import qualis
 from report.charts.graficoDeBarras import GraficoDeBarras
 from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
@@ -47,13 +48,13 @@ class Grupo:
     matrizProgramaComputador = None
     matrizDesenhoIndustrial = None
 
-    matrizDeAdjacencia = None
-    matrizDeFrequencia = None
-    matrizDeFrequenciaNormalizada = None
-    vetorDeCoAutoria = None
+    _co_authorship_adjacency_matrix = None
+    co_authorship_normalized_weighted_matrix = None
+    co_authorship_vector = None
+    author_rank_vector = None
+
     mapaDeGeolocalizacao = None
 
-    vectorRank = None
     nomes = None
     rotulos = None
     geolocalizacoes = None
@@ -82,12 +83,17 @@ class Grupo:
         for index, row in ids_df.iterrows():
             self.members_list[row.identificador] = Membro(row['identificador'], row['nome'], row['periodo'],
                                                           row['rotulo'], self.items_desde_ano, self.items_ate_ano)
+        self.members_indices = {lattes_id: index for index, lattes_id in enumerate(self.members_list.keys())}
 
         self.ids_df = ids_df
         # XXX: following lines replaced by property method below
         # self.labels_set = ids_df['rotulo'].unique()
         # self.labels_set.sort()
         # self.listaDeRotulosCores = [''] * len(self.labels_set)
+
+        self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
+        self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
+        self.productions_list = [self.journal_papers, self.event_papers]
 
         # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
         read_from_cache = True if cache.file('qualis.data') else False
@@ -111,21 +117,21 @@ class Grupo:
                 logger.debug(u"{}".format(self.members_list[id_lattes]))
 
     def aggregate_data(self):
-        self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
-        self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
         for _, member in self.members_list.items():
             self.journal_papers.append(member.journal_papers)
             self.event_papers.append(member.event_papers)
-        self.journal_papers.group_similar()
-        self.event_papers.group_similar()
+            # self.journal_papers.group_similar()
+            # self.event_papers.group_similar()
 
     # REFATORADO ATE AQUI *********************************************************************************************
 
     # FIXME: não usar config aqui; elas são no fundo filtros para os relatórios
     def compilarListasDeItems(self, config):
+        raise "método inutilizado"
         self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
+        self.aggregate_data()
 
-        self.get_colaboration_matrixes()
+        self.create_colaboration_matrices()
 
         # XXX: não sei para que serve o trecho abaixo
         # listas de nomes, rotulos e IDs
@@ -137,21 +143,39 @@ class Grupo:
         #     self.rotulos.append(membro.rotulo)
         #     self.ids.append(membro.idLattes)
 
-    def get_colaboration_matrixes(self):
+    @property
+    def co_authorship_adjacency_matrix(self):
+        if self._co_authorship_adjacency_matrix is None:
+            self._co_authorship_adjacency_matrix = sparse.lil_matrix((len(self.members_indices), len(self.members_indices)))
+            for production in self.productions_list:
+                self._co_authorship_adjacency_matrix += production.co_authorship_adjacency_matrix(self.members_indices)
+        return self._co_authorship_adjacency_matrix
+
+    def create_colaboration_matrices(self):
         # FIXME: depende do compilador ter sido instanciado no método compilarListasDeItems
         # Grafos de coautoria
-        self.compilador.criarMatrizesDeColaboracao()
-        [self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
+        # self.compilador.criarMatrizesDeColaboracao()
+        # self.matrizesArtigoEmPeriodico = self.journal_papers.co_authorship_adjacency_matrix(self.members_indices)
+        # self.matrizesTrabalhoCompletoEmCongresso = self.event_papers.co_authorship_adjacency_matrix(self.members_indices)
+        # [self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
+
+        weighted_matrix = sparse.lil_matrix((len(self.members_indices), len(self.members_indices)))
+        for production in self.productions_list:
+            weighted_matrix += production.co_authorship_weighted_matrix(self.members_indices)
+
         # soma das linhas = num. de items feitos em co-autoria (parceria) com outro membro do grupo
-        self.vetorDeCoAutoria = self.matrizDeFrequencia.sum(axis=1)
-        self.matrizDeFrequenciaNormalizada = self.matrizDeFrequencia.copy()
-        for i in range(0, self.numeroDeMembros()):
-            if not self.vetorDeCoAutoria[i] == 0:
-                self.matrizDeFrequenciaNormalizada[i, :] /= float(self.vetorDeCoAutoria[i])
+        total = weighted_matrix.sum(axis=1)
+        total[total == 0] = 1  # for avoiding NaNs in empty rows
+        self.co_authorship_normalized_weighted_matrix = sparse.lil_matrix(weighted_matrix / total)
+
+        self.co_authorship_vector = weighted_matrix.sum(axis=1)
+        # self.co_authorship_normalized_weighted_matrix = weighted_matrix.copy()
+        # for i in range(len(self.members_list)):
+        #     if not self.co_authorship_vector[i] == 0:
+        #         self.co_authorship_normalized_weighted_matrix[i, :] /= float(self.co_authorship_vector[i])
 
         # AuthorRank
-        authorRank = AuthorRank(self.matrizDeFrequenciaNormalizada, 100)
-        self.vectorRank = authorRank.vectorRank
+        self.author_rank_vector = AuthorRank(self.co_authorship_normalized_weighted_matrix, 100).rank_vector
 
     # FIXME: finish refactoring
     def gerarXMLdeGrupo(self):
@@ -211,14 +235,16 @@ class Grupo:
         for membro in self.members_list.values():
             self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
 
+        # FIXME: save cache
         # if self.diretorioCache:
-        filename = (self.diretorioCache or '/tmp') + '/qualis.data'
+        # filename = (self.diretorioCache or '/tmp') + '/qualis.data'
         # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
-        self.qualis.qextractor.save_data(filename)
+        # self.qualis.qextractor.save_data(filename)
 
-        self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
-                                               self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-                                               self.compilador.listaCompletaResumoExpandidoEmCongresso)
+        # FIXME: calcular qualis de eventos (precisa ler do arquivo csv)
+        # self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
+        #                                        self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
+        #                                        self.compilador.listaCompletaResumoExpandidoEmCongresso)
 
     def salvarVetorDeProducoes(self, vetor, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')
@@ -309,12 +335,14 @@ class Grupo:
     def imprimirMatrizesDeFrequencia(self):
         self.compilador.imprimirMatrizesDeFrequencia()
         print "\n[VETOR DE CO-AUTORIA]"
-        print self.vetorDeCoAutoria
+        print self.co_authorship_vector
         print "\n[MATRIZ DE FREQUENCIA NORMALIZADA]"
-        print self.matrizDeFrequenciaNormalizada
+        print self.co_authorship_normalized_weighted_matrix
 
     # def numeroDeMembros(self):
     #     return len(self.members_list)
+    def __len__(self):
+        return len(self.members_list)
 
     def ordenarListaDeMembros(self, chave):
         self.members_list.values().sort(key=operator.attrgetter(chave))  # ordenamos por nome
@@ -343,5 +371,5 @@ class Grupo:
             #
             #             return self.listaDeParametros[i][1]
 
-    # def atribuirCoNoRotulo(self, indice, cor):
-    #     self.listaDeRotulosCores[indice] = cor
+            # def atribuirCoNoRotulo(self, indice, cor):
+            #     self.listaDeRotulosCores[indice] = cor

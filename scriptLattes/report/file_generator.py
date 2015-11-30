@@ -16,10 +16,10 @@ def gerarArquivosTemporarios(group):
     prefix = self.obterParametro('global-prefixo') + '-' if not self.obterParametro('global-prefixo') == '' else ''
 
     # (1) matrizes
-    salvarMatrizTXT(group.matrizDeAdjacencia, prefix + "matrizDeAdjacencia.txt")
+    salvarMatrizTXT(group.co_authorship_adjacency_matrix, prefix + "co_authorship_adjacency_matrix.txt")
     salvarMatrizTXT(group.matrizDeFrequencia, prefix + "matrizDeFrequencia.txt")
-    salvarMatrizTXT(group.matrizDeFrequenciaNormalizada, prefix + "matrizDeFrequenciaNormalizada.txt")
-    # self.salvarMatrizXML(self.matrizDeAdjacencia, prefix+"matrizDeAdjacencia.xml")
+    salvarMatrizTXT(group.co_authorship_normalized_weighted_matrix, prefix + "co_authorship_normalized_weighted_matrix.txt")
+    # self.salvarMatrizXML(group.co_authorship_adjacency_matrix, prefix+"co_authorship_adjacency_matrix.xml")
 
     # (2) listas de nomes, rótulos, ids
     # FIXME: acertar método correto para salvar (save_list_txt)
@@ -28,7 +28,7 @@ def gerarArquivosTemporarios(group):
     salvarListaTXT(group.ids, prefix + "listaDeIDs.txt")
 
     # (3) medidas de authorRanks
-    salvarListaTXT(group.vectorRank, prefix + "authorRank.txt")
+    salvarListaTXT(group.author_rank_vector, prefix + "authorRank.txt")
 
     # (4) lista unica de colaboradores (orientadores, ou qualquer outro tipo de parceiros...)
     rawColaboradores = list([])
@@ -83,7 +83,7 @@ def gerarCSVdeQualisdeGrupo(grupo):
             nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
             string += "\n" + str(
                 i) + "," + membro.idLattes + "," + nomeCompleto + "," + membro.rotulo + "," + membro.enderecoProfissionalLat + "," + membro.enderecoProfissionalLon + ","
-            string += str(self.vectorRank[i]) + ","
+            string += str(self.author_rank_vector[i]) + ","
             string += str(len(membro.listaArtigoEmPeriodico) + len(membro.listaLivroPublicado) + len(
                 membro.listaCapituloDeLivroPublicado) + len(membro.listaTrabalhoCompletoEmCongresso) + len(
                 membro.listaResumoExpandidoEmCongresso) + len(membro.listaResumoEmCongresso)) + ","
@@ -97,7 +97,7 @@ def gerarCSVdeQualisdeGrupo(grupo):
             i += 1
 
         # Arestas
-        matriz = self.matrizDeAdjacencia
+        matriz = self.co_authorship_adjacency_matrix
 
         string += "\nedgedef> node1 VARCHAR, node2 VARCHAR, weight DOUBLE"
         for i in range(0, N):
@@ -172,7 +172,7 @@ def salvarMatrizXML(self, matriz, nomeArquivo):
             \n<key id="amount" for="edge" attr.name="amount" attr.type="int"/> \
             \n<key id="pubs" for="node" attr.name="pubs" attr.type="int"/>'
 
-    for i in range(0, self.numeroDeMembros()):
+    for i in range(len(self.members_list)):
         membro = self.members_list.values()[i]
         s += '\n<!-- nodes --> \
                 \n<node id="' + str(membro.idMembro) + '"> \
@@ -181,7 +181,7 @@ def salvarMatrizXML(self, matriz, nomeArquivo):
                 \n<data key="gender">' + membro.sexo[0].upper() + '</data> \
                 \n<data key="image">' + membro.foto + '</data> \
                 \n<data key="link">' + membro.url + '</data> \
-                \n<data key="pubs">' + str(int(self.vetorDeCoAutoria[i])) + '</data> \
+                \n<data key="pubs">' + str(int(self.co_authorship_vector[i])) + '</data> \
                 \n</node>'
 
     N = matriz.shape[0]
