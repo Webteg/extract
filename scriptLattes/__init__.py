@@ -5,7 +5,7 @@ scriptlattes
 
 Processador de currículos da Plataforma Lattes
 
-:copyright: (c) 2015 by Jesús P. Mena-Chalco
+:copyright: (c) 2015 by Jesús P. Mena-Chalco, Fábio N. Kepler
 :licence: GPLv3, see LICENSE for more details
 """
 from __future__ import absolute_import, unicode_literals
@@ -25,11 +25,11 @@ __uri__ = 'https://bitbucket.org/scriptlattes/scriptlattes'
 
 __version__ = '9.0.0'
 
-__author__ = 'Jesús P. Mena-Chalco'
-__email__ = 'jesus.mena@ufabc.edu.br'
+__author__ = 'Jesús P. Mena-Chalco, Fabio N. Kepler'
+__email__ = 'jesus.mena@ufabc.edu.br, kepler@unipampa.edu.br'
 
 __license__ = 'GPLv3'
-__copyright__ = 'Copyright 2015 Jesús P. Mena-Chalco'
+__copyright__ = 'Copyright 2015 Jesús P. Mena-Chalco, Fabio N. Kepler'
 
 # the user should dictate what happens when a logging event occurs
 logging.getLogger(__name__).addHandler(logging.NullHandler())

@@ -5,11 +5,18 @@
 
 {% block head %}
     {{ super() }}
-    <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css" href="css/dataTables.colVis.min.css">
-    <script type="text/javascript" charset="utf8" src="js/jquery.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="js/dataTables.colVis.min.js"></script>
+    <!--<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="css/dataTables.colVis.min.css">-->
+    <!--<script type="text/javascript" charset="utf8" src="js/jquery.min.js"></script>-->
+    <!--<script type="text/javascript" charset="utf8" src="js/jquery.dataTables.min.js"></script>-->
+    <!--<script type="text/javascript" charset="utf8" src="js/dataTables.colVis.min.js"></script>-->
+    <!--<script type="text/javascript" charset="utf8" src="js/jexpand/jExpand.js"></script>-->
+    <!--<script>-->
+        <!--$(document).ready(function () {-->
+            <!--$(".collapse-box").jExpand();-->
+        <!--});-->
+    <!--</script>-->
+
 {% endblock %}
 
 {% block content %}
@@ -34,7 +41,7 @@
             <td valign="top" height="40px"><img src="{{membro.foto}}" width="40px"></td>
             <td><a href="{{membro.url}}">{{membro.nome_completo}}</a></td>
             <td class="centered"><font size=-1>{{membro.rotulo if membro.rotulo else '[sem rótulo]'}}</font></td>
-            <td class="centered"><font size=-1>{{ '({})'.format(membro.bolsa) if membro.bolsa}}</font></td>
+            <td class="centered"><font size=-1>{{'({})'.format(membro.bolsa) if membro.bolsa}}</font></td>
             <td class="centered"><font size=-1>{{membro.periodo}}</font></td>
             <td class="centered"><font size=-1>{{membro.atualizacaoCV}}</font></td>
             <td class="centered">
@@ -53,10 +60,10 @@
 </table>
 
 
-<script>
-    $(document).ready(function () {
-        $('#membros').DataTable();
-    });
-</script>
+<!--<script>-->
+    <!--$(document).ready(function () {-->
+        <!--$('#membros').DataTable();-->
+    <!--});-->
+<!--</script>-->
 
 {% endblock %}

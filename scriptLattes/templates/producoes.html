@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% set active_page = "producao_bibliografica" %}
+
+{% block title %}{{group_name}}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="css/dataTables.colVis.min.css">
+    <script type="text/javascript" charset="utf8" src="js/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="js/dataTables.colVis.min.js"></script>
+    <!--<script type="text/javascript" charset="utf8" src="js/jexpand/jExpand.js"></script>-->
+    <!--<script>-->
+        <!--$(document).ready(function () {-->
+            <!--$(".collapse-box").jExpand();-->
+        <!--});-->
+    <!--</script>-->
+
+{% endblock %}
+
+{% block content %}
+
+<h3>{{subtitle}}</h3>
+
+{{chart}}
+<div id="container" style="min-width: 310px; max-width: 1920px; height: {height}; margin: 0"></div>
+
+Número total de itens: {{numero_itens}}<br>
+{{totais_qualis}}
+{{indice_paginas}}
+
+<!--{producoes}-->
+{% for production in productions_list %}
+    <div id="dv-year-{0}"><h3 class="year">{0}</h3>
+        <table>
+            <tr valign="top">
+                <td>{{loop.index}}. &nbsp;</td>
+                <td>{% include '_journal_paper.html' with context %}</td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+
+{% endblock %}

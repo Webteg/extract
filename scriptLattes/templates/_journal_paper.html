@@ -1,0 +1,14 @@
+
+{{production.autores}}. <b>{{production.titulo}}</b>. <font color=#330066>{{production.revista}}</font>.
+{{ 'v. {},'.format(volume) if volume else '' }}
+{{ 'n. {},'.format(numero) if numero else '' }}
+{{ 'p. {},'.format(paginas) if paginas else '' }}
+{{ 'v. {},'.format(issn) if issn else '' }}
+{{year}}.
+{% if doi %}
+<a href="{{doi}}" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="images/doi.png"></a>
+{% endif %}
+
+{% include '_journal_paper_search_menu.html' %}
+
+<!--s += formata_qualis(self.qualis, self.qualissimilar)-->

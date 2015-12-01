@@ -18,7 +18,7 @@
 ('index.html', 'index', 'Início'),
 ('membros.html', 'membros', 'Membros'),
 ('producao_membros.html', 'producao_membros', 'Produção qualificado por membro'),
-('index.html#producaoBibliografica', 'producao_bibliografica', 'Produção bibliográfica'),
+('PB-0.html', 'producao_bibliografica', 'Produção bibliográfica'),
 ('index.html#producaoTecnica', 'producao_tecnica', 'Produção técnica'),
 ('index.html#producaoArtistica', 'producao_artistica', 'Produção artística'),
 ('index.html#orientacoes', 'orientacoes', 'Orientações'),
@@ -77,6 +77,7 @@
     (desenvolvido no <a href="http://nuvem.ufabc.edu.br/">NUVEM/UFABC</a> e no <a href="http://ccsl.ime.usp.br/">CCSL-IME/USP</a> por <a
             href="http://professor.ufabc.edu.br/~jesus.mena/">Jesús P. Mena-Chalco</a> e <a href="http://www.ime.usp.br/~cesar">Roberto M. Cesar-Jr</a>
     e no <a href="http://www.unipampa.edu.br/alegrete/">LEA/UNIPAMPA</a> por <a href="http://www.github.com/kepler">Fabio N. Kepler</a> e colaboradores).
+    <br>
     Os resultados estão sujeitos a falhas devido a inconsistências no preenchimento dos currículos Lattes. Caso note alguma falha, por favor, contacte o
     responsável por esta página:
     <a href="mailto:{{admin_email}}">{{admin_email}}</a>.
@@ -90,7 +91,7 @@
 </script>
 <script type="text/javascript">
     try {
-        var pageTracker = _gat._getTracker("' + self.grupo.obterParametro('global-google_analytics_key') + '");
+        var pageTracker = _gat._getTracker("{{google_analytics_key}}");
         pageTracker._trackPageview();
     } catch (err) {
     }

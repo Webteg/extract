@@ -23,7 +23,7 @@
 #
 
 
-from scriptLattes.geradorDePaginasWeb import *
+from report.web_pages_generator import *
 from scriptLattes.util.util import similaridade_entre_cadeias
 
 class OrientacaoEmAndamento:

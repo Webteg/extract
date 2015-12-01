@@ -24,18 +24,13 @@ from report.charts.graficoDeInternacionalizacao import *
 logger = logging.getLogger('scriptLattes')
 
 
-class GeradorDePaginasWeb:
-    grupo = None
-    dir = None
-    version = None
-    extensaoPagina = None
+class WebPagesGenerator:
     arquivoRis = None
 
-    def __init__(self, grupo, output_directory):
+    def __init__(self, grupo, output_directory, version, admin_email=None, google_analytics_key=None):
         assert isinstance(output_directory, Path)
 
         self.grupo = grupo
-        self.version = '9.0.0'
         self.output_directory = output_directory
 
         self.jinja = Environment(loader=PackageLoader('scriptLattes', 'templates'))
@@ -56,10 +51,21 @@ class GeradorDePaginasWeb:
         #     prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
         #         'global-prefixo') == '' else ''
         #     self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
-        #
+
+        self.global_template_vars = {
+            # "group": self.grupo,
+            "group_name": self.grupo.name,
+            "version": version,
+            # "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
+        }
+        if admin_email:
+            self.global_template_vars["admin_email"] = admin_email
+        if google_analytics_key:
+            self.global_template_vars["google_analytics_key"] = google_analytics_key
+
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
-        self.gerarPaginasDeProducoesBibliograficas()
+        self.generate_bibliographic_productions_pages()
         # self.gerarPaginasDeProducoesTecnicas()
         # self.gerarPaginasDeProducoesArtisticas()
         # self.gerarPaginasDePatentes()
@@ -92,14 +98,12 @@ class GeradorDePaginasWeb:
         file_name = 'index.html'
         index_template = self.jinja.get_template(file_name)
 
-        template_vars = {
-            "group_name": self.grupo.name,
+        template_vars = self.global_template_vars
+        template_vars.update({
             "mostrar_mapa_de_geolocalizacao": False,  # FIXME: self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
             "group": self.grupo,
-            "admin_email": "fixme@fixme",  # FIXME: puxar das config (global-email_do_admin)
             "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
-            "google_analytics_key": None,  # FIXME: global-google_analytics_key
-        }
+        })
 
         # Ou
         # if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
@@ -303,9 +307,107 @@ class GeradorDePaginasWeb:
                 s += '<i>Nenhuma publicação com DOI disponível para análise</i>'.decode("utf8")
             s += '</ul>'
 
+    def gerar_pagina_de_membros(self):
+        file_name = 'membros.html'
+        template = self.jinja.get_template(file_name)
 
+        template_vars = dict(self.global_template_vars)
+        template_vars.update({
+            "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
+            "members_list": self.grupo.members_list.values(),
+        })
 
-    def gerarPaginasDeProducoesBibliograficas(self):
+        s = template.render(template_vars).encode("utf-8")
+        file_path = self.output_directory / file_name
+        file_generator.save_string_to_file(s, file_path)
+
+        # FIXME: em quais circunstâncias este '-grp' aparece no rótulo de um membro?
+        # if "-grp[" in rotulo:
+        #     multirotulos = rotulo.split("::")
+        #     rotulo = ""
+        #     for r in multirotulos:
+        #         grupoURL = "http://dgp.cnpq.br/buscaoperacional/detalhegrupo.jsp?grupo=" + re.search('\[(.*)\]', r.strip()).group(1)
+        #         rotulo = rotulo + "<a href=" + grupoURL + ">" + r.strip() + "</a><br>"
+        #
+        # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+
+    def gerar_pagina_de_producoes(self, productions_list, template, title, prefix, ris=False):
+        template = self.jinja.get_template("producoes.html")
+        file_name = '{}-0.html'.format(prefix)
+
+        template_vars = self.global_template_vars.copy()
+        template_vars.update({
+            "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
+            "subtitle": title,
+            "subtemplate": template,
+            # "members_list": self.grupo.members_list.values(),
+            "chart": "FIXME: IMPLEMENTAR CHART",
+            "numero_itens": "FIXME",
+            "totais_qualis": "FIXME",
+            "indice_paginas": "FIXME",
+        })
+
+        template_vars["productions_list"] = productions_list
+
+        s = template.render(template_vars).encode("utf-8")
+        file_path = self.output_directory / file_name
+        file_generator.save_string_to_file(s, file_path)
+
+        return
+        ##############################
+        totais_qualis = ""
+        # if self.grupo.obterParametro('global-identificar_publicacoes_com_qualis'):
+        #     if self.grupo.obterParametro('global-arquivo_qualis_de_periodicos'):  # FIXME: nao está mais sendo usado agora que há qualis online
+        #         if prefixo == 'PB0':
+        #             totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB0)
+        #     if self.grupo.obterParametro('global-arquivo_qualis_de_congressos'):
+        #         if prefixo == 'PB4':
+        #             totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB4)
+        #         elif prefixo == 'PB5':
+        #             totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB5)
+
+        total_producoes = sum(len(v) for v in lista_completa.values())
+
+        keys = sorted(lista_completa.keys(), reverse=True)
+        if keys:  # apenas geramos páginas web para lista com pelo menos 1 elemento
+            max_elementos = int(self.grupo.obterParametro('global-itens_por_pagina'))
+            total_paginas = int(math.ceil(total_producoes / (max_elementos * 1.0)))  # dividimos os relatórios em grupos (e.g 1000 items)
+
+            grafico = self.gerar_grafico_de_producoes(lista_completa, titulo_pagina)  # FIXME: é o mesmo gráfico em todas as páginas
+
+            anos_indices_publicacoes = self.arranjar_publicacoes(lista_completa)
+            itens_por_pagina = self.chunks(anos_indices_publicacoes, max_elementos)
+            for numero_pagina, itens in enumerate(itens_por_pagina):
+                producoes_html = ''
+                for indice_na_pagina, (ano, indice_no_ano, publicacao) in enumerate(itens):
+                    # armazenamos uma copia da publicacao (formato RIS)
+                    if ris and self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
+                        self.salvarPublicacaoEmFormatoRIS(publicacao)
+
+                    if indice_na_pagina == 0 or indice_no_ano == 0:
+                        if indice_na_pagina > 0:
+                            producoes_html += '</table></div>'
+                        producoes_html += '<div id="dv-year-{0}"><h3 class="year">{0}</h3> <table>'.format(
+                            ano if ano else '*itens sem ano')
+
+                    producao_html = self.template_producao()
+                    producao_html = producao_html.format(indice=indice_no_ano + 1,
+                                                         publicacao=publicacao.html(self.grupo.members_list.values()))
+                    producoes_html += producao_html
+                producoes_html += '</table></div>'
+
+                pagina_html = self.template_pagina_de_producoes()
+                pagina_html = pagina_html.format(top=self.pagina_top(), bottom=self.paginaBottom(),
+                                                 grafico=grafico.html(), height=grafico['chart']['height'],
+                                                 titulo=titulo_pagina.decode("utf8"), numero_itens=str(total_producoes),
+                                                 totais_qualis=totais_qualis,
+                                                 indice_paginas=self.gerarIndiceDePaginas(total_paginas, numero_pagina,
+                                                                                          prefixo),
+                                                 producoes=producoes_html)
+                self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
+        return total_producoes
+
+    def generate_bibliographic_productions_pages(self):
         self.nPB0 = 0
         self.nPB1 = 0
         self.nPB2 = 0
@@ -317,8 +419,13 @@ class GeradorDePaginasWeb:
         self.nPB8 = 0
         self.nPB9 = 0
         self.nPB = 0
-        return
 
+        # Total de produção bibliográfica
+        # FIXME: só testando; total tem que ser outros dados
+        self.nPB = self.gerar_pagina_de_producoes(self.grupo.journal_papers.data_frame, template="journal_papers.html",  #self.grupo.compilador.listaCompletaPB,
+                                                  title=u"Total de produção bibliográfica", prefix="PB")
+        return
+        #########################################
         # FIXME: refatorar
 
         if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
@@ -354,10 +461,6 @@ class GeradorDePaginasWeb:
             self.nPB9 = self.gerar_pagina_de_producoes(
                 self.grupo.compilador.listaCompletaOutroTipoDeProducaoBibliografica,
                 "Demais tipos de produção bibliográfica", "PB9")
-        # Total de produção bibliográfica
-        self.nPB = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPB,
-                                                  "Total de produção bibliográfica", "PB")
-
 
     def gerarPaginasDeProducoesTecnicas(self):
         self.nPT0 = 0
@@ -646,61 +749,6 @@ class GeradorDePaginasWeb:
 
         return chart
 
-    def gerar_pagina_de_producoes(self, lista_completa, titulo_pagina, prefixo, ris=False):
-        totais_qualis = ""
-        if self.grupo.obterParametro('global-identificar_publicacoes_com_qualis'):
-            if self.grupo.obterParametro('global-arquivo_qualis_de_periodicos'):  # FIXME: nao está mais sendo usado agora que há qualis online
-                if prefixo == 'PB0':
-                    totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB0)
-            if self.grupo.obterParametro('global-arquivo_qualis_de_congressos'):
-                if prefixo == 'PB4':
-                    totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB4)
-                elif prefixo == 'PB5':
-                    totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB5)
-
-        total_producoes = sum(len(v) for v in lista_completa.values())
-
-        keys = sorted(lista_completa.keys(), reverse=True)
-        if keys:  # apenas geramos páginas web para lista com pelo menos 1 elemento
-            max_elementos = int(self.grupo.obterParametro('global-itens_por_pagina'))
-            total_paginas = int(math.ceil(
-                total_producoes / (max_elementos * 1.0)))  # dividimos os relatórios em grupos (e.g 1000 items)
-
-            grafico = self.gerar_grafico_de_producoes(lista_completa,
-                                                      titulo_pagina)  # FIXME: é o mesmo gráfico em todas as páginas
-
-            anos_indices_publicacoes = self.arranjar_publicacoes(lista_completa)
-            itens_por_pagina = self.chunks(anos_indices_publicacoes, max_elementos)
-            for numero_pagina, itens in enumerate(itens_por_pagina):
-                producoes_html = ''
-                for indice_na_pagina, (ano, indice_no_ano, publicacao) in enumerate(itens):
-                    # armazenamos uma copia da publicacao (formato RIS)
-                    if ris and self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
-                        self.salvarPublicacaoEmFormatoRIS(publicacao)
-
-                    if indice_na_pagina == 0 or indice_no_ano == 0:
-                        if indice_na_pagina > 0:
-                            producoes_html += '</table></div>'
-                        producoes_html += '<div id="dv-year-{0}"><h3 class="year">{0}</h3> <table>'.format(
-                            ano if ano else '*itens sem ano')
-
-                    producao_html = self.template_producao()
-                    producao_html = producao_html.format(indice=indice_no_ano + 1,
-                                                         publicacao=publicacao.html(self.grupo.members_list.values()))
-                    producoes_html += producao_html
-                producoes_html += '</table></div>'
-
-                pagina_html = self.template_pagina_de_producoes()
-                pagina_html = pagina_html.format(top=self.pagina_top(), bottom=self.paginaBottom(),
-                                                 grafico=grafico.html(), height=grafico['chart']['height'],
-                                                 titulo=titulo_pagina.decode("utf8"), numero_itens=str(total_producoes),
-                                                 totais_qualis=totais_qualis,
-                                                 indice_paginas=self.gerarIndiceDePaginas(total_paginas, numero_pagina,
-                                                                                          prefixo),
-                                                 producoes=producoes_html)
-                self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
-        return total_producoes
-
     def gerarIndiceDePaginas(self, numeroDePaginas, numeroDePaginaAtual, prefixo):
         if numeroDePaginas == 1:
             return ''
@@ -983,64 +1031,6 @@ class GeradorDePaginasWeb:
         # tabTipo += '<div style="clear:both"></div>'
         # tabTipo += "<br><br></div><br><br>"
         return tabela
-
-    def gerar_pagina_de_membros(self):
-        file_name = 'membros.html'
-        self.grupo.members_list.values()
-
-        template = self.jinja.get_template(file_name)
-
-        template_vars = {
-            "group": self.grupo,
-            "group_name": self.grupo.name,
-            "admin_email": "fixme@fixme",  # FIXME: puxar das config (global-email_do_admin)
-            "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
-            "google_analytics_key": None,  # FIXME: global-google_analytics_key
-            "members_list": self.grupo.members_list.values(),
-        }
-
-        s = template.render(template_vars).encode("utf-8")
-        file_path = self.output_directory / file_name
-        file_generator.save_string_to_file(s, file_path)
-
-        # elemento = 0
-        # tabela = {}
-        # for membro in self.grupo.members_list.values():
-        #     # elemento += 1
-        #     # bolsa = '(' + membro.bolsaProdutividade + ')' if membro.bolsaProdutividade else ''
-        #     # rotulo = membro.rotulo if not membro.rotulo == '[sem rotulo]' else ''
-        #     # rotulo = rotulo.decode('iso-8859-1', 'replace')
-        #     #
-        #     # if "-grp[" in rotulo:
-        #     #     multirotulos = rotulo.split("::")
-        #     #     rotulo = ""
-        #     #     for r in multirotulos:
-        #     #         grupoURL = "http://dgp.cnpq.br/buscaoperacional/detalhegrupo.jsp?grupo=" + re.search('\[(.*)\]', r.strip()).group(1)
-        #     #         rotulo = rotulo + "<a href=" + grupoURL + ">" + r.strip() + "</a><br>"
-        #     #
-        #     # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
-        #     #
-        #     # s += '\n<tr class="testetabela"> \
-        #     #          <td valign="center" height="40px">' + str(elemento) + '.</td> \
-        #     #          <td valign="top" height="40px"><img src="' + membro.foto + '" width="40px"></td> \
-        #     #          <td><a href="' + membro.url + '">' + nomeCompleto + '</a></td> \
-        #     #          <td class="centered"><font size=-1>' + rotulo + '</font></td> \
-        #     #          <td class="centered"><font size=-1>' + bolsa + '</font></td> \
-        #     #          <td class="centered"><font size=-1>' + membro.periodo + '</font></td> \
-        #     #          <td class="centered"><font size=-1>' + membro.atualizacaoCV + '</font></td> \
-        #     #          <td class="centered"><a href="http://scholar.google.com.br/citations?view_op=search_authors&mauthors=' + nomeCompleto + '"><font size=-1>[ Cita&ccedil;&otilde;es em Google Acad&ecirc;mico | </font></a></td> \
-        #     #          <td class="centered"><a href="http://academic.research.microsoft.com/Search?query=author:(' + nomeCompleto + ')"><font size=-1>Cita&ccedil;&otilde;es em Microsoft Acad&ecirc;mico ]</font></a></td> \
-        #     #      </tr>'
-
-        #add jquery and plugins
-        # s += '<script src="../../js/jexpand/jExpand.js"></script>' \
-        #      '<script>' \
-        #      '  $(document).ready(function(){' \
-        #      '    $(".collapse-box").jExpand();' \
-        #      '  });' \
-        #      '</script>'
-
-        # self.salvarPagina("membros" + self.extensaoPagina, s)
 
     @staticmethod
     def producao_qualis_por_membro(lista_de_membros):

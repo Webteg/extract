@@ -34,23 +34,21 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import sys
+from pathlib import Path
 
 import pandas
 from configobj import ConfigObj
 from docopt import docopt
-from pathlib import Path
 
-import report
+import scriptLattes
 from extract.parserLattesHTML import ParserLattesHTML
 from extract.parserLattesXML import ParserLattesXML
 from fetch.download_html import download_html
-from geradorDePaginasWeb import GeradorDePaginasWeb
 from grupo import Grupo
 from persist.cache import cache
 from persist.store import Store
-from report import file_generator
 from report.charts.collaboration_graph import CollaborationGraph
-from report.file_generator import save_list_txt
+from report.web_pages_generator import WebPagesGenerator
 from scriptLattes.log import configure_stream
 from scriptLattes.util import util, config_migrator
 from validate import Validator
@@ -374,7 +372,11 @@ def cli():
 
         # # group.gerarGraficosDeBarras() # java charts
         # group.gerarMapaDeGeolocalizacao()  # obrigatorio
-        GeradorDePaginasWeb(group, output_directory)  # obrigatorio
+
+        if config['geral'].get('criar_paginas_jsp'):
+            raise "Formato JSP não mais suportado (configuração geral.criar_paginas_jsp)"
+
+        WebPagesGenerator(group, output_directory, version=scriptLattes.__version__, admin_email=config['geral'].get('email_do_admin'))  # obrigatorio
         # report.file_generator.gerarArquivosTemporarios(group)  # obrigatorio
         util.copy_report_files(output_directory)
 

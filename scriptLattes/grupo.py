@@ -9,7 +9,6 @@ from scipy import sparse
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
-from geradorDePaginasWeb import GeradorDePaginasWeb
 from membro import Membro
 from persist.cache import cache
 from process.authorRank import AuthorRank
