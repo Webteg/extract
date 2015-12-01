@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 # filename: geradorDePaginasWeb
 
 import datetime
@@ -9,13 +9,16 @@ import re
 import unicodedata
 from collections import defaultdict
 
+import dateutil
 import pandas
 from jinja2.environment import Environment
 from jinja2.loaders import PackageLoader
 from pandas.core.indexing import IndexingError
+from pathlib import Path
 
 import membro
 from highcharts import *  # highcharts
+from report import file_generator
 from report.charts.graficoDeInternacionalizacao import *
 
 logger = logging.getLogger('scriptLattes')
@@ -28,149 +31,105 @@ class GeradorDePaginasWeb:
     extensaoPagina = None
     arquivoRis = None
 
-    def __init__(self, grupo):
+    def __init__(self, grupo, output_directory):
+        assert isinstance(output_directory, Path)
+
         self.grupo = grupo
         self.version = '9.0.0'
-        # self.dir = self.grupo.obterParametro('global-diretorio_de_saida')
+        self.output_directory = output_directory
 
         self.jinja = Environment(loader=PackageLoader('scriptLattes', 'templates'))
 
-        index_template = self.jinja.get_template('index.html')
-        print(index_template.render(teste="Olá mundo"))
-
-        if self.grupo.obterParametro('global-criar_paginas_jsp'):
-            raise "Formato JSP não mais suportado"
-            self.extensaoPagina = '.jsp'
-            self.html1 = '<%@ page language="java" contentType="text/html; charset=ISO8859-1" pageEncoding="ISO8859-1"%> <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core"%> <f:verbatim>'
-            self.html2 = '</f:verbatim>'
-        else:
-            self.extensaoPagina = '.html'
-            self.html1 = '<html>'
-            self.html2 = '</html>'
-
-        # geracao de arquivo RIS com as publicacoes
-        # FIXME: mover para fora daqui
-        if self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
-            prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
-                'global-prefixo') == '' else ''
-            self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
-
+        # if self.grupo.obterParametro('global-criar_paginas_jsp'):
+        #     raise "Formato JSP não mais suportado"
+        #     self.extensaoPagina = '.jsp'
+        #     self.html1 = '<%@ page language="java" contentType="text/html; charset=ISO8859-1" pageEncoding="ISO8859-1"%> <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core"%> <f:verbatim>'
+        #     self.html2 = '</f:verbatim>'
+        # else:
+        #     self.extensaoPagina = '.html'
+        #     self.html1 = '<html>'
+        #     self.html2 = '</html>'
+        #
+        # # geracao de arquivo RIS com as publicacoes
+        # # FIXME: mover para fora daqui
+        # if self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
+        #     prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
+        #         'global-prefixo') == '' else ''
+        #     self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
+        #
         self.gerar_pagina_de_membros()
-        self.gerar_pagina_de_producao_qualificado_por_membro()
+        # self.gerar_pagina_de_producao_qualificado_por_membro()
         self.gerarPaginasDeProducoesBibliograficas()
-        self.gerarPaginasDeProducoesTecnicas()
-        self.gerarPaginasDeProducoesArtisticas()
-        self.gerarPaginasDePatentes()
-
-        if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):
-            self.gerarPaginasDeOrientacoes()
-
-        if self.grupo.obterParametro('relatorio-incluir_projeto'):
-            self.gerarPaginasDeProjetos()
-
-        if self.grupo.obterParametro('relatorio-incluir_premio'):
-            self.gerarPaginasDePremios()
-
-        if self.grupo.obterParametro('relatorio-incluir_participacao_em_evento'):
-            self.gerarPaginasDeParticipacaoEmEventos()
-
-        if self.grupo.obterParametro('relatorio-incluir_organizacao_de_evento'):
-            self.gerarPaginasDeOrganizacaoDeEventos()
-
-        if self.grupo.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):
-            self.gerarPaginaDeGrafosDeColaboracoes()
-
-        if self.grupo.obterParametro('relatorio-incluir_internacionalizacao'):
-            self.gerarPaginasDeInternacionalizacao()
+        # self.gerarPaginasDeProducoesTecnicas()
+        # self.gerarPaginasDeProducoesArtisticas()
+        # self.gerarPaginasDePatentes()
+        #
+        # if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):
+        #     self.gerarPaginasDeOrientacoes()
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_projeto'):
+        #     self.gerarPaginasDeProjetos()
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_premio'):
+        #     self.gerarPaginasDePremios()
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_participacao_em_evento'):
+        #     self.gerarPaginasDeParticipacaoEmEventos()
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_organizacao_de_evento'):
+        #     self.gerarPaginasDeOrganizacaoDeEventos()
+        #
+        # if self.grupo.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):
+        #     self.gerarPaginaDeGrafosDeColaboracoes()
+        #
+        # if self.grupo.obterParametro('relatorio-incluir_internacionalizacao'):
+        #     self.gerarPaginasDeInternacionalizacao()
 
         # final do fim!
-        self.gerarPaginaPrincipal()
+        self.generate_index_page()
+
+    def generate_index_page(self):
+        file_name = 'index.html'
+        index_template = self.jinja.get_template(file_name)
+
+        template_vars = {
+            "group_name": self.grupo.name,
+            "mostrar_mapa_de_geolocalizacao": False,  # FIXME: self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
+            "group": self.grupo,
+            "admin_email": "fixme@fixme",  # FIXME: puxar das config (global-email_do_admin)
+            "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
+            "google_analytics_key": None,  # FIXME: global-google_analytics_key
+        }
+
+        # Ou
+        # if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
+        # <body onload="initialize()" onunload="GUnload()"> # FIXME: initialize é do mapa
+
+        # s += '<h3 id="producaoBibliografica">Produção bibliográfica</h3> <ul>'.decode("utf8")
+        bibliography_totals = [
+            ("PB0-0.html", "Artigos completos publicados em periódicos", self.nPB0),
+            ("PB1-0.html", "Livros publicados/organizados ou edições", self.nPB1),
+            ("PB2-0.html", "Capítulos de livros publicados ", self.nPB2),
+            ("PB3-0.html", "Textos em jornais de notícias/revistas ", self.nPB3),
+            ("PB4-0.html", "Trabalhos completos publicados em anais de congressos ", self.nPB4),
+            ("PB5-0.html", "Resumos expandidos publicados em anais de congressos ", self.nPB5),
+            ("PB6-0.html", "Resumos publicados em anais de congressos ", self.nPB6),
+            ("PB7-0.html", "Artigos aceitos para publicação ", self.nPB7),
+            ("PB8-0.html", "Apresentações de trabalho ", self.nPB8),
+            ("PB9-0.html", "Demais tipos de produção bibliográfica ", self.nPB9),
+            ("PB-0.html",  "Total de produção bibliográfica", self.nPB),
+        ]
+        template_vars["bibliography_totals"] = bibliography_totals
+
+        s = index_template.render(template_vars).encode("utf-8")
+        file_path = self.output_directory / file_name
+        file_generator.save_string_to_file(s, file_path)
+
+        return
 
 
-    def gerarPaginaPrincipal(self):
-        nomeGrupo = self.grupo.obterParametro('global-nome_do_grupo').decode("utf8")
-
-        s = self.html1 + ' \
-        <head> \
-           <title>' + nomeGrupo + '</title> \
-           <meta name="Generator" content="scriptLattes"> \
-           <link rel="stylesheet" href="css/scriptLattes.css" type="text/css">  \
-           <meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
-        if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
-            s += self.grupo.mapaDeGeolocalizacao.mapa  #.encode("utf8")
-
-        s += '</head> \n \
-        <body onload="initialize()" onunload="GUnload()"> <div id="header">  \
-        <center> <h2> ' + nomeGrupo + '</h2>'
-
-        s += '[ <a href=membros' + self.extensaoPagina + '>Membros</a> \
-            | <a href=producao_membros' + self.extensaoPagina + '>Produção qualificado por membro</a> \
-            | <a href=#producaoBibliografica>Produção bibliográfica</a> \
-            | <a href=#producaoTecnica>Produção técnica</a> \
-            | <a href=#producaoArtistica>Produção artística</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):
-            s += '| <a href=#orientacoes>Orientações</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('relatorio-incluir_projeto'):
-            s += '| <a href=#projetos>Projetos</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('relatorio-incluir_premio'):
-            s += '| <a href=#premios>Prêmios</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('relatorio-incluir_participacao_em_evento') or self.grupo.obterParametro(
-                'relatorio-incluir_organizacao_de_evento'):
-            s += '| <a href=#eventos>Eventos</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):
-            s += '| <a href=#grafo>Grafo de colaborações</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
-            s += '| <a href=#mapa>Mapa de geolocalização</a> '.decode("utf8")
-
-        if self.grupo.obterParametro('relatorio-incluir_internacionalizacao'):
-            s += '| <a href=#internacionalizacao>Internacionalização</a> '.decode("utf8")
-
-        s += ' ] </center><br></div>'
-        s += '<h3 id="producaoBibliografica">Produção bibliográfica</h3> <ul>'.decode("utf8")
-
-        if self.nPB0 > 0:
-            s += '<li> <a href="PB0-0' + self.extensaoPagina + '">Artigos completos publicados em periódicos</a> '.decode(
-                "utf8") + '(' + str(self.nPB0) + ')'
-        if self.nPB1 > 0:
-            s += '<li> <a href="PB1-0' + self.extensaoPagina + '">Livros publicados/organizados ou edições</a> '.decode(
-                "utf8") + '(' + str(self.nPB1) + ')'
-        if self.nPB2 > 0:
-            s += '<li> <a href="PB2-0' + self.extensaoPagina + '">Capítulos de livros publicados </a> '.decode(
-                "utf8") + '(' + str(self.nPB2) + ')'
-        if self.nPB3 > 0:
-            s += '<li> <a href="PB3-0' + self.extensaoPagina + '">Textos em jornais de notícias/revistas </a> '.decode(
-                "utf8") + '(' + str(self.nPB3) + ')'
-        if self.nPB4 > 0:
-            s += '<li> <a href="PB4-0' + self.extensaoPagina + '">Trabalhos completos publicados em anais de congressos </a> '.decode(
-                "utf8") + '(' + str(self.nPB4) + ')'
-        if self.nPB5 > 0:
-            s += '<li> <a href="PB5-0' + self.extensaoPagina + '">Resumos expandidos publicados em anais de congressos </a> '.decode(
-                "utf8") + '(' + str(self.nPB5) + ')'
-        if self.nPB6 > 0:
-            s += '<li> <a href="PB6-0' + self.extensaoPagina + '">Resumos publicados em anais de congressos </a> '.decode(
-                "utf8") + '(' + str(self.nPB6) + ')'
-        if self.nPB7 > 0:
-            s += '<li> <a href="PB7-0' + self.extensaoPagina + '">Artigos aceitos para publicação </a> '.decode(
-                "utf8") + '(' + str(self.nPB7) + ')'
-        if self.nPB8 > 0:
-            s += '<li> <a href="PB8-0' + self.extensaoPagina + '">Apresentações de trabalho </a> '.decode(
-                "utf8") + '(' + str(self.nPB8) + ')'
-        if self.nPB9 > 0:
-            s += '<li> <a href="PB9-0' + self.extensaoPagina + '">Demais tipos de produção bibliográfica </a> '.decode(
-                "utf8") + '(' + str(self.nPB9) + ')'
-        if self.nPB > 0:
-            s += '<li> <a href="PB-0' + self.extensaoPagina + '">Total de produção bibliográfica</a> '.decode(
-                "utf8") + '(' + str(self.nPB) + ')'
-        else:
-            s += '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
-
-        s += '</ul> <h3 id="producaoTecnica">Produção técnica</h3> <ul>'.decode("utf8")
+        s += '</ul>' \
+             ' <h3 id="producaoTecnica">Produção técnica</h3> <ul>'.decode("utf8")
         if self.nPT0 > 0:
             s += '<li> <a href="PT0-0' + self.extensaoPagina + '">Programas de computador com registro de patente</a> '.decode(
                 "utf8") + '(' + str(self.nPT0) + ')'
@@ -207,7 +166,8 @@ class GeradorDePaginasWeb:
         #	s+= '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
 
 
-        s += '</ul> <h3 id="producaoArtistica">Produção artística</h3> <ul>'.decode("utf8")
+        s += '</ul>' \
+             ' <h3 id="producaoArtistica">Produção artística</h3> <ul>'.decode("utf8")
         if self.nPA > 0:
             s += '<li> <a href="PA-0' + self.extensaoPagina + '">Total de produção artística</a> '.decode(
                 "utf8") + '(' + str(self.nPA) + ')'
@@ -215,7 +175,8 @@ class GeradorDePaginasWeb:
             s += '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
 
         if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):
-            s += '</ul> <h3 id="orientacoes">Orientações</h3> <ul>'.decode("utf8")
+            s += '</ul>' \
+                 ' <h3 id="orientacoes">Orientações</h3> <ul>'.decode("utf8")
             s += '<li><b>Orientações em andamento</b>'.decode("utf8")
             s += '<ul>'
             if self.nOA0 > 0:
@@ -342,8 +303,6 @@ class GeradorDePaginasWeb:
                 s += '<i>Nenhuma publicação com DOI disponível para análise</i>'.decode("utf8")
             s += '</ul>'
 
-        s += self.paginaBottom()
-        self.salvarPagina("index" + self.extensaoPagina, s)
 
 
     def gerarPaginasDeProducoesBibliograficas(self):
@@ -358,6 +317,9 @@ class GeradorDePaginasWeb:
         self.nPB8 = 0
         self.nPB9 = 0
         self.nPB = 0
+        return
+
+        # FIXME: refatorar
 
         if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
             self.nPB0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaArtigoEmPeriodico,
@@ -1023,69 +985,52 @@ class GeradorDePaginasWeb:
         return tabela
 
     def gerar_pagina_de_membros(self):
-        s = self.pagina_top()
-        s += '\n<h3>Lista de membros</h3> <table id="membros" class="collapse-box"> \
-            <tr><th></th> <th></th> <th></th> <th></th> <th class="centered"><b><font size=-1>Bolsa de produtividade<br>em pesquisa</font></b></th> <th class="centered"><b><font size=-1>Período de<br>análise individual</font></b></th><th class="centered"><b><font size=-1>Data de<br>atualização do CV</font><b></th>  <th class="centered"></th></tr>'.decode(
-            "utf8")
+        file_name = 'membros.html'
+        self.grupo.members_list.values()
 
-        elemento = 0
-        tabela = {}
-        for membro in self.grupo.members_list.values():
-            elemento += 1
-            bolsa = '(' + membro.bolsaProdutividade + ')' if membro.bolsaProdutividade else ''
-            rotulo = membro.rotulo if not membro.rotulo == '[sem rotulo]' else ''
-            rotulo = rotulo.decode('iso-8859-1', 'replace')
+        template = self.jinja.get_template(file_name)
 
-            if "-grp[" in rotulo:
-                multirotulos = rotulo.split("::")
-                rotulo = ""
-                for r in multirotulos:
-                    grupoURL = "http://dgp.cnpq.br/buscaoperacional/detalhegrupo.jsp?grupo=" + re.search('\[(.*)\]',
-                                                                                                         r.strip()).group(
-                        1)
-                    rotulo = rotulo + "<a href=" + grupoURL + ">" + r.strip() + "</a><br>"
+        template_vars = {
+            "group": self.grupo,
+            "group_name": self.grupo.name,
+            "admin_email": "fixme@fixme",  # FIXME: puxar das config (global-email_do_admin)
+            "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
+            "google_analytics_key": None,  # FIXME: global-google_analytics_key
+            "members_list": self.grupo.members_list.values(),
+        }
 
-            nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+        s = template.render(template_vars).encode("utf-8")
+        file_path = self.output_directory / file_name
+        file_generator.save_string_to_file(s, file_path)
 
-            #print " --------------------------------------------"
-            #print membro.nome_completo
-            #print type(membro.nome_completo)
-            #print " "
-            #nome_completo = membro.nome_completo.decode('utf8','replace')
-            #print nome_completo
-            #print type(nome_completo)
-            #print " --------------------------------------------"
-            #nome_completo = membro.nome_completo.decode('iso-8859-1','replace')
-
-            #print str(elemento)
-            #print membro.foto
-            #print membro.url
-            #print nome_completo
-            #print rotulo
-            #print bolsa
-            #print membro.periodo
-            #print membro.atualizacaoCV
-
-            # html_qualis = self.producao_qualis(elemento, membro)
-
-            s += '\n<tr class="testetabela"> \
-                     <td valign="center" height="40px">' + str(elemento) + '.</td> \
-                     <td valign="top" height="40px"><img src="' + membro.foto + '" width="40px"></td> \
-                     <td><a href="' + membro.url + '">' + nomeCompleto + '</a></td> \
-                     <td class="centered"><font size=-1>' + rotulo + '</font></td> \
-                     <td class="centered"><font size=-1>' + bolsa + '</font></td> \
-                     <td class="centered"><font size=-1>' + membro.periodo + '</font></td> \
-                     <td class="centered"><font size=-1>' + membro.atualizacaoCV + '</font></td> \
-                     <td class="centered"><a href="http://scholar.google.com.br/citations?view_op=search_authors&mauthors=' + nomeCompleto + '"><font size=-1>[ Cita&ccedil;&otilde;es em Google Acad&ecirc;mico | </font></a></td> \
-                     <td class="centered"><a href="http://academic.research.microsoft.com/Search?query=author:(' + nomeCompleto + ')"><font size=-1>Cita&ccedil;&otilde;es em Microsoft Acad&ecirc;mico ]</font></a></td> \
-                 </tr>'
-            # <td class="centered"><font size=-1>' + u'Produção com Qualis' + '</font></td> \
-
-            # s += '<tr><td colspan="9"> \
-            #      ' + html_qualis + ' \
-            #      </td></tr>'
-
-        s += '\n</table>'
+        # elemento = 0
+        # tabela = {}
+        # for membro in self.grupo.members_list.values():
+        #     # elemento += 1
+        #     # bolsa = '(' + membro.bolsaProdutividade + ')' if membro.bolsaProdutividade else ''
+        #     # rotulo = membro.rotulo if not membro.rotulo == '[sem rotulo]' else ''
+        #     # rotulo = rotulo.decode('iso-8859-1', 'replace')
+        #     #
+        #     # if "-grp[" in rotulo:
+        #     #     multirotulos = rotulo.split("::")
+        #     #     rotulo = ""
+        #     #     for r in multirotulos:
+        #     #         grupoURL = "http://dgp.cnpq.br/buscaoperacional/detalhegrupo.jsp?grupo=" + re.search('\[(.*)\]', r.strip()).group(1)
+        #     #         rotulo = rotulo + "<a href=" + grupoURL + ">" + r.strip() + "</a><br>"
+        #     #
+        #     # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
+        #     #
+        #     # s += '\n<tr class="testetabela"> \
+        #     #          <td valign="center" height="40px">' + str(elemento) + '.</td> \
+        #     #          <td valign="top" height="40px"><img src="' + membro.foto + '" width="40px"></td> \
+        #     #          <td><a href="' + membro.url + '">' + nomeCompleto + '</a></td> \
+        #     #          <td class="centered"><font size=-1>' + rotulo + '</font></td> \
+        #     #          <td class="centered"><font size=-1>' + bolsa + '</font></td> \
+        #     #          <td class="centered"><font size=-1>' + membro.periodo + '</font></td> \
+        #     #          <td class="centered"><font size=-1>' + membro.atualizacaoCV + '</font></td> \
+        #     #          <td class="centered"><a href="http://scholar.google.com.br/citations?view_op=search_authors&mauthors=' + nomeCompleto + '"><font size=-1>[ Cita&ccedil;&otilde;es em Google Acad&ecirc;mico | </font></a></td> \
+        #     #          <td class="centered"><a href="http://academic.research.microsoft.com/Search?query=author:(' + nomeCompleto + ')"><font size=-1>Cita&ccedil;&otilde;es em Microsoft Acad&ecirc;mico ]</font></a></td> \
+        #     #      </tr>'
 
         #add jquery and plugins
         # s += '<script src="../../js/jexpand/jExpand.js"></script>' \
@@ -1095,33 +1040,7 @@ class GeradorDePaginasWeb:
         #      '  });' \
         #      '</script>'
 
-        s += '<script>' \
-             '  $(document).ready( function () {' \
-             '    $(\'#membros\').DataTable();' \
-             '  });' \
-             '</script>'
-
-
-        # $(".ano_esquerda").live("click", function(e){\
-        #     var anoAtual = parseInt($(this).attr("rel"));\
-        #     var contador = $(this).attr("rev");\
-        #     if(anoAtual > ' + str(anoInicio) + '){\
-        #         $("#ano_"+anoAtual+"_"+contador).css("display", "none");\
-        #         $("#ano_"+(anoAtual-1)+"_"+contador).css("display", "block");\
-        #     }\
-        # });\
-        # $(".ano_direita").live("click", function(e){\
-        #     var anoAtual = parseInt($(this).attr("rel"));\
-        #     var contador = $(this).attr("rev");\
-        #     if(anoAtual < ' + str(anoFim) + '){\
-        #         $("#ano_"+anoAtual+"_"+contador).css("display", "none");\
-        #         $("#ano_"+(anoAtual+1)+"_"+contador).css("display", "block");\
-        #     }\
-        # });\
-
-        s += self.paginaBottom()
-
-        self.salvarPagina("membros" + self.extensaoPagina, s)
+        # self.salvarPagina("membros" + self.extensaoPagina, s)
 
     @staticmethod
     def producao_qualis_por_membro(lista_de_membros):
@@ -1300,53 +1219,10 @@ class GeradorDePaginasWeb:
         return s
 
     def paginaBottom(self):
-        agora = datetime.datetime.now()
-        dia = '0' + str(agora.day)
-        mes = '0' + str(agora.month)
-        ano = str(agora.year)
-        hora = '0' + str(agora.hour)
-        minuto = '0' + str(agora.minute)
-        segundo = '0' + str(agora.second)
-
-        dia = dia[-2:]
-        mes = mes[-2:]
-        hora = hora[-2:]
-        minuto = minuto[-2:]
-        segundo = segundo[-2:]
-        data = dia + "/" + mes + "/" + ano + " " + hora + ":" + minuto + ":" + segundo
-
-        s = '<br><p>'
-        if not self.grupo.obterParametro('global-itens_desde_o_ano') == '' and not self.grupo.obterParametro(
-                'global-itens_ate_o_ano') == '':
-            s += '<br>(*) Relatório criado com produções desde ' + self.grupo.obterParametro(
-                'global-itens_desde_o_ano') + ' até ' + self.grupo.obterParametro('global-itens_ate_o_ano')
-
-        s += '\n<br>Data de processamento: ' + data + '<br> \
-        <div id="footer"> \
-        Este arquivo foi gerado automaticamente por <a href="http://scriptlattes.sourceforge.net/">scriptLattes ' + self.version + '</a>. \
-        (desenvolvido no <a href="http://nuvem.ufabc.edu.br/">NUVEM/UFABC</a> e \
-        no <a href="http://ccsl.ime.usp.br/">CCSL-IME/USP</a> por <a href="http://professor.ufabc.edu.br/~jesus.mena/">Jesús P. Mena-Chalco</a> e <a href="http://www.ime.usp.br/~cesar">Roberto M. Cesar-Jr</a>). \
-        Os resultados estão sujeitos a falhas devido a inconsistências no preenchimento dos currículos Lattes. Caso note alguma falha, por favor, contacte o responsável por esta página: <a href="mailto:' + self.grupo.obterParametro(
-            'global-email_do_admin') + '">' + self.grupo.obterParametro('global-email_do_admin') + '</a> \
-        </div> '
-
-        if self.grupo.obterParametro('global-google_analytics_key'):
-            s += '<script type="text/javascript">\
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");\
-            document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));\
-            </script>\
-            <script type="text/javascript">\
-            try {\
-              var pageTracker = _gat._getTracker("' + self.grupo.obterParametro('global-google_analytics_key') + '");\
-              pageTracker._trackPageview();\
-            } catch(err) {}\
-            </script>'
-        s += '</body>' + self.html2
-
-        return s.decode("utf8")
-
+        raise "método inutilizado"
 
     def salvarPagina(self, nome, conteudo):
+        raise "método inutilizado"
         file = open(os.path.join(self.dir, nome), 'w')
         file.write(conteudo.encode('utf8', 'replace'))
         file.close()

@@ -44,6 +44,7 @@ import report
 from extract.parserLattesHTML import ParserLattesHTML
 from extract.parserLattesXML import ParserLattesXML
 from fetch.download_html import download_html
+from geradorDePaginasWeb import GeradorDePaginasWeb
 from grupo import Grupo
 from persist.cache import cache
 from persist.store import Store
@@ -266,7 +267,8 @@ def cli():
         if config['geral']['arquivo_areas_qualis']:
             areas_qualis = util.find_file(Path(config['geral']['arquivo_areas_qualis']), config_file_path)
 
-    group = Grupo(ids_df=ids_df,
+    group = Grupo(name=config['geral'].get('nome_do_grupo'),
+                  ids_df=ids_df,
                   desde_ano=config['geral']['itens_desde_o_ano'],
                   ate_ano=config['geral']['itens_ate_o_ano'],
                   qualis_de_congressos=qualis_de_congressos,
@@ -372,12 +374,9 @@ def cli():
 
         # # group.gerarGraficosDeBarras() # java charts
         # group.gerarMapaDeGeolocalizacao()  # obrigatorio
-        group.gerarPaginasWeb()  # obrigatorio
-        report.file_generator.gerarArquivosTemporarios(group)  # obrigatorio
-
-        if 'diretorio_de_saida' in config['geral']:
-            output_dir = util.resolve_file_path(config['geral']['diretorio_de_saida'], config_file_path)
-            util.copiarArquivos(output_dir)
+        GeradorDePaginasWeb(group, output_directory)  # obrigatorio
+        # report.file_generator.gerarArquivosTemporarios(group)  # obrigatorio
+        util.copy_report_files(output_directory)
 
         # if config['geral'].get('diretorio_de_armazenamento_de_cvs'):
         #     cache_path = util.resolve_file_path(config['geral']['diretorio_de_armazenamento_de_cvs'], config_file_path)
@@ -388,6 +387,7 @@ def cli():
         #
         # ids_file_path = util.find_file(Path(config['geral']['arquivo_de_entrada']), config_file_path)
 
+    # XXX: fluxo antigo; apenas para referência
     # if criarDiretorio('global-diretorio_de_saida')):
     # if 'diretorio_de_saida' in config['geral']:
         # extract
@@ -407,7 +407,7 @@ def cli():
         # group.gerarArquivosTemporarios()  # obrigatorio
 
         # copiar images, css e js
-        # copiarArquivos(config['global-diretorio_de_saida'])
+        # copy_report_files(config['global-diretorio_de_saida'])
 
     # finalizando o processo
     print('\n\n\n[PARA REFERENCIAR/CITAR ESTE SOFTWARE USE]')

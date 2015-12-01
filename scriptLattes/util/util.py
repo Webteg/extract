@@ -78,46 +78,31 @@ def find_file(file_name, config_file_path):
 #     return filepath
 #
 #
-def copiarArquivos(dir):
-    base = os.path.abspath('.') + os.path.sep
+def copy_report_files(directory_path):
+    assert isinstance(directory_path, Path)
 
-    try:
-        destination = os.path.join(dir, 'css')
-        if os.path.exists(destination):
-            shutil.rmtree(destination)
-        source = pkg_resources.resource_filename('scriptLattes', 'static/css')
-        shutil.copytree(source, destination)
-    except OSError, e:
-        pass  # provavelmente diretório já existe
-        logging.warning(e)
+    assets_to_copy = ['css', 'images', 'js']
+
+    for asset in assets_to_copy:
+        try:
+            destination = directory_path / asset
+            if destination.exists():
+                shutil.rmtree(str(destination))
+            source = pkg_resources.resource_filename('scriptLattes', 'static/' + asset)
+            shutil.copytree(source, str(destination))
+        except OSError, e:
+            pass  # provavelmente diretório já existe
+            logger.warning(e)
 
     # shutil.copy2(os.path.join(base, 'css', 'scriptLattes.css'), dir)
     # shutil.copy2(os.path.join(base, 'css', 'jquery.dataTables.css'), dir)
 
-    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint0.png'), dir)
-    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint1.png'), dir)
-    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint2.png'), dir)
-    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint3.png'), dir)
-    shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint_shadow.png'), dir)
-    shutil.copy2(os.path.join(base, 'static/images', 'doi.png'), dir)
-
-    try:
-        destination = os.path.join(dir, 'images')
-        if os.path.exists(destination):
-            shutil.rmtree(destination)
-        shutil.copytree(os.path.join(base, 'static/images'), destination)
-    except OSError, e:
-        pass  # provavelmente diretório já existe
-        logging.warning(e)
-
-    try:
-        destination = os.path.join(dir, 'js')
-        if os.path.exists(destination):
-            shutil.rmtree(destination)
-        shutil.copytree(os.path.join(base, 'static/js'), destination)
-    except OSError, e:
-        pass  # provavelmente diretório já existe
-        logging.warning(e)
+    # shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint0.png'), dir)
+    # shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint1.png'), dir)
+    # shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint2.png'), dir)
+    # shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint3.png'), dir)
+    # shutil.copy2(os.path.join(base, 'static/images', 'lattesPoint_shadow.png'), dir)
+    # shutil.copy2(os.path.join(base, 'static/images', 'doi.png'), dir)
 
     # shutil.copy2(os.path.join(base, 'js', 'jquery.min.js'), dir)
     # shutil.copy2(os.path.join(base, 'js', 'highcharts.js'), dir)
@@ -126,7 +111,7 @@ def copiarArquivos(dir):
     # shutil.copy2(os.path.join(base, 'js', 'jquery.dataTables.min.js'), dir)
     # shutil.copy2(os.path.join(base, 'js', 'jquery.dataTables.rowGrouping.js'), dir)
 
-    print "Arquivos salvos em: >>'%s'<<" % os.path.abspath(dir)
+    logger.info("Arquivos salvos em: >>'{}'<<".format(directory_path.resolve()))
 
 
 # ---------------------------------------------------------------------------- #

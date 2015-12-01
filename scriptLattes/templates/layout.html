@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt_BR">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="Generator" content="scriptLattes">
+    <title>{% block title %}{% endblock %} | {{ nome_do_grupo }}</title>
+    <link rel="stylesheet" href="css/scriptLattes.css" type="text/css">
+    {% endblock %}
+
+    {% if mostrar_mapa_de_geolocalizacao %}
+    {{ grupo.mapaDeGeolocalizacao.mapa }}
+    {% endif %}
+</head>
+<body>
+{% set navigation_bar = [
+('index.html', 'index', 'Início'),
+('membros.html', 'membros', 'Membros'),
+('producao_membros.html', 'producao_membros', 'Produção qualificado por membro'),
+('index.html#producaoBibliografica', 'producao_bibliografica', 'Produção bibliográfica'),
+('index.html#producaoTecnica', 'producao_tecnica', 'Produção técnica'),
+('index.html#producaoArtistica', 'producao_artistica', 'Produção artística'),
+('index.html#orientacoes', 'orientacoes', 'Orientações'),
+('index.html#projetos', 'projetos', 'Projetos'),
+('index.html#premios', 'premios', 'Prêmios'),
+('index.html#eventos', 'eventos', 'Eventos'),
+('index.html#grafo', 'grafo', 'Grafo de colaborações'),
+('index.html#mapa', 'mapa', 'Mapa de geolocalização'),
+('index.html#internacionalizacao', 'internacionalizacao', 'Internacionalização'),
+] -%}
+{% set active_page = active_page|default('index') -%}
+<!--if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):-->
+<!--if self.grupo.obterParametro('relatorio-incluir_projeto'):-->
+<!--if self.grupo.obterParametro('relatorio-incluir_premio'):-->
+<!--if self.grupo.obterParametro('relatorio-incluir_participacao_em_evento') or self.grupo.obterParametro('relatorio-incluir_organizacao_de_evento'):-->
+<!--if self.grupo.obterParametro('grafo-mostrar_grafo_de_colaboracoes'):-->
+<!--if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):-->
+<!--if self.grupo.obterParametro('relatorio-incluir_internacionalizacao'):-->
+<!--('/about/', 'about', 'About')-->
+
+<div id="header">
+    <h2>{{group_name}}</h2>
+<!--<ul id="navigation">-->
+<center>
+    {% for href, id, caption in navigation_bar %}
+    <a {% if id== active_page %} class="active" {% endif %}>
+        <a href="{{ href|e }}">{{ caption|e }}</a>
+    </a>
+    {% endfor %}
+</center>
+<!--</ul>-->
+</div>
+
+<!--s += '| <a href=#premios>Prêmios</a> '.decode("utf8")-->
+<!--s += ' ] </center><br></div>'-->
+
+
+{% block content %}{% endblock %}
+
+
+<br>
+
+<p>
+    {% if since_year and until_year %}
+    <br>
+    (*) Relatório criado com produções desde {{since_year}} até {{until_year}}
+    {% endif %}
+
+    <br>
+    Data de processamento: {{timestamp}}
+    <br>
+
+<div id="footer">
+    {% block footer %}
+    Este arquivo foi gerado automaticamente por <a href="https://bitbucket.org/scriptlattes/scriptlattes">scriptLattes {{version}}</a>
+    (desenvolvido no <a href="http://nuvem.ufabc.edu.br/">NUVEM/UFABC</a> e no <a href="http://ccsl.ime.usp.br/">CCSL-IME/USP</a> por <a
+            href="http://professor.ufabc.edu.br/~jesus.mena/">Jesús P. Mena-Chalco</a> e <a href="http://www.ime.usp.br/~cesar">Roberto M. Cesar-Jr</a>
+    e no <a href="http://www.unipampa.edu.br/alegrete/">LEA/UNIPAMPA</a> por <a href="http://www.github.com/kepler">Fabio N. Kepler</a> e colaboradores).
+    Os resultados estão sujeitos a falhas devido a inconsistências no preenchimento dos currículos Lattes. Caso note alguma falha, por favor, contacte o
+    responsável por esta página:
+    <a href="mailto:{{admin_email}}">{{admin_email}}</a>.
+    {% endblock %}
+</div>
+
+{%if google_analytics_key %}
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+    try {
+        var pageTracker = _gat._getTracker("' + self.grupo.obterParametro('global-google_analytics_key') + '");
+        pageTracker._trackPageview();
+    } catch (err) {
+    }
+</script>
+{% endif %}
+
+</body>
+</html>

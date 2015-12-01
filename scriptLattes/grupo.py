@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 # filename: grupo.py
 import datetime
 import logging
@@ -61,7 +61,8 @@ class Grupo:
 
     qualis = None
 
-    def __init__(self, ids_df, group_id=1, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+    def __init__(self, name, ids_df, group_id=1, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+        self.name = name
         self.group_id = group_id
 
         if desde_ano is None or type(desde_ano) is str and desde_ano.lower() == 'hoje':
@@ -226,9 +227,6 @@ class Grupo:
     def gerarMapaDeGeolocalizacao(self):
         if self.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
-
-    def gerarPaginasWeb(self):
-        paginasWeb = GeradorDePaginasWeb(self)
 
     def identificarQualisEmPublicacoes(self):
         print "\n[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]"

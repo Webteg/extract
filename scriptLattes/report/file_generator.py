@@ -119,7 +119,16 @@ def salvarArquivoGenerico(conteudo, nomeArquivo):
     arquivo.close()
 
 
-def save_list_txt(self, a_list, file_path):
+def save_string_to_file(a_string, file_path):
+    assert isinstance(file_path, Path)
+    with file_path.open('w', encoding="utf-8") as f:
+        try:
+            f.write(a_string)
+        except TypeError:
+            f.write(a_string.decode("utf-8"))
+
+
+def save_list_txt(a_list, file_path):
     assert isinstance(file_path, Path)
     with file_path.open('w') as f:
         for element in a_list:

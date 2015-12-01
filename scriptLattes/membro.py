@@ -25,6 +25,7 @@ from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from extract.parserLattesXML import *
 from report.charts.geolocalizador import *
+from util.util import get_lattes_url
 
 
 class Membro:
@@ -113,8 +114,8 @@ class Membro:
 
     def __init__(self, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
         self.id_lattes = str(identificador)
-        self.nome = nome
         # FIXME: precisa dos dois campos de nome?
+        # self.nome = nome
         self.nome_completo = nome  # nome.split(";")[0].strip().decode('utf8', 'replace')
         self.periodo = periodo
         self.rotulo = rotulo
@@ -128,6 +129,7 @@ class Membro:
         #     self.url = 'http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id={}'.format(identificador)
         # else:
         #     self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
+        self.url = get_lattes_url(self.id_lattes)
 
         self.itemsDesdeOAno = itemsDesdeOAno
         self.itemsAteOAno = itemsAteOAno
@@ -154,7 +156,7 @@ class Membro:
                 else:
                     print("\n[AVISO IMPORTANTE] Periodo nao válido: {}. (periodo desconsiderado na lista)".format(periodo))
                     print("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}\n".format(self.id_lattes,
-                                                                                  self.nome.encode('utf8')))
+                                                                                  self.nome_completo.encode('utf8')))
 
     def carregar_dados_cv_lattes(self, parser):
         # Obtemos todos os dados do CV Lattes
