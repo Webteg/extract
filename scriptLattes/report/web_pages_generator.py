@@ -7,8 +7,7 @@ import logging
 import os
 import re
 import unicodedata
-from collections import defaultdict
-
+from collections import defaultdict, OrderedDict
 import dateutil
 import pandas
 from jinja2.environment import Environment
@@ -331,15 +330,16 @@ class WebPagesGenerator:
         #
         # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 
-    def gerar_pagina_de_producoes(self, productions_list, template, title, prefix, ris=False):
+    def gerar_pagina_de_producoes(self, productions_list, subtemplate, title, prefix, group_by='ano', ascending=True, ris=False):
         template = self.jinja.get_template("producoes.html")
+        subtemplate = self.jinja.get_template(subtemplate)
         file_name = '{}-0.html'.format(prefix)
 
         template_vars = self.global_template_vars.copy()
         template_vars.update({
             "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
             "subtitle": title,
-            "subtemplate": template,
+            "subtemplate": subtemplate,
             # "members_list": self.grupo.members_list.values(),
             "chart": "FIXME: IMPLEMENTAR CHART",
             "numero_itens": "FIXME",
@@ -347,7 +347,11 @@ class WebPagesGenerator:
             "indice_paginas": "FIXME",
         })
 
-        template_vars["productions_list"] = productions_list
+        assert isinstance(productions_list, pandas.DataFrame)
+        group_dict = {
+            key: productions_list[productions_list[group_by] == key] for key in productions_list[group_by].unique()
+        }
+        template_vars["productions_list"] = OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=True))
 
         s = template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -422,7 +426,7 @@ class WebPagesGenerator:
 
         # Total de produção bibliográfica
         # FIXME: só testando; total tem que ser outros dados
-        self.nPB = self.gerar_pagina_de_producoes(self.grupo.journal_papers.data_frame, template="journal_papers.html",  #self.grupo.compilador.listaCompletaPB,
+        self.nPB = self.gerar_pagina_de_producoes(self.grupo.journal_papers.data_frame, group_by='ano', ascending=False, subtemplate="_journal_paper.html",  #self.grupo.compilador.listaCompletaPB,
                                                   title=u"Total de produção bibliográfica", prefix="PB")
         return
         #########################################

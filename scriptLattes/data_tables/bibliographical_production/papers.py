@@ -55,3 +55,6 @@ class Papers:
 
     def __len__(self):
         return len(self.data_frame)
+
+    def pivot_by(self, column, ascending=True):
+        return pd.pivot_table(self.data_frame, index=column).sort_index(ascending=ascending)

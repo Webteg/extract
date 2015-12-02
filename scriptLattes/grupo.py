@@ -175,7 +175,7 @@ class Grupo:
         #         self.co_authorship_normalized_weighted_matrix[i, :] /= float(self.co_authorship_vector[i])
 
         # AuthorRank
-        self.author_rank_vector = AuthorRank(self.co_authorship_normalized_weighted_matrix, 100).rank_vector
+        # self.author_rank_vector = AuthorRank(self.co_authorship_normalized_weighted_matrix, 100).rank_vector  # FIXME: por que 100 iteracoes?
 
     # FIXME: finish refactoring
     def gerarXMLdeGrupo(self):

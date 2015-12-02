@@ -31,13 +31,15 @@ Número total de itens: {{numero_itens}}<br>
 {{indice_paginas}}
 
 <!--{producoes}-->
-{% for production in productions_list %}
-    <div id="dv-year-{0}"><h3 class="year">{0}</h3>
+{% for pivot, productions in productions_list.items() %}
+    <div id="dv-year-{{pivot}}"><h3 class="year">{{pivot}}</h3>
         <table>
-            <tr valign="top">
-                <td>{{loop.index}}. &nbsp;</td>
-                <td>{% include '_journal_paper.html' with context %}</td>
-            </tr>
+            {% for production in productions %}
+                <tr valign="top">
+                    <td>{{loop.index}}. &nbsp;</td>
+                    <td>{% include subtemplate with context %}</td>
+                </tr>
+            {% endfor %}
         </table>
     </div>
 {% endfor %}
