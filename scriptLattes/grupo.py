@@ -7,6 +7,7 @@ import logging
 from scipy import sparse
 
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
+from data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from membro import Membro
@@ -94,6 +95,7 @@ class Grupo:
         self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
         self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
         self.productions_list = [self.journal_papers, self.event_papers]
+        self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
 
         # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
         read_from_cache = True if cache.file('qualis.data') else False
@@ -152,7 +154,6 @@ class Grupo:
         return self._co_authorship_adjacency_matrix
 
     def create_colaboration_matrices(self):
-        # FIXME: depende do compilador ter sido instanciado no método compilarListasDeItems
         # Grafos de coautoria
         # self.compilador.criarMatrizesDeColaboracao()
         # self.matrizesArtigoEmPeriodico = self.journal_papers.co_authorship_adjacency_matrix(self.members_indices)

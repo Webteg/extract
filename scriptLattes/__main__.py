@@ -347,9 +347,10 @@ def cli():
         # processar/carregar
         # group.compilarListasDeItems(config['relatorio'])  # obrigatorio
         group.aggregate_data()
-        group.create_colaboration_matrices()
+        # FIXME: uncomment group.create_colaboration_matrices()
 
         if config['geral']['identificar_publicacoes_com_qualis']:
+            # FIXME: verificar se está OK
             group.identificarQualisEmPublicacoes()  # obrigatorio
 
         # TODO: decidir se é aqui ou em report

@@ -1,0 +1,12 @@
+{% extends "bibliographical_production/list.html" %}
+
+{% block content %}
+  {{super()}}
+
+    TESTESTSETSE
+
+{% endblock %}
+
+{% block list_item %}
+    {% include "bibliographical_production/event_paper.html" with context %}
+{% endblock %}

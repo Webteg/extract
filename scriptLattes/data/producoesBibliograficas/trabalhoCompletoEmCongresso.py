@@ -166,6 +166,7 @@ class TrabalhoCompletoEmCongresso:
             return None
 
     def html(self, listaDeMembros):
+        raise "deprecated"
         s = self.autores + '. <b>' + self.titulo + '</b>. '
 
         s += 'Em: <font color=#330066>' + self.nomeDoEvento + '</font>, ' if not self.nomeDoEvento == ''  else ''

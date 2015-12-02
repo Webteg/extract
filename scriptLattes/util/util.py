@@ -14,30 +14,29 @@ import pkg_resources
 logger = logging.getLogger(__name__)
 
 
-class OutputStream:
-    def __init__(self, output, encoding):
-        self.encoding = encoding
-        self.output = output
-
-    def write(self, text):
-        try:
-            text = text.decode(self.encoding)
-        except:
-            try:
-                text = text.decode('utf8').encode('iso-8859-1')
-            except:
-                try:
-                    text = text.encode('iso-8859-1')
-                except:
-                    pass
-        try:
-            self.output.write(text)
-        except:
-            try:
-                self.output.write(unicode(text))
-            except:
-                self.output.write('ERRO na impressao')
-
+# class OutputStream:
+#     def __init__(self, output, encoding):
+#         self.encoding = encoding
+#         self.output = output
+#
+#     def write(self, text):
+#         try:
+#             text = text.decode(self.encoding)
+#         except:
+#             try:
+#                 text = text.decode('utf8').encode('iso-8859-1')
+#             except:
+#                 try:
+#                     text = text.encode('iso-8859-1')
+#                 except:
+#                     pass
+#         try:
+#             self.output.write(text)
+#         except:
+#             try:
+#                 self.output.write(unicode(text))
+#             except:
+#                 self.output.write('ERRO na impressao')
 
 def resolve_file_path(file_name, config_file_path):
     file_path = Path(file_name)
@@ -90,7 +89,7 @@ def copy_report_files(directory_path):
                 shutil.rmtree(str(destination))
             source = pkg_resources.resource_filename('scriptLattes', 'static/' + asset)
             shutil.copytree(source, str(destination))
-        except OSError, e:
+        except OSError as e:
             pass  # provavelmente diretório já existe
             logger.warning(e)
 
@@ -144,16 +143,16 @@ def similaridade_entre_cadeias(str1, str2, qualis=False):
     return 0
 
 
-def criarDiretorio(dir):
-    if not os.path.exists(dir):
-        try:
-            os.makedirs(dir)
-        ### except OSError as exc:
-        except:
-            print "\n[ERRO] Não foi possível criar ou atualizar o diretório: " + dir.encode('utf8')
-            print "[ERRO] Você conta com as permissões de escrita? \n"
-            return 0
-    return 1
+# def criarDiretorio(dir):
+#     if not os.path.exists(dir):
+#         try:
+#             os.makedirs(dir)
+#         ### except OSError as exc:
+#         except:
+#             print "\n[ERRO] Não foi possível criar ou atualizar o diretório: " + dir.encode('utf8')
+#             print "[ERRO] Você conta com as permissões de escrita? \n"
+#             return 0
+#     return 1
 
 
 def get_lattes_url(lattes_id):

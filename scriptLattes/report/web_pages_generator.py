@@ -7,13 +7,14 @@ import logging
 import os
 import re
 import unicodedata
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
+from pathlib import Path
+
 import dateutil
 import pandas
 from jinja2.environment import Environment
 from jinja2.loaders import PackageLoader
 from pandas.core.indexing import IndexingError
-from pathlib import Path
 
 import membro
 from highcharts import *  # highcharts
@@ -24,32 +25,37 @@ logger = logging.getLogger('scriptLattes')
 
 
 class WebPagesGenerator:
-    arquivoRis = None
+    # arquivoRis = None
 
     def __init__(self, grupo, output_directory, version, admin_email=None, google_analytics_key=None):
         assert isinstance(output_directory, Path)
 
         self.grupo = grupo
         self.output_directory = output_directory
-
         self.jinja = Environment(loader=PackageLoader('scriptLattes', 'templates'))
 
-        # if self.grupo.obterParametro('global-criar_paginas_jsp'):
-        #     raise "Formato JSP não mais suportado"
-        #     self.extensaoPagina = '.jsp'
-        #     self.html1 = '<%@ page language="java" contentType="text/html; charset=ISO8859-1" pageEncoding="ISO8859-1"%> <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core"%> <f:verbatim>'
-        #     self.html2 = '</f:verbatim>'
-        # else:
-        #     self.extensaoPagina = '.html'
-        #     self.html1 = '<html>'
-        #     self.html2 = '</html>'
-        #
         # # geracao de arquivo RIS com as publicacoes
         # # FIXME: mover para fora daqui
         # if self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
         #     prefix = self.grupo.obterParametro('global-prefixo') + '-' if not self.grupo.obterParametro(
         #         'global-prefixo') == '' else ''
         #     self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
+
+        # Format: (page, title, object, template)
+        # template is a relative path; check self.jinja initialization
+        self.bibliographical_productions_routes = [
+            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers, "bibliographical_production/journal_papers_list.html"),
+            # ("PB1-0.html", u"Livros publicados/organizados ou edições", self.nPB1),
+            # ("PB2-0.html", u"Capítulos de livros publicados ", self.nPB2),
+            # ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.nPB3),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
+            # ("PB7-0.html", u"Artigos aceitos para publicação ", self.nPB7),
+            # ("PB8-0.html", u"Apresentações de trabalho ", self.nPB8),
+            # ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.nPB9),
+            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
+        ]
 
         self.global_template_vars = {
             # "group": self.grupo,
@@ -64,7 +70,7 @@ class WebPagesGenerator:
 
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
-        self.generate_bibliographic_productions_pages()
+        self.generate_bibliographical_production_pages()
         # self.gerarPaginasDeProducoesTecnicas()
         # self.gerarPaginasDeProducoesArtisticas()
         # self.gerarPaginasDePatentes()
@@ -109,20 +115,10 @@ class WebPagesGenerator:
         # <body onload="initialize()" onunload="GUnload()"> # FIXME: initialize é do mapa
 
         # s += '<h3 id="producaoBibliografica">Produção bibliográfica</h3> <ul>'.decode("utf8")
-        bibliography_totals = [
-            ("PB0-0.html", "Artigos completos publicados em periódicos", self.nPB0),
-            ("PB1-0.html", "Livros publicados/organizados ou edições", self.nPB1),
-            ("PB2-0.html", "Capítulos de livros publicados ", self.nPB2),
-            ("PB3-0.html", "Textos em jornais de notícias/revistas ", self.nPB3),
-            ("PB4-0.html", "Trabalhos completos publicados em anais de congressos ", self.nPB4),
-            ("PB5-0.html", "Resumos expandidos publicados em anais de congressos ", self.nPB5),
-            ("PB6-0.html", "Resumos publicados em anais de congressos ", self.nPB6),
-            ("PB7-0.html", "Artigos aceitos para publicação ", self.nPB7),
-            ("PB8-0.html", "Apresentações de trabalho ", self.nPB8),
-            ("PB9-0.html", "Demais tipos de produção bibliográfica ", self.nPB9),
-            ("PB-0.html",  "Total de produção bibliográfica", self.nPB),
+        bibliographical_productions_index = [
+            (page, title, len(production)) for page, title, production, _ in self.bibliographical_productions_routes
         ]
-        template_vars["bibliography_totals"] = bibliography_totals
+        template_vars["bibliographical_productions_index"] = bibliographical_productions_index
 
         s = index_template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -330,28 +326,24 @@ class WebPagesGenerator:
         #
         # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 
-    def gerar_pagina_de_producoes(self, productions_list, subtemplate, title, prefix, group_by='ano', ascending=True, ris=False):
-        template = self.jinja.get_template("producoes.html")
-        subtemplate = self.jinja.get_template(subtemplate)
-        file_name = '{}-0.html'.format(prefix)
+    def gerar_pagina_de_producoes(self, productions, template_name, title, page, group_by='ano', ascending=True, ris=False):
+        # template = self.jinja.get_template("list.html")
+        template = self.jinja.get_template(template_name)
+        file_name = page
 
         template_vars = self.global_template_vars.copy()
         template_vars.update({
             "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
             "subtitle": title,
-            "subtemplate": subtemplate,
-            # "members_list": self.grupo.members_list.values(),
+            # "template_name": template_name,
             "chart": "FIXME: IMPLEMENTAR CHART",
-            "numero_itens": "FIXME",
+            "numero_itens": len(productions),
             "totais_qualis": "FIXME",
             "indice_paginas": "FIXME",
         })
 
-        assert isinstance(productions_list, pandas.DataFrame)
-        group_dict = {
-            key: productions_list[productions_list[group_by] == key] for key in productions_list[group_by].unique()
-        }
-        template_vars["productions_list"] = OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=True))
+        # assert isinstance(productions, pandas.DataFrame)
+        template_vars["grouped_productions"] = productions.ordered_dict_by(group_by=group_by, ascending=ascending)
 
         s = template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -411,23 +403,11 @@ class WebPagesGenerator:
                 self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
         return total_producoes
 
-    def generate_bibliographic_productions_pages(self):
-        self.nPB0 = 0
-        self.nPB1 = 0
-        self.nPB2 = 0
-        self.nPB3 = 0
-        self.nPB4 = 0
-        self.nPB5 = 0
-        self.nPB6 = 0
-        self.nPB7 = 0
-        self.nPB8 = 0
-        self.nPB9 = 0
-        self.nPB = 0
-
-        # Total de produção bibliográfica
-        # FIXME: só testando; total tem que ser outros dados
-        self.nPB = self.gerar_pagina_de_producoes(self.grupo.journal_papers.data_frame, group_by='ano', ascending=False, subtemplate="_journal_paper.html",  #self.grupo.compilador.listaCompletaPB,
-                                                  title=u"Total de produção bibliográfica", prefix="PB")
+    def generate_bibliographical_production_pages(self):
+        for page, title, productions, template in self.bibliographical_productions_routes:
+            self.gerar_pagina_de_producoes(productions, group_by='ano', ascending=False,
+                                           template_name=template,  # self.grupo.compilador.listaCompletaPB,
+                                           title=title, page=page)
         return
         #########################################
         # FIXME: refatorar
@@ -1242,15 +1222,16 @@ class WebPagesGenerator:
 
 
 def menuHTMLdeBuscaPB(titulo):
-    titulo = re.sub('\s+', '+', titulo)
-
-    s = '<br>\
-         <font size=-1> \
-         [ <a href="http://scholar.google.com/scholar?hl=en&lr=&q=' + titulo + '&btnG=Search">cita&ccedil;&otilde;es Google Scholar</a> | \
-           <a href="http://academic.research.microsoft.com/Search?query=' + titulo + '">cita&ccedil;&otilde;es Microsoft Acad&ecirc;mico</a> | \
-           <a href="http://www.google.com/search?btnG=Google+Search&q=' + titulo + '">busca Google</a> ] \
-         </font><br>'
-    return s
+    raise "deprecated"
+    # titulo = re.sub('\s+', '+', titulo)
+    #
+    # s = '<br>\
+    #      <font size=-1> \
+    #      [ <a href="http://scholar.google.com/scholar?hl=en&lr=&q=' + titulo + '&btnG=Search">cita&ccedil;&otilde;es Google Scholar</a> | \
+    #        <a href="http://academic.research.microsoft.com/Search?query=' + titulo + '">cita&ccedil;&otilde;es Microsoft Acad&ecirc;mico</a> | \
+    #        <a href="http://www.google.com/search?btnG=Google+Search&q=' + titulo + '">busca Google</a> ] \
+    #      </font><br>'
+    # return s
 
 
 def menuHTMLdeBuscaPT(titulo):

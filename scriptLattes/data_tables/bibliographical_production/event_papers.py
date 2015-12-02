@@ -30,9 +30,11 @@ class EventPapers(Papers):
                'type',  # completo, resumo, resumo_expandido
                'qualis']
 
-    def __init__(self, id):
+    def __init__(self, id=None, initial_data_frame=None):
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
+        if initial_data_frame is not None:
+            self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
 
     def add_from_parser(self, papers_list, papers_type):
         # list of trabalhoEmCongresso
@@ -72,3 +74,15 @@ class EventPapers(Papers):
         #     self.grouped = self.data_frame.groupby('similar')
         #     # grouped.aggregate({'id_membro': lambda x: frozenset(x)})
         #     # grouped.aggregate(list)
+
+    @property
+    def complete(self):
+        return EventPapers(self.id, self.data_frame[self.data_frame['type'] == self.Types.complete])
+
+    @property
+    def abstract(self):
+        return EventPapers(self.id, self.data_frame[self.data_frame['type'] == self.Types.abstract])
+
+    @property
+    def expanded_abstract(self):
+        return EventPapers(self.id, self.data_frame[self.data_frame['type'] == self.Types.expanded_abstract])

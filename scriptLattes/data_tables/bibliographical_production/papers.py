@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABCMeta
+from collections import OrderedDict
 
 import pandas as pd
 
@@ -56,5 +57,11 @@ class Papers:
     def __len__(self):
         return len(self.data_frame)
 
-    def pivot_by(self, column, ascending=True):
+    def pivoted_by(self, column, ascending=True):
         return pd.pivot_table(self.data_frame, index=column).sort_index(ascending=ascending)
+
+    def ordered_dict_by(self, group_by, ascending=True):
+        group_dict = {
+            key: self.data_frame[self.data_frame[group_by] == key] for key in self.data_frame[group_by].unique()
+        }
+        return OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=not ascending))

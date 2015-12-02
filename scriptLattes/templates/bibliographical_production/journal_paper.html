@@ -1,13 +1,19 @@
+<!--{{production}}-->
 {{production.autores}}. <b>{{production.titulo}}</b>. <font color=#330066>{{production.revista}}</font>.
 {{ 'v. {},'.format(production.volume) if production.volume else '' }}
 {{ 'n. {},'.format(production.numero) if production.numero else '' }}
 {{ 'p. {},'.format(production.paginas) if production.paginas else '' }}
-{{ 'v. {},'.format(production.issn) if production.issn else '' }}
+{{ 'issn: {},'.format(production.issn) if production.issn else '' }}
 {{production.ano}}.
 {% if production.doi %}
 <a href="{{production.doi}}" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="images/doi.png"></a>
 {% endif %}
 
-{% include '_journal_paper_search_menu.html' %}
+<br>
+<font size=-1>
+[ <a href="http://scholar.google.com/scholar?hl=en&lr=&q={{production.titulo|e}}&btnG=Search">cita&ccedil;&otilde;es Google Scholar</a> |
+  <a href="http://academic.research.microsoft.com/Search?query={{production.titulo|e}}">cita&ccedil;&otilde;es Microsoft Acad&ecirc;mico</a> |
+  <a href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}">busca Google</a> ]
+</font><br>
 
 <!--s += formata_qualis(self.qualis, self.qualissimilar)-->
