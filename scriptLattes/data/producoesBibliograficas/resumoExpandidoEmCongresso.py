@@ -142,6 +142,7 @@ class ResumoExpandidoEmCongresso:
 
 
     def html(self, listaDeMembros):
+        raise "deprecated"
         s = self.autores + '. <b>' + self.titulo + '</b>. '
         s+= 'Em: ' + self.nomeDoEvento + ', '  if not self.nomeDoEvento==''  else ''
         s+= 'v. ' + self.volume + ', '  if not self.volume==''  else ''

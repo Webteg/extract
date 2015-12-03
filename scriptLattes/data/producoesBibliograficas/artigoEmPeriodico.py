@@ -198,6 +198,7 @@ class ArtigoEmPeriodico:
 # America. A, Optics Image Science and Vision
 
     def html(self, listaDeMembros):
+        raise "deprecated"
         s = self.autores + '. <b>' + self.titulo + '</b>. <font color=#330066>' + self.revista + '</font>. '
         s+= 'v. ' + self.volume + ', '  if not self.volume==''  else ''
         s+= 'n. ' + self.numero + ', '  if not self.numero== '' else ''

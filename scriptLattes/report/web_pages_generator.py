@@ -41,22 +41,6 @@ class WebPagesGenerator:
         #         'global-prefixo') == '' else ''
         #     self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
 
-        # Format: (page, title, object, template)
-        # template is a relative path; check self.jinja initialization
-        self.bibliographical_productions_routes = [
-            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers, "bibliographical_production/journal_papers_list.html"),
-            # ("PB1-0.html", u"Livros publicados/organizados ou edições", self.nPB1),
-            # ("PB2-0.html", u"Capítulos de livros publicados ", self.nPB2),
-            # ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.nPB3),
-            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
-            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
-            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
-            # ("PB7-0.html", u"Artigos aceitos para publicação ", self.nPB7),
-            # ("PB8-0.html", u"Apresentações de trabalho ", self.nPB8),
-            # ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.nPB9),
-            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
-        ]
-
         self.global_template_vars = {
             # "group": self.grupo,
             "group_name": self.grupo.name,
@@ -114,10 +98,9 @@ class WebPagesGenerator:
         # if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
         # <body onload="initialize()" onunload="GUnload()"> # FIXME: initialize é do mapa
 
-        # s += '<h3 id="producaoBibliografica">Produção bibliográfica</h3> <ul>'.decode("utf8")
         bibliographical_productions_index = [
             (page, title, len(production)) for page, title, production, _ in self.bibliographical_productions_routes
-        ]
+            ]
         template_vars["bibliographical_productions_index"] = bibliographical_productions_index
 
         s = index_template.render(template_vars).encode("utf-8")
@@ -125,7 +108,6 @@ class WebPagesGenerator:
         file_generator.save_string_to_file(s, file_path)
 
         return
-
 
         s += '</ul>' \
              ' <h3 id="producaoTecnica">Produção técnica</h3> <ul>'.decode("utf8")
@@ -155,13 +137,13 @@ class WebPagesGenerator:
 
 
             # s+='</ul> <h3 id="patenteRegistro">Patente e Registro</h3> <ul>'.decode("utf8")
-        #if self.nPR0>0:
+        # if self.nPR0>0:
         #	s+= '<li> <a href="PR0-0'+self.extensaoPagina+'">Patente</a> '.decode("utf8")+'('+str(self.nPR0)+')'
         # if self.nPR1>0:
         #	s+= '<li> <a href="PR1-0'+self.extensaoPagina+'">Programa de computador</a> '.decode("utf8")+'('+str(self.nPR1)+')'
-        #if self.nPR2>0:
+        # if self.nPR2>0:
         #	s+= '<li> <a href="PR2-0'+self.extensaoPagina+'">Desenho industrial</a> '.decode("utf8")+'('+str(self.nPR2)+')'
-        #if self.nPR0 == 0 and self.nPR1 == 0 and self.nPR2 == 0:
+        # if self.nPR0 == 0 and self.nPR1 == 0 and self.nPR2 == 0:
         #	s+= '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
 
 
@@ -326,7 +308,7 @@ class WebPagesGenerator:
         #
         # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 
-    def gerar_pagina_de_producoes(self, productions, template_name, title, page, group_by='ano', ascending=True, ris=False):
+    def generate_production_page(self, productions, template_name, title, page, group_by='ano', ascending=True, ris=False):
         # template = self.jinja.get_template("list.html")
         template = self.jinja.get_template(template_name)
         file_name = page
@@ -404,45 +386,51 @@ class WebPagesGenerator:
         return total_producoes
 
     def generate_bibliographical_production_pages(self):
+        # Format: (page, title, object, template)
+        # template is a relative path; check self.jinja initialization
+        self.bibliographical_productions_routes = [
+            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
+            ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
+            ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
+            ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
+            ("PB8-0.html", u"Apresentações de trabalho ", self.grupo.presentations, "bibliographical_production/presentations_list.html"),
+            ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.grupo.others, "bibliographical_production/others_list.html"),
+            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
+        ]
+
         for page, title, productions, template in self.bibliographical_productions_routes:
-            self.gerar_pagina_de_producoes(productions, group_by='ano', ascending=False,
-                                           template_name=template,  # self.grupo.compilador.listaCompletaPB,
-                                           title=title, page=page)
+            self.generate_production_page(productions, group_by='ano', ascending=False,
+                                          template_name=template,  # self.grupo.compilador.listaCompletaPB,
+                                          title=title, page=page)
         return
         #########################################
         # FIXME: refatorar
 
-        if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
-            self.nPB0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaArtigoEmPeriodico,
-                                                       "Artigos completos publicados em periódicos", "PB0", ris=True)
+        # if self.grupo.obterParametro('relatorio-incluir_artigo_em_periodico'):
         if self.grupo.obterParametro('relatorio-incluir_livro_publicado'):
-            self.nPB1 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaLivroPublicado,
-                                                       "Livros publicados/organizados ou edições", "PB1", ris=True)
+            self.nPB1 = self.generate_production_page(self.grupo.compilador.listaCompletaLivroPublicado,
+                                                      "Livros publicados/organizados ou edições", "PB1", ris=True)
         if self.grupo.obterParametro('relatorio-incluir_capitulo_de_livro_publicado'):
-            self.nPB2 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaCapituloDeLivroPublicado,
-                                                       "Capítulos de livros publicados", "PB2", ris=True)
+            self.nPB2 = self.generate_production_page(self.grupo.compilador.listaCompletaCapituloDeLivroPublicado,
+                                                      "Capítulos de livros publicados", "PB2", ris=True)
         if self.grupo.obterParametro('relatorio-incluir_texto_em_jornal_de_noticia'):
-            self.nPB3 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaTextoEmJornalDeNoticia,
-                                                       "Textos em jornais de notícias/revistas", "PB3", ris=True)
-        if self.grupo.obterParametro('relatorio-incluir_trabalho_completo_em_congresso'):
-            self.nPB4 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-                                                       "Trabalhos completos publicados em anais de congressos", "PB4",
-                                                       ris=True)
-        if self.grupo.obterParametro('relatorio-incluir_resumo_expandido_em_congresso'):
-            self.nPB5 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaResumoExpandidoEmCongresso,
-                                                       "Resumos expandidos publicados em anais de congressos", "PB5",
-                                                       ris=True)
-        if self.grupo.obterParametro('relatorio-incluir_resumo_em_congresso'):
-            self.nPB6 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaResumoEmCongresso,
-                                                       "Resumos publicados em anais de congressos", "PB6", ris=True)
+            self.nPB3 = self.generate_production_page(self.grupo.compilador.listaCompletaTextoEmJornalDeNoticia,
+                                                      "Textos em jornais de notícias/revistas", "PB3", ris=True)
+        # if self.grupo.obterParametro('relatorio-incluir_trabalho_completo_em_congresso'):
+        # if self.grupo.obterParametro('relatorio-incluir_resumo_expandido_em_congresso'):
+        # if self.grupo.obterParametro('relatorio-incluir_resumo_em_congresso'):
         if self.grupo.obterParametro('relatorio-incluir_artigo_aceito_para_publicacao'):
-            self.nPB7 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaArtigoAceito,
-                                                       "Artigos aceitos para publicação", "PB7")
+            self.nPB7 = self.generate_production_page(self.grupo.compilador.listaCompletaArtigoAceito,
+                                                      "Artigos aceitos para publicação", "PB7")
         if self.grupo.obterParametro('relatorio-incluir_apresentacao_de_trabalho'):
-            self.nPB8 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaApresentacaoDeTrabalho,
-                                                       "Apresentações de trabalho", "PB8")
+            self.nPB8 = self.generate_production_page(self.grupo.compilador.listaCompletaApresentacaoDeTrabalho,
+                                                      "Apresentações de trabalho", "PB8")
         if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_bibliografica'):
-            self.nPB9 = self.gerar_pagina_de_producoes(
+            self.nPB9 = self.generate_production_page(
                 self.grupo.compilador.listaCompletaOutroTipoDeProducaoBibliografica,
                 "Demais tipos de produção bibliográfica", "PB9")
 
@@ -456,39 +444,37 @@ class WebPagesGenerator:
         self.nPT = 0
 
         if self.grupo.obterParametro('relatorio-incluir_software_com_patente'):
-            self.nPT0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaSoftwareComPatente,
-                                                       "Softwares com registro de patente", "PT0")
+            self.nPT0 = self.generate_production_page(self.grupo.compilador.listaCompletaSoftwareComPatente,
+                                                      "Softwares com registro de patente", "PT0")
         if self.grupo.obterParametro('relatorio-incluir_software_sem_patente'):
-            self.nPT1 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaSoftwareSemPatente,
-                                                       "Softwares sem registro de patente", "PT1")
+            self.nPT1 = self.generate_production_page(self.grupo.compilador.listaCompletaSoftwareSemPatente,
+                                                      "Softwares sem registro de patente", "PT1")
         if self.grupo.obterParametro('relatorio-incluir_produto_tecnologico'):
-            self.nPT2 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaProdutoTecnologico,
-                                                       "Produtos tecnológicos", "PT2")
+            self.nPT2 = self.generate_production_page(self.grupo.compilador.listaCompletaProdutoTecnologico,
+                                                      "Produtos tecnológicos", "PT2")
         if self.grupo.obterParametro('relatorio-incluir_processo_ou_tecnica'):
-            self.nPT3 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaProcessoOuTecnica,
-                                                       "Processos ou técnicas", "PT3")
+            self.nPT3 = self.generate_production_page(self.grupo.compilador.listaCompletaProcessoOuTecnica,
+                                                      "Processos ou técnicas", "PT3")
         if self.grupo.obterParametro('relatorio-incluir_trabalho_tecnico'):
-            self.nPT4 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaTrabalhoTecnico,
-                                                       "Trabalhos técnicos", "PT4")
+            self.nPT4 = self.generate_production_page(self.grupo.compilador.listaCompletaTrabalhoTecnico,
+                                                      "Trabalhos técnicos", "PT4")
         if self.grupo.obterParametro('relatorio-incluir_outro_tipo_de_producao_tecnica'):
-            self.nPT5 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOutroTipoDeProducaoTecnica,
-                                                       "Demais tipos de produção técnica", "PT5")
+            self.nPT5 = self.generate_production_page(self.grupo.compilador.listaCompletaOutroTipoDeProducaoTecnica,
+                                                      "Demais tipos de produção técnica", "PT5")
         # Total de produções técnicas
-        self.nPT = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPT, "Total de produção técnica",
-                                                  "PT")
-
+        self.nPT = self.generate_production_page(self.grupo.compilador.listaCompletaPT, "Total de produção técnica",
+                                                 "PT")
 
     def gerarPaginasDeProducoesArtisticas(self):
         self.nPA0 = 0
         self.nPA = 0
 
         if self.grupo.obterParametro('relatorio-incluir_producao_artistica'):
-            self.nPA0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaProducaoArtistica,
-                                                       "Produção artística/cultural", "PA0")
+            self.nPA0 = self.generate_production_page(self.grupo.compilador.listaCompletaProducaoArtistica,
+                                                      "Produção artística/cultural", "PA0")
         # Total de produções técnicas
-        self.nPA = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPA, "Total de produção artística",
-                                                  "PA")
-
+        self.nPA = self.generate_production_page(self.grupo.compilador.listaCompletaPA, "Total de produção artística",
+                                                 "PA")
 
     def gerarPaginasDePatentes(self):
         self.nPR0 = 0
@@ -498,13 +484,13 @@ class WebPagesGenerator:
 
         # if self.grupo.obterParametro('relatorio-incluir_patente'):
 
-        #	self.nPR0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPatente, "Patente", "PR0")
-        #	self.nPR1 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaProgramaComputador, "Programa de computador", "PR1")
-        #	self.nPR2 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaDesenhoIndustrial, "Desenho industrial", "PR2")
+        #	self.nPR0 = self.generate_production_page(self.grupo.compilador.listaCompletaPatente, "Patente", "PR0")
+        #	self.nPR1 = self.generate_production_page(self.grupo.compilador.listaCompletaProgramaComputador, "Programa de computador", "PR1")
+        #	self.nPR2 = self.generate_production_page(self.grupo.compilador.listaCompletaDesenhoIndustrial, "Desenho industrial", "PR2")
 
         # Total de produções técnicas
 
-    #self.nPR = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPR, "Total de patentes e registros", "PR")
+    # self.nPR = self.generate_production_page(self.grupo.compilador.listaCompletaPR, "Total de patentes e registros", "PR")
 
 
     def gerarPaginasDeOrientacoes(self):
@@ -518,30 +504,30 @@ class WebPagesGenerator:
         self.nOA = 0
 
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_pos_doutorado'):
-            self.nOA0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOASupervisaoDePosDoutorado,
-                                                       "Supervisão de pós-doutorado", "OA0")
+            self.nOA0 = self.generate_production_page(self.grupo.compilador.listaCompletaOASupervisaoDePosDoutorado,
+                                                      "Supervisão de pós-doutorado", "OA0")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_doutorado'):
-            self.nOA1 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOATeseDeDoutorado,
-                                                       "Tese de doutorado", "OA1")
+            self.nOA1 = self.generate_production_page(self.grupo.compilador.listaCompletaOATeseDeDoutorado,
+                                                      "Tese de doutorado", "OA1")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_mestrado'):
-            self.nOA2 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOADissertacaoDeMestrado,
-                                                       "Dissertação de mestrado", "OA2")
+            self.nOA2 = self.generate_production_page(self.grupo.compilador.listaCompletaOADissertacaoDeMestrado,
+                                                      "Dissertação de mestrado", "OA2")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_monografia_de_especializacao'):
-            self.nOA3 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOAMonografiaDeEspecializacao,
-                                                       "Monografia de conclusão de curso de aperfeiçoamento/especialização",
-                                                       "OA3")
+            self.nOA3 = self.generate_production_page(self.grupo.compilador.listaCompletaOAMonografiaDeEspecializacao,
+                                                      "Monografia de conclusão de curso de aperfeiçoamento/especialização",
+                                                      "OA3")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_tcc'):
-            self.nOA4 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOATCC,
-                                                       "Trabalho de conclusão de curso de graduação", "OA4")
+            self.nOA4 = self.generate_production_page(self.grupo.compilador.listaCompletaOATCC,
+                                                      "Trabalho de conclusão de curso de graduação", "OA4")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_iniciacao_cientifica'):
-            self.nOA5 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOAIniciacaoCientifica,
-                                                       "Iniciação científica", "OA5")
+            self.nOA5 = self.generate_production_page(self.grupo.compilador.listaCompletaOAIniciacaoCientifica,
+                                                      "Iniciação científica", "OA5")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_em_andamento_outro_tipo'):
-            self.nOA6 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOAOutroTipoDeOrientacao,
-                                                       "Orientações de outra natureza", "OA6")
+            self.nOA6 = self.generate_production_page(self.grupo.compilador.listaCompletaOAOutroTipoDeOrientacao,
+                                                      "Orientações de outra natureza", "OA6")
         # Total de orientações em andamento
-        self.nOA = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOA,
-                                                  "Total de orientações em andamento", "OA")
+        self.nOA = self.generate_production_page(self.grupo.compilador.listaCompletaOA,
+                                                 "Total de orientações em andamento", "OA")
 
         self.nOC0 = 0
         self.nOC1 = 0
@@ -553,52 +539,50 @@ class WebPagesGenerator:
         self.nOC = 0
 
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_pos_doutorado'):
-            self.nOC0 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCSupervisaoDePosDoutorado,
-                                                       "Supervisão de pós-doutorado", "OC0")
+            self.nOC0 = self.generate_production_page(self.grupo.compilador.listaCompletaOCSupervisaoDePosDoutorado,
+                                                      "Supervisão de pós-doutorado", "OC0")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_doutorado'):
-            self.nOC1 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCTeseDeDoutorado,
-                                                       "Tese de doutorado", "OC1")
+            self.nOC1 = self.generate_production_page(self.grupo.compilador.listaCompletaOCTeseDeDoutorado,
+                                                      "Tese de doutorado", "OC1")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_mestrado'):
-            self.nOC2 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCDissertacaoDeMestrado,
-                                                       "Dissertação de mestrado", "OC2")
+            self.nOC2 = self.generate_production_page(self.grupo.compilador.listaCompletaOCDissertacaoDeMestrado,
+                                                      "Dissertação de mestrado", "OC2")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_monografia_de_especializacao'):
-            self.nOC3 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCMonografiaDeEspecializacao,
-                                                       "Monografia de conclusão de curso de aperfeiçoamento/especialização",
-                                                       "OC3")
+            self.nOC3 = self.generate_production_page(self.grupo.compilador.listaCompletaOCMonografiaDeEspecializacao,
+                                                      "Monografia de conclusão de curso de aperfeiçoamento/especialização",
+                                                      "OC3")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_tcc'):
-            self.nOC4 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCTCC,
-                                                       "Trabalho de conclusão de curso de graduação", "OC4")
+            self.nOC4 = self.generate_production_page(self.grupo.compilador.listaCompletaOCTCC,
+                                                      "Trabalho de conclusão de curso de graduação", "OC4")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_iniciacao_cientifica'):
-            self.nOC5 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCIniciacaoCientifica,
-                                                       "Iniciação científica", "OC5")
+            self.nOC5 = self.generate_production_page(self.grupo.compilador.listaCompletaOCIniciacaoCientifica,
+                                                      "Iniciação científica", "OC5")
         if self.grupo.obterParametro('relatorio-incluir_orientacao_concluida_outro_tipo'):
-            self.nOC6 = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOCOutroTipoDeOrientacao,
-                                                       "Orientações de outra natureza", "OC6")
+            self.nOC6 = self.generate_production_page(self.grupo.compilador.listaCompletaOCOutroTipoDeOrientacao,
+                                                      "Orientações de outra natureza", "OC6")
         # Total de orientações concluídas
-        self.nOC = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOC,
-                                                  "Total de orientações concluídas", "OC")
-
+        self.nOC = self.generate_production_page(self.grupo.compilador.listaCompletaOC,
+                                                 "Total de orientações concluídas", "OC")
 
     def gerarPaginasDeProjetos(self):
         self.nPj = 0
-        self.nPj = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaProjetoDePesquisa,
-                                                  "Total de projetos de pesquisa", "Pj")
-
+        self.nPj = self.generate_production_page(self.grupo.compilador.listaCompletaProjetoDePesquisa,
+                                                 "Total de projetos de pesquisa", "Pj")
 
     def gerarPaginasDePremios(self):
         self.nPm = 0
-        self.nPm = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaPremioOuTitulo,
-                                                  "Total de prêmios e títulos", "Pm")
+        self.nPm = self.generate_production_page(self.grupo.compilador.listaCompletaPremioOuTitulo,
+                                                 "Total de prêmios e títulos", "Pm")
 
     def gerarPaginasDeParticipacaoEmEventos(self):
         self.nEp = 0
-        self.nEp = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaParticipacaoEmEvento,
-                                                  "Total de participação em eventos", "Ep")
+        self.nEp = self.generate_production_page(self.grupo.compilador.listaCompletaParticipacaoEmEvento,
+                                                 "Total de participação em eventos", "Ep")
 
     def gerarPaginasDeOrganizacaoDeEventos(self):
         self.nEo = 0
-        self.nEo = self.gerar_pagina_de_producoes(self.grupo.compilador.listaCompletaOrganizacaoDeEvento,
-                                                  "Total de organização de eventos", "Eo")
+        self.nEo = self.generate_production_page(self.grupo.compilador.listaCompletaOrganizacaoDeEvento,
+                                                 "Total de organização de eventos", "Eo")
 
     def gerarPaginasDeInternacionalizacao(self):
         self.nIn0 = 0
@@ -679,7 +663,7 @@ class WebPagesGenerator:
         if not estrato_area_ano_freq.keys():  # produções vazias
             logger.debug("produções vazias")
         elif len(
-                estrato_area_ano_freq.keys()) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
+            estrato_area_ano_freq.keys()) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
             chart.settitle(titulo.decode('utf8'))
             chart['plotOptions']['column']['stacking'] = None
             chart['chart']['height'] = 400
@@ -726,7 +710,7 @@ class WebPagesGenerator:
 
                     drilldown_series.append(
                         {'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
-                one_serie = {'name': estrato, 'data': data}  #, 'stack': area}
+                one_serie = {'name': estrato, 'data': data}  # , 'stack': area}
                 series.append(one_serie)
             chart['drilldown'] = {'series': drilldown_series}
         chart.set_series(series)
@@ -744,7 +728,6 @@ class WebPagesGenerator:
                 else:
                     s += '<a href="' + prefixo + '-' + str(i) + self.extensaoPagina + '">' + str(i + 1) + '</a> &nbsp;'
             return '<center>' + s + '</center>'
-
 
     def gerarPaginaDeInternacionalizacao(self, listaCompleta, tituloPagina, prefixo):
         numeroTotalDeProducoes = 0
@@ -800,7 +783,7 @@ class WebPagesGenerator:
                             "utf8")
 
                         st += self.gerarIndiceDePaginas(numeroDePaginas, numeroDePaginaAtual, prefixo)
-                        st += s  #.decode("utf8")
+                        st += s  # .decode("utf8")
                         st += '</table>'
                         st += self.paginaBottom()
 
@@ -815,7 +798,6 @@ class WebPagesGenerator:
 
                 s += '</table>'
         return numeroTotalDeProducoes
-
 
     def gerarPaginaDeGrafosDeColaboracoes(self):
         lista = ''
@@ -1201,10 +1183,8 @@ class WebPagesGenerator:
         file.write(conteudo.encode('utf8', 'replace'))
         file.close()
 
-
     def salvarPublicacaoEmFormatoRIS(self, pub):
         self.arquivoRis.write(pub.ris().encode('utf8'))
-
 
     def formatarTotaisQualis(self, qtd):
         """
@@ -1290,4 +1270,3 @@ def formata_qualis(qualis, qualissimilar):
                  sorted(qualis.items(), key=lambda x: x[0])]
             s += '&nbsp|&nbsp'.join(l)
     return s
-

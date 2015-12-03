@@ -21,8 +21,12 @@
 #  junto com este programa, se não, escreva para a Fundação do Software
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+from data_tables.bibliographical_production.books import Books
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
+from data_tables.bibliographical_production.newspaper_texts import NewspaperTexts
+from data_tables.bibliographical_production.others import Others
+from data_tables.bibliographical_production.presentations import Presentations
 from extract.parserLattesXML import *
 from report.charts.geolocalizador import *
 from util.util import get_lattes_url
@@ -114,14 +118,16 @@ class Membro:
 
     def __init__(self, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
         self.id_lattes = str(identificador)
-        # FIXME: precisa dos dois campos de nome?
-        # self.nome = nome
         self.nome_completo = nome  # nome.split(";")[0].strip().decode('utf8', 'replace')
         self.periodo = periodo
         self.rotulo = rotulo
 
         self.journal_papers = JournalPapers(self.id_lattes)
         self.event_papers = EventPapers(self.id_lattes)
+        self.books = Books(self.id_lattes)
+        self.newspaper_texts = NewspaperTexts(self.id_lattes)
+        self.presentations = Presentations(self.id_lattes)
+        self.others = Others(self.id_lattes)
 
         # replaced by util.get_lattes_url
         # p = re.compile('[a-zA-Z]+')
@@ -178,25 +184,21 @@ class Membro:
         self.listaIDLattesColaboradoresUnica = set(self.listaIDLattesColaboradores)
 
         # Produção bibliográfica
-        # self.listaArtigoEmPeriodico = parser.listaArtigoEmPeriodico
         self.journal_papers.add_from_parser(parser.listaArtigoEmPeriodico)
+        self.journal_papers.add_from_parser(parser.listaArtigoAceito, only_accepted=True)
 
-        self.listaArtigoAceito = parser.listaArtigoAceito
-
-        # self.listaTrabalhoCompletoEmCongresso = parser.listaTrabalhoCompletoEmCongresso
-        # self.listaResumoExpandidoEmCongresso = parser.listaResumoExpandidoEmCongresso
-        # self.listaResumoEmCongresso = parser.listaResumoEmCongresso
         self.event_papers.add_from_parser(parser.listaTrabalhoCompletoEmCongresso, EventPapers.Types.complete)
         self.event_papers.add_from_parser(parser.listaResumoExpandidoEmCongresso, EventPapers.Types.expanded_abstract)
         self.event_papers.add_from_parser(parser.listaResumoEmCongresso, EventPapers.Types.abstract)
 
-        # TODO: testando refatoracao até acima
-        self.listaLivroPublicado = parser.listaLivroPublicado
-        self.listaCapituloDeLivroPublicado = parser.listaCapituloDeLivroPublicado
-        self.listaTextoEmJornalDeNoticia = parser.listaTextoEmJornalDeNoticia
-        self.listaApresentacaoDeTrabalho = parser.listaApresentacaoDeTrabalho
-        self.listaOutroTipoDeProducaoBibliografica = parser.listaOutroTipoDeProducaoBibliografica
+        self.books.add_from_parser(parser.listaLivroPublicado)
+        self.books.add_from_parser(parser.listaCapituloDeLivroPublicado, only_chapter=True)
 
+        self.newspaper_texts.add_from_parser(parser.listaTextoEmJornalDeNoticia)
+        self.presentations.add_from_parser(parser.listaApresentacaoDeTrabalho)
+        self.others.add_from_parser(parser.listaOutroTipoDeProducaoBibliografica)
+
+        # TODO: testando refatoracao até acima
         # Produção técnica
         self.listaSoftwareComPatente = parser.listaSoftwareComPatente
         self.listaSoftwareSemPatente = parser.listaSoftwareSemPatente

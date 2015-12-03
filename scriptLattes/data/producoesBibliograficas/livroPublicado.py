@@ -131,6 +131,7 @@ class LivroPublicado:
 
 
     def html(self, listaDeMembros):
+        raise "deprecated"
         s = self.autores + '. <b>' + self.titulo + '</b>. '
         s+= self.edicao + ' ed. '       if not self.edicao==''  else ''
         s += self.editora + ', ' if not self.editora == ''  else ''

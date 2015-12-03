@@ -8,8 +8,12 @@ from scipy import sparse
 
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
 from data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
+from data_tables.bibliographical_production.books import Books
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
+from data_tables.bibliographical_production.newspaper_texts import NewspaperTexts
+from data_tables.bibliographical_production.others import Others
+from data_tables.bibliographical_production.presentations import Presentations
 from membro import Membro
 from persist.cache import cache
 from process.authorRank import AuthorRank
@@ -94,8 +98,12 @@ class Grupo:
 
         self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
         self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
-        self.productions_list = [self.journal_papers, self.event_papers]
-        self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
+        self.books = Books(id=self.group_id)  # TODO: define a group id
+        self.newspaper_texts = NewspaperTexts(id=self.group_id)  # TODO: define a group id
+        self.presentations = Presentations(id=self.group_id)  # TODO: define a group id
+        self.others = Others(id=self.group_id)  # TODO: define a group id
+        self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
+        # self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
 
         # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
         read_from_cache = True if cache.file('qualis.data') else False
@@ -122,8 +130,10 @@ class Grupo:
         for _, member in self.members_list.items():
             self.journal_papers.append(member.journal_papers)
             self.event_papers.append(member.event_papers)
-            # self.journal_papers.group_similar()
-            # self.event_papers.group_similar()
+            self.books.append(member.books)
+            self.newspaper_texts.append(member.newspaper_texts)
+            self.presentations.append(member.presentations)
+            self.others.append(member.others)
 
     # REFATORADO ATE AQUI *********************************************************************************************
 
