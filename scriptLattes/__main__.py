@@ -32,6 +32,7 @@ Other:
 
 from __future__ import absolute_import, unicode_literals
 
+import chardet
 import logging
 import sys
 from pathlib import Path
@@ -305,6 +306,7 @@ def cli():
                     # sera procurada a coautoria endogena com os outros membro.
                     # para isso é necessario indicar o nome abreviado no arquivo .list
                     # FIXME: verificar se ainda funciona
+                    raise "FIXME: membro sem lattes ainda não implementado"
                     continue
                 try:
                     cv_path = (cache.directory / id_lattes).resolve()
@@ -313,8 +315,17 @@ def cli():
                         "O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
                     continue
 
-                with cv_path.open() as f:
-                    cv_lattes_content = f.read()
+                assert isinstance(cv_path, Path)
+                # with open(str(cv_path)) as f:
+                #     charset = chardet.detect(f.read())
+                for encoding in ["utf-8", "latin-1", "ascii"]:
+                    try:
+                        # with cv_path.open() as f:
+                        with open(str(cv_path)) as f:
+                            cv_lattes_content = f.read().decode(encoding)#.encode("utf-8")
+                    except UnicodeDecodeError:
+                        continue
+                    break
                 logger.debug("Utilizando CV armazenado no cache: {}.".format(cv_path))
 
                 if use_xml:
