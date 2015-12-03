@@ -28,5 +28,5 @@ def configure_stream(level='WARNING'):
     console.setLevel(level)
     console.setFormatter(formatter)
 
-    root_logger.addHandler(console)
+    # root_logger.addHandler(console)  # FIXME: está duplicando saída; é necessário direcionar o root_logger para um arquivo
     return root_logger
