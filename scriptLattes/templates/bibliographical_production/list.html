@@ -22,8 +22,10 @@
 
     <h3>{{subtitle}}</h3>
 
-    {{chart}}
-    <div id="container" style="min-width: 310px; max-width: 1920px; height: {{height}}; margin: 0"></div>
+    {% if chart %}
+        {% include "highchart.html" with context %}
+        {{chart}}
+    {% endif %}
 
     Número total de itens: {{numero_itens}}
     <br>

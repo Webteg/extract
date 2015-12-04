@@ -44,6 +44,8 @@ class NewspaperTexts(Papers):
             texts[column] = [getattr(text, attribute, '') for text in texts_list]
         df = pd.DataFrame(texts, columns=self.columns)
         df['id_membro'] = self.id
+
+        # df['titulo'] = df['titulo'].str.decode("utf-8").str.encode("utf-8")
         self.data_frame = self.data_frame.append(df, ignore_index=True)
 
     def append(self, books):

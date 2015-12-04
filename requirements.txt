@@ -1,5 +1,5 @@
 jinja2
-PIL
+#PIL
 docopt
 configobj == 5.0.6
 setuptools
@@ -8,7 +8,8 @@ robobrowser
 numpy >= 1.10.0
 pygraphviz
 scipy
-BeautifulSoup
+#BeautifulSoup
+beautifulsoup4
 python_Levenshtein
 Pillow
 # PySide
@@ -19,3 +20,5 @@ six
 pathlib
 pandas >= 0.17.0
 tables
+HTMLParser
+lxml

@@ -22,8 +22,15 @@
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 import re
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint
+
+import sys
+
+if sys.version_info[0] < 3:
+    from HTMLParser import HTMLParser
+    from htmlentitydefs import name2codepoint
+else:
+    from html.parser import HTMLParser
+    from html.entities import name2codepoint
 
 from tidylib import tidy_document
 

@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -28,7 +28,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-	
+
 class GraficoDeBarras:
 	diretorioDeSaida = None
 	listaCompleta = None
@@ -40,7 +40,7 @@ class GraficoDeBarras:
 		self.diretorioDeSaida = diretorioDeSaida
 		self.vetorDeProducoes = []
 
-	
+
 	def criarGrafico(self, listaCompleta, prefixo, titulo):
 		self.listaCompleta = []
 		self.listaCompleta = listaCompleta
@@ -61,9 +61,9 @@ class GraficoDeBarras:
 			vetorDeQuantidades.append( len(self.listaCompleta[k]) )
 
 		if len(vetorDeAnos)>0: # Apenas para listas com elemtos
-			print self.prefixo + ": " , vetorDeAnos , vetorDeQuantidades
+			print(self.prefixo + ": " , vetorDeAnos , vetorDeQuantidades)
 
-			ind = np.arange(len(vetorDeAnos)) 
+			ind = np.arange(len(vetorDeAnos))
 			bar_width = 0.20
 
 			plt.clf()

@@ -29,8 +29,14 @@
 # Por enquanto esta característica fica sem documentação.
 # ---------------------------------------------------------------------------- #
 
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint
+import sys
+
+if sys.version_info[0] < 3:
+    from HTMLParser import HTMLParser
+    from htmlentitydefs import name2codepoint
+else:
+    from html.parser import HTMLParser
+    from html.entities import name2codepoint
 
 from data.orientacoes.orientacaoConcluida import *
 from data.producoesBibliograficas.apresentacaoDeTrabalho import *

@@ -7,12 +7,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -26,7 +26,7 @@ matplotlib.use("Agg")
 
 import operator
 import math
-	
+
 class GraficoDeInternacionalizacao:
 	listaCompleta = None
 	vetorDePaises = None
@@ -61,7 +61,7 @@ class GraficoDeInternacionalizacao:
 							if listaDePaisesEquantidades.get(pais)==None:
 								listaDePaisesEquantidades[pais] = 0
 							listaDePaisesEquantidades[pais]+=1
-	
+
 						if (soBrasil):
 							self.publicacoesRealizadasSemParceirasComEstrangeiros += 1
 						else:
@@ -90,9 +90,9 @@ class GraficoDeInternacionalizacao:
 		script = ""
 
 		if len(self.vetorDePaises)>0: # Apenas para listas com elemtos
-			print "\n[CRIANDO GRAFICO DE BARRAS - INTERNACIONALIZACAO]"
-			print self.vetorDePaises
-			print self.vetorDeQuantidades
+			print("\n[CRIANDO GRAFICO DE BARRAS - INTERNACIONALIZACAO]")
+			print(self.vetorDePaises)
+			print(self.vetorDeQuantidades)
 
 			script = "<script type='text/javascript' src='https://www.google.com/jsapi'></script>"
 
@@ -153,4 +153,4 @@ class GraficoDeInternacionalizacao:
             </script>"
 
 		return script
-			
+

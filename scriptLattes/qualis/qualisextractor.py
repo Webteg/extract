@@ -14,19 +14,33 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import sys
+
+py2 = sys.version_info[0] < 3
+
+if py2:
+    import urllib2
+    from HTMLParser import HTMLParser
+
+    _urllib = urllib2
+    _urlerror = urllib2
+else:
+    import urllib.request, urllib.error, urllib.parse
+    from html.parser import HTMLParser
+
+    _urllib = urllib.request
+    _urlerror = urllib.error
+
 import codecs
 import logging
-import urllib2
 import pickle
-from HTMLParser import HTMLParser
 import datetime
-
 import requests
 from lxml import etree
 import pandas as pd
 
-
 logger = logging.getLogger(__name__)
+
 
 # converts a string to a integer if the string is a integer, else returns None
 def str2int(string):
@@ -87,8 +101,13 @@ class QualisExtractor(object):
             jid = acesso_inicial.cookies['JSESSIONID']
             logger.info('Iniciando sessão qualis. ID da Sessão: {}'.format(jid))
             url1 = url_base + "publico/pesquisaPublicaClassificacao.seam;jsessionid=" + jid + "?conversationPropagation=begin"
-            req1 = urllib2.Request(url1)
-            arq1 = urllib2.urlopen(req1)
+
+            if py2:
+                req1 = urllib2.Request(url1)
+                arq1 = urllib2.urlopen(req1)
+            else:
+                req1 = urllib.request.Request(url1)
+                arq1 = urllib.request.urlopen(req1)
 
             self.url2 = url_base + "publico/pesquisaPublicaClassificacao.seam;jsessionid=" + jid
             self.initialized = True
@@ -152,27 +171,27 @@ class QualisExtractor(object):
             scroller = 1
             more = 1
             # FIXME: armazenar mapeamento do nome da área para seu código, e utilizar o código nas URLs abaixo.
-            reqn = urllib2.Request(self.url2,
-                                   'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
-                                       area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&consultaPublicaClassificacaoForm%3AbtnPesquisarTituloPorArea=Pesquisar&javax.faces.ViewState=j_id2')
+            reqn = _urllib.Request(self.url2,
+                               'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
+                                   area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&consultaPublicaClassificacaoForm%3AbtnPesquisarTituloPorArea=Pesquisar&javax.faces.ViewState=j_id2')
+            arqn = _urllib.urlopen(reqn)
 
-            arqn = urllib2.urlopen(reqn)
             data = []
             logger.info('Qualis da area {} desatualizado!'.format(area))
             logger.info('Extraindo qualis da area: {}'.format(area))
             while more == 1:
-                reqn = urllib2.Request(self.url2,
-                                       'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
-                                           area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3AscrollerArea&consultaPublicaClassificacaoForm%3AscrollerArea=' + str(
-                                           scroller) + '&AJAX%3AEVENTS_COUNT=1&')
+                reqn = _urllib.Request(self.url2,
+                                   'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
+                                       area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3AscrollerArea&consultaPublicaClassificacaoForm%3AscrollerArea=' + str(
+                                       scroller) + '&AJAX%3AEVENTS_COUNT=1&')
 
                 # arqn = urllib2.urlopen (reqn)
                 tries = 10
                 for i in range(tries):
                     try:
-                        arqn = urllib2.urlopen(reqn)
+                        arqn = _urllib.urlopen(reqn)
                         break  # success
-                    except urllib2.URLError as err:
+                    except _urlerror.URLError as err:
                         logger.warning('Erro extraindo qualis. Tentando novamente.')
                         # continue
                         # if not isinstance(err.reason, socket.timeout):
@@ -228,9 +247,9 @@ class QualisExtractor(object):
         arqn = None
         for i in range(tries):
             try:
-                arqn = urllib2.urlopen(req)
+                arqn = _urllib.urlopen(req)
                 break  # success
-            except urllib2.URLError as err:
+            except _urlerror.URLError as err:
                 logger.warning('Erro extraindo Qualis do ISSN {}. Tentando novamente.'.format(issn))
             if i == tries - 1:
                 logger.warning(
@@ -261,7 +280,7 @@ class QualisExtractor(object):
         # url0 = url + "?conversationPropagation=begin"
         # urllib2.urlopen(urllib2.Request(url0))
 
-        req = urllib2.Request(url,
+        req = _urllib.Request(url,
                               'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3Aissn=' + str(
                                   issn) + '&consultaPublicaClassificacaoForm%3AbtnPesquisarISSN=Pesquisar&javax.faces.ViewState=j_id2')
         html_document = self.read_url(req)
@@ -270,7 +289,7 @@ class QualisExtractor(object):
 
         pages = self.other_pages(html_document)
         for scroller in pages:
-            req = urllib2.Request(url,
+            req = _urllib.Request(url,
                                   'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3Aissn=' + str(
                                       issn) + '&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3Adatascroller1&consultaPublicaClassificacaoForm%3Adatascroller1=' + str(
                                       scroller) + '&AJAX%3AEVENTS_COUNT=1&')
@@ -330,7 +349,7 @@ class QualisExtractor(object):
         # url0 = url + "?conversationPropagation=begin"
         # urllib2.urlopen(urllib2.Request(url0))
 
-        req = urllib2.Request(url,
+        req = _urllib.Request(url,
                               'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3Atitulo=' +
                               str(journal_title) +
                               '&consultaPublicaClassificacaoForm%3AbtnPesquisarTitulo=Pesquisar&javax.faces.ViewState=j_id2')
@@ -340,7 +359,7 @@ class QualisExtractor(object):
 
         pages = self.other_pages(html_document)
         for scroller in pages:
-            req = urllib2.Request(url,
+            req = _urllib.Request(url,
                                   'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3Atitulo=' +
                                   str(journal_title) +
                                   '&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3Adatascroller2&consultaPublicaClassificacaoForm%3Adatascroller2=' +
@@ -416,7 +435,8 @@ class QualisExtractor(object):
     @staticmethod
     def other_pages(html_document):
         tree = etree.HTML(html_document)
-        inactive_page_buttons = tree.xpath("//table[@id='consultaPublicaClassificacaoForm:datascroller1_table']/tbody/tr/td[@class='rich-datascr-inact ']")  # espaço em branco na classe
+        inactive_page_buttons = tree.xpath(
+            "//table[@id='consultaPublicaClassificacaoForm:datascroller1_table']/tbody/tr/td[@class='rich-datascr-inact ']")  # espaço em branco na classe
         return [button.text for button in inactive_page_buttons]
 
     @staticmethod

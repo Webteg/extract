@@ -40,7 +40,7 @@ class GeradorDeXML:
         self.dir = self.grupo.obterParametro('global-diretorio_de_saida')
 
     def gerarXmlParaGrupo(self):
-        print '\n\n[GERANDO XML PARA CADA UM DOS CVs LATTES]'
+        print('\n\n[GERANDO XML PARA CADA UM DOS CVs LATTES]')
         xmlTemp = ''  # variavel importante para continuar a varredura dos membros caso ocorra erros
 
         errors = []
@@ -48,7 +48,7 @@ class GeradorDeXML:
         xml += "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
         xml += '<curriculo_lattes data_processamento="' + self.getDataProcessamento() + '">\n'
         for registro in self.membros:
-            print "- ID Lattes: [" + registro.idLattes + "]"
+            print("- ID Lattes: [" + registro.idLattes + "]")
             try:
                 xmlTemp = '  <pesquisador id="' + registro.idLattes + '">\n'
 

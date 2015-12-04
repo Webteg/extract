@@ -87,7 +87,7 @@ class SoftwareSemPatente:
 		s = self.autores + '. <b>' + self.titulo + '</b>. '
 		s+= str(self.ano) + '.'  if str(self.ano).isdigit() else '.'
 
- 		s+= menuHTMLdeBuscaPT(self.titulo)
+		s+= menuHTMLdeBuscaPT(self.titulo)
 		return s
 
 

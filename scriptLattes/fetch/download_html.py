@@ -104,9 +104,9 @@ def download_html(id_lattes, debug=True):
                 tries -= 1
             else:
                 return data
-        except Exception, e:
+        except Exception as e:
             if debug:
-                print e
+                print(e)
             tries -= 1
     # depois de 5 tentativas, verifiquemos se existe uma nova versao do baixaLattes
     __self_update()

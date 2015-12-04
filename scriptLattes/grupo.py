@@ -202,9 +202,9 @@ class Grupo:
         salvarXML("database.xml", xml)
 
         if errors:
-            print "\n\n[AVISO] Erro ao gerar XML para os lattes abaixo:"
+            logger.error("Erro ao gerar XML para os lattes abaixo:")
             for item in errors:
-                print "- [ID Lattes: " + item + "]"
+                logger.error("- [ID Lattes: {}]".format(item))
 
     def HTMLColorToRGB(self, colorstring):
         colorstring = colorstring.strip()
@@ -239,7 +239,7 @@ class Grupo:
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
 
     def identificarQualisEmPublicacoes(self):
-        print "\n[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]"
+        logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
         for membro in self.members_list.values():
             self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
 
@@ -267,7 +267,7 @@ class Grupo:
         arquivo.close()
 
     def gerarGraficosDeBarras(self):
-        print "\n[CRIANDO GRAFICOS DE BARRAS]"
+        logger.info("[CRIANDO GRAFICOS DE BARRAS]")
         gBarra = GraficoDeBarras(self.obterParametro('global-diretorio_de_saida'))
 
         gBarra.criarGrafico(self.compilador.listaCompletaArtigoEmPeriodico, 'PB0', 'Numero de publicacoes')
@@ -332,7 +332,7 @@ class Grupo:
             gProporcoes = GraficoDeProporcoes(self, self.obterParametro('global-diretorio_de_saida'))
 
     def calcularInternacionalizacao(self):
-        print "\n[ANALISANDO INTERNACIONALIZACAO]"
+        logger.info("[ANALISANDO INTERNACIONALIZACAO]")
         self.analisadorDePublicacoes = AnalisadorDePublicacoes(self)
         self.listaDePublicacoesEinternacionalizacao = self.analisadorDePublicacoes.analisarInternacionalizacaoNaCoautoria()
         return self.analisadorDePublicacoes.listaDoiValido
@@ -342,10 +342,10 @@ class Grupo:
 
     def imprimirMatrizesDeFrequencia(self):
         self.compilador.imprimirMatrizesDeFrequencia()
-        print "\n[VETOR DE CO-AUTORIA]"
-        print self.co_authorship_vector
-        print "\n[MATRIZ DE FREQUENCIA NORMALIZADA]"
-        print self.co_authorship_normalized_weighted_matrix
+        logger.info("[VETOR DE CO-AUTORIA]")
+        logger.info(self.co_authorship_vector)
+        logger.info("[MATRIZ DE FREQUENCIA NORMALIZADA]")
+        logger.info(self.co_authorship_normalized_weighted_matrix)
 
     # def numeroDeMembros(self):
     #     return len(self.members_list)
@@ -357,17 +357,15 @@ class Grupo:
 
     def imprimirListaDeParametros(self):
         for par in self.listaDeParametros:  # .keys():
-            print "[PARAMETRO] ", par[0], " = ", par[1]
-        print
+            print("[PARAMETRO] {} = {}".format(par[0], par[1]))
 
     def imprimirListaDeMembros(self):
         for membro in self.members_list.values():
-            print membro
-        print
+            print(membro)
 
     def imprimirListaDeRotulos(self):
         for rotulo in self.labels_set:
-            print "[ROTULO] ", rotulo
+            print("[ROTULO] ", rotulo)
 
             # def obterParametro(self, parametro):
             #     for i in range(0, len(self.listaDeParametros)):

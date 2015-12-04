@@ -6,9 +6,13 @@
 # character data -- the normal case), RCDATA (replaceable character
 # data -- only char and entity references and end tags are special)
 # and CDATA (character data -- only end tags are special).
+import sys
 
-
-import markupbase
+py2 = sys.version_info[0] < 3
+if py2:
+    import markupbase
+else:
+    import _markupbase as markupbase
 import re
 
 # Regular expressions used for parsing

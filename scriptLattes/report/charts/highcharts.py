@@ -8,12 +8,12 @@
 #  http://scriptlattes.sourceforge.net/
 #
 #
-#  Este programa é um software livre; você pode redistribui-lo e/ou 
-#  modifica-lo dentro dos termos da Licença Pública Geral GNU como 
-#  publicada pela Fundação do Software Livre (FSF); na versão 2 da 
+#  Este programa é um software livre; você pode redistribui-lo e/ou
+#  modifica-lo dentro dos termos da Licença Pública Geral GNU como
+#  publicada pela Fundação do Software Livre (FSF); na versão 2 da
 #  Licença, ou (na sua opinião) qualquer versão.
 #
-#  Este programa é distribuído na esperança que possa ser util, 
+#  Este programa é distribuído na esperança que possa ser util,
 #  mas SEM NENHUMA GARANTIA; sem uma garantia implicita de ADEQUAÇÂO a qualquer
 #  MERCADO ou APLICAÇÃO EM PARTICULAR. Veja a
 #  Licença Pública Geral GNU para maiores detalhes.
@@ -23,89 +23,6 @@
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 from string import Template
-
-theme = '''{
-   colors: ["#f45b5b", "#8085e9", "#8d4654", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee", "#2b908f", "#90ee7e",
-      "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
-   chart: {
-      backgroundColor: null,
-      style: {
-         fontFamily: "'Source Sans Pro', 'sans-serif'"
-      }
-   },
-   title: {
-      style: {
-         color: 'black',
-         fontSize: '16px',
-         fontWeight: 'bold'
-      }
-   },
-   subtitle: {
-      style: {
-         color: 'black'
-      }
-   },
-   tooltip: {
-      borderWidth: 0
-   },
-   legend: {
-      itemStyle: {
-         fontWeight: 'bold',
-         fontSize: '13px'
-      }
-   },
-   xAxis: {
-      labels: {
-         style: {
-            color: '#6e6e70'
-         }
-      }
-   },
-   yAxis: {
-      labels: {
-         style: {
-            color: '#6e6e70'
-         }
-      }
-   },
-   plotOptions: {
-      series: {
-         shadow: true
-      },
-      candlestick: {
-         lineColor: '#404048'
-      },
-      map: {
-         shadow: false
-      }
-   },
-
-   // Highstock specific
-   navigator: {
-      xAxis: {
-         gridLineColor: '#D0D0D8'
-      }
-   },
-   rangeSelector: {
-      buttonTheme: {
-         fill: 'white',
-         stroke: '#C0C0C8',
-         'stroke-width': 1,
-         states: {
-            select: {
-               fill: '#D0D0D8'
-            }
-         }
-      }
-   },
-   scrollbar: {
-      trackBorderColor: '#C0C0C8'
-   },
-
-   // General
-   background2: '#E0E0E8'
-};
-'''
 
 
 class jscmd(object):
@@ -138,9 +55,10 @@ class bgcolor(object):
         return self.colorstr
 
 
-true = jsbool(True)
-false = jsbool(False)
-
+# true = jsbool(True)
+# false = jsbool(False)
+true = 'true'
+false = 'false'
 
 def format_json(d):
     s = u''
@@ -287,7 +205,8 @@ jsondata = {
         # 'y': 40,
         # 'floating': true,
         'borderWidth': 1,
-        'backgroundColor': bgcolor(),
+        # 'backgroundColor': bgcolor(),
+        'backgroundColor': '(Highcharts.theme && Highcharts.theme.legendBackgroundColor || \'#FFFFFF\')',
         'shadow': true,
         # 'labelFormatter': jscmd('''function () {
         #         return this.options.stack + ' (click to hide)';
@@ -363,7 +282,7 @@ class highchart(dict):
         self['series'] = series
 
     def html(self):
-        return self.htmldata.replace('@jsondata@', format_json(self)).replace('@theme@', theme)
+        return self.htmldata.replace('@jsondata@', format_json(self))
 
     def json(self):
         return format_json(self)

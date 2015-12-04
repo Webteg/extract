@@ -141,6 +141,9 @@ class Membro:
         self.itemsAteOAno = itemsAteOAno
         self.criarListaDePeriodos(self.periodo)
 
+    def __lt__(self, other):
+        return self.nome_completo < other.nome_completo
+
     def criarListaDePeriodos(self, periodoDoMembro):
         self.listaPeriodo = []
         periodoDoMembro = re.sub('\s+', '', periodoDoMembro)
@@ -287,7 +290,7 @@ class Membro:
         self.listaOrganizacaoDeEvento = self.filtrarItems(self.listaOrganizacaoDeEvento)
 
     def filtrarItems(self, lista):
-        return filter(self.estaDentroDoPeriodo, lista)
+        return list(filter(self.estaDentroDoPeriodo, lista))
 
         # Not pythonic
         # for i in range(0, len(lista)):

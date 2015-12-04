@@ -28,7 +28,8 @@
 
 import logging
 
-import pygraphviz  # TODO: replace with graph_tool
+# FIXME: uncomment pygraphviz or replace it
+# import pygraphviz  # TODO: replace with graph_tool
 # import Image
 from PIL import Image
 from pathlib import Path

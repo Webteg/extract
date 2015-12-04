@@ -126,7 +126,7 @@ class ArtigoEmPeriodico:
         # usando os dados complementares (obtidos do div/cvuri)
         nomePeriodicoParte = complemento.split("nomePeriodico=")
 
-        if (len(nomePeriodicoParte) == 2):
+        if len(nomePeriodicoParte) == 2:
             self.revista = nomePeriodicoParte[1].strip()
 
         complementoPartes = complemento.split("&")
@@ -248,7 +248,7 @@ class ArtigoEmPeriodico:
         if nomeCompleto=="": # tratamento grupal
             s +=  str(self.ano) +"\t"+ self.doi +"\t"+ self.titulo +"\t"+ self.revista +"\t"+ self.autores +"\t"+ str(self.qualis) +"\t"+ str(self.qualissimilar)
         else: # tratamento individual
-            s += nomeCompleto +"\t"+ str(self.ano) +"\t" + self.doi +"\t"+ self.titulo +"\t"+ self.revista +"\t"+ self.autores +"\t"+ str(self.qualis) +"\t"+ (self.qualissimilar)
+            s += nomeCompleto +"\t"+ str(self.ano) +"\t" + self.doi +"\t"+ self.titulo +"\t"+ self.revista +"\t"+ self.autores +"\t"+ str(self.qualis) +"\t" + self.qualissimilar
         return s
 
 

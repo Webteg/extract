@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def gerarArquivosTemporarios(group):
-    print "\n[CRIANDO ARQUIVOS TEMPORARIOS: CSV, RIS, TXT, GDF]"
+    print("\n[CRIANDO ARQUIVOS TEMPORARIOS: CSV, RIS, TXT, GDF]")
 
     gerarRISdeMembros(group)
     gerarCSVdeQualisdeGrupo(group)

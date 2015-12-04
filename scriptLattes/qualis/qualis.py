@@ -28,8 +28,8 @@ import fileinput
 
 import pandas
 
+from qualis.qualisextractor import QualisExtractor
 from scriptLattes.util.util import similaridade_entre_cadeias
-from qualisextractor import QualisExtractor
 from scriptLattes.util.util import find_file
 
 logger = logging.getLogger(__name__)

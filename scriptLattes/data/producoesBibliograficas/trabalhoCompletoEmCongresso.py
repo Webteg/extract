@@ -217,7 +217,7 @@ class TrabalhoCompletoEmCongresso:
                 s += u"{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}".format(nomeCompleto, self.ano, self.doi,
                                                                       self.titulo, self.nomeDoEvento, self.autores,
                                                                       self.qualis, self.qualissimilar)
-            except UnicodeDecodeError, err:
+            except UnicodeDecodeError as err:
                 print(nomeCompleto)
                 print(str(self.ano))
                 print(self.doi)

@@ -32,7 +32,6 @@ Other:
 
 from __future__ import absolute_import, unicode_literals
 
-import chardet
 import logging
 import sys
 from pathlib import Path
@@ -322,7 +321,7 @@ def cli():
                     try:
                         # with cv_path.open() as f:
                         with open(str(cv_path)) as f:
-                            cv_lattes_content = f.read().decode(encoding)#.encode("utf-8")
+                            cv_lattes_content = f.read()#.decode(encoding)#.encode("utf-8")
                     except UnicodeDecodeError:
                         continue
                     break

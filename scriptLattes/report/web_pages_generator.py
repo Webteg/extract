@@ -3,6 +3,7 @@
 # filename: geradorDePaginasWeb
 
 import datetime
+import json
 import logging
 import os
 import re
@@ -17,9 +18,9 @@ from jinja2.loaders import PackageLoader
 from pandas.core.indexing import IndexingError
 
 import membro
-from highcharts import *  # highcharts
 from report import file_generator
 from report.charts.graficoDeInternacionalizacao import *
+from report.charts.highcharts import highchart, chart_type, jscmd
 
 logger = logging.getLogger('scriptLattes')
 
@@ -52,9 +53,25 @@ class WebPagesGenerator:
         if google_analytics_key:
             self.global_template_vars["google_analytics_key"] = google_analytics_key
 
+        # Format: (page, title, object, template)
+        # template is a relative path; check self.jinja initialization
+        self.bibliographical_productions_routes = [
+            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
+            ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
+            ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
+            ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
+            ("PB8-0.html", u"Apresentações de trabalho ", self.grupo.presentations, "bibliographical_production/presentations_list.html"),
+            ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.grupo.others, "bibliographical_production/others_list.html"),
+            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
+        ]
+
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
-        self.generate_bibliographical_production_pages()
+        self.generate_bibliographical_production_pages(routes=self.bibliographical_productions_routes)
         # self.gerarPaginasDeProducoesTecnicas()
         # self.gerarPaginasDeProducoesArtisticas()
         # self.gerarPaginasDePatentes()
@@ -325,7 +342,11 @@ class WebPagesGenerator:
         })
 
         # assert isinstance(productions, pandas.DataFrame)
-        template_vars["grouped_productions"] = productions.ordered_dict_by(group_by=group_by, ascending=ascending)
+        productions_by_year = productions.ordered_dict_by(group_by=group_by, ascending=ascending)
+        template_vars["grouped_productions"] = productions_by_year
+        chart = self.gerar_grafico_de_producoes(productions_by_year, title)
+        jsondata = json.dumps(chart)
+        template_vars["chart"] = {"jsondata": jsondata}
 
         s = template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -385,24 +406,9 @@ class WebPagesGenerator:
                 self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
         return total_producoes
 
-    def generate_bibliographical_production_pages(self):
-        # Format: (page, title, object, template)
-        # template is a relative path; check self.jinja initialization
-        self.bibliographical_productions_routes = [
-            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
-            ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
-            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
-            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
-            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
-            ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
-            ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
-            ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
-            ("PB8-0.html", u"Apresentações de trabalho ", self.grupo.presentations, "bibliographical_production/presentations_list.html"),
-            ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.grupo.others, "bibliographical_production/others_list.html"),
-            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
-        ]
+    def generate_bibliographical_production_pages(self, routes):
 
-        for page, title, productions, template in self.bibliographical_productions_routes:
+        for page, title, productions, template in routes:
             self.generate_production_page(productions, group_by='ano', ascending=False,
                                           template_name=template,  # self.grupo.compilador.listaCompletaPB,
                                           title=title, page=page)
@@ -607,19 +613,20 @@ class WebPagesGenerator:
 
     @staticmethod
     def template_pagina_de_producoes():
-        st = u'''
-                {top}
-                {grafico}
-                <h3>{titulo}</h3> <br>
-                    <div id="container" style="min-width: 310px; max-width: 1920px; height: {height}; margin: 0"></div>
-                    Número total de itens: {numero_itens}<br>
-                    {totais_qualis}
-                    {indice_paginas}
-                    {producoes}
-                    </table>
-                {bottom}
-              '''
-        return st
+        raise "deprecated"
+        # st = u'''
+        #         {top}
+        #         {grafico}
+        #         <h3>{titulo}</h3> <br>
+        #             <div id="container" style="min-width: 310px; max-width: 1920px; height: {height}; margin: 0"></div>
+        #             Número total de itens: {numero_itens}<br>
+        #             {totais_qualis}
+        #             {indice_paginas}
+        #             {producoes}
+        #             </table>
+        #         {bottom}
+        #       '''
+        # return st
 
     @staticmethod
     def template_producao():
@@ -629,18 +636,18 @@ class WebPagesGenerator:
         return s
 
     @staticmethod
-    def gerar_grafico_de_producoes(listaCompleta, titulo):
-
+    def gerar_grafico_de_producoes(productions_by_year, titulo):
+        # FIXME: replace by package pandas-highcharts
         chart = highchart(type=chart_type.column)
         chart.set_y_title(u'Frequência')
         # chart.set_x_title(u'Ano')
-        # chart.set_x_categories(sorted(listaCompleta.keys()))
+        # chart.set_x_categories(sorted(productions_by_year.keys()))
         # chart['xAxis']['type'] = 'categories'
 
         categories = []
         areas_map = {None: 0}
         estrato_area_ano_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for ano, publicacoes in sorted(listaCompleta.items()):
+        for ano, publicacoes in sorted(productions_by_year.items()):
             categories.append(ano)
             for pub in publicacoes:
                 try:
@@ -662,13 +669,13 @@ class WebPagesGenerator:
         series = []
         if not estrato_area_ano_freq.keys():  # produções vazias
             logger.debug("produções vazias")
-        elif len(
-            estrato_area_ano_freq.keys()) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
-            chart.settitle(titulo.decode('utf8'))
+        elif len(list(estrato_area_ano_freq.keys())) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
+            chart.settitle(titulo)
             chart['plotOptions']['column']['stacking'] = None
             chart['chart']['height'] = 400
             # chart['legend']['title'] = {'text': 'Ano'}
-            chart['legend']['enabled'] = jscmd('false')
+            # chart['legend']['enabled'] = jscmd('false')
+            chart['legend']['enabled'] = 'false'
             chart['xAxis']['type'] = 'category'
 
             # freq = [estrato_area_ano_freq[None][None][ano] for ano in categories]
@@ -681,7 +688,7 @@ class WebPagesGenerator:
                 data.append([ano, freq])
             series.append({'name': u'Total', 'data': data})
 
-            # for ano, pub in sorted(listaCompleta.items()):
+            # for ano, pub in sorted(productions_by_year.items()):
             #     series.append({'name': ano, 'data': [len(pub)]}) #, 'y': [len(pub)]})
         else:  # temos informações sobre qualis
             chart.settitle(u'Publicações por ano agrupadas por área e estrato Qualis')
@@ -690,7 +697,8 @@ class WebPagesGenerator:
             # chart['plotOptions']['column']['stacking'] = 'normal'
             chart['plotOptions']['bar']['stacking'] = 'normal'
             chart['legend']['title'] = {'text': 'Estrato Qualis'}
-            chart['legend']['enabled'] = jscmd('true')
+            # chart['legend']['enabled'] = jscmd('true')
+            chart['legend']['enabled'] = 'true'
             chart['xAxis']['type'] = 'category'
             # chart['yAxis']['stackLabels']['rotation'] = 90
             # chart['yAxis']['stackLabels']['textAlign'] = 'right'
