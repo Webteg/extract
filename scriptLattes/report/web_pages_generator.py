@@ -334,19 +334,18 @@ class WebPagesGenerator:
         template_vars.update({
             "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
             "subtitle": title,
-            # "template_name": template_name,
-            "chart": "FIXME: IMPLEMENTAR CHART",
             "numero_itens": len(productions),
-            "totais_qualis": "FIXME",
-            "indice_paginas": "FIXME",
+            "totais_qualis": None,
+            "indice_paginas": None,
         })
 
         # assert isinstance(productions, pandas.DataFrame)
-        productions_by_year = productions.ordered_dict_by(group_by=group_by, ascending=ascending)
+        productions_by_year = productions.ordered_dict_by(key_by=group_by, ascending=ascending)
         template_vars["grouped_productions"] = productions_by_year
         chart = self.gerar_grafico_de_producoes(productions_by_year, title)
-        jsondata = json.dumps(chart)
-        template_vars["chart"] = {"jsondata": jsondata}
+        # jsondata = json.dumps(chart)
+        jsondata = chart.json()
+        template_vars["chart"] = {"jsondata": jsondata, "height": chart['chart']['height']}
 
         s = template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -354,7 +353,7 @@ class WebPagesGenerator:
 
         return
         ##############################
-        totais_qualis = ""
+        # totais_qualis = ""
         # if self.grupo.obterParametro('global-identificar_publicacoes_com_qualis'):
         #     if self.grupo.obterParametro('global-arquivo_qualis_de_periodicos'):  # FIXME: nao está mais sendo usado agora que há qualis online
         #         if prefixo == 'PB0':
@@ -365,46 +364,46 @@ class WebPagesGenerator:
         #         elif prefixo == 'PB5':
         #             totais_qualis = self.formatarTotaisQualis(self.grupo.qualis.qtdPB5)
 
-        total_producoes = sum(len(v) for v in lista_completa.values())
-
-        keys = sorted(lista_completa.keys(), reverse=True)
-        if keys:  # apenas geramos páginas web para lista com pelo menos 1 elemento
-            max_elementos = int(self.grupo.obterParametro('global-itens_por_pagina'))
-            total_paginas = int(math.ceil(total_producoes / (max_elementos * 1.0)))  # dividimos os relatórios em grupos (e.g 1000 items)
-
-            grafico = self.gerar_grafico_de_producoes(lista_completa, titulo_pagina)  # FIXME: é o mesmo gráfico em todas as páginas
-
-            anos_indices_publicacoes = self.arranjar_publicacoes(lista_completa)
-            itens_por_pagina = self.chunks(anos_indices_publicacoes, max_elementos)
-            for numero_pagina, itens in enumerate(itens_por_pagina):
-                producoes_html = ''
-                for indice_na_pagina, (ano, indice_no_ano, publicacao) in enumerate(itens):
-                    # armazenamos uma copia da publicacao (formato RIS)
-                    if ris and self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
-                        self.salvarPublicacaoEmFormatoRIS(publicacao)
-
-                    if indice_na_pagina == 0 or indice_no_ano == 0:
-                        if indice_na_pagina > 0:
-                            producoes_html += '</table></div>'
-                        producoes_html += '<div id="dv-year-{0}"><h3 class="year">{0}</h3> <table>'.format(
-                            ano if ano else '*itens sem ano')
-
-                    producao_html = self.template_producao()
-                    producao_html = producao_html.format(indice=indice_no_ano + 1,
-                                                         publicacao=publicacao.html(self.grupo.members_list.values()))
-                    producoes_html += producao_html
-                producoes_html += '</table></div>'
-
-                pagina_html = self.template_pagina_de_producoes()
-                pagina_html = pagina_html.format(top=self.pagina_top(), bottom=self.paginaBottom(),
-                                                 grafico=grafico.html(), height=grafico['chart']['height'],
-                                                 titulo=titulo_pagina.decode("utf8"), numero_itens=str(total_producoes),
-                                                 totais_qualis=totais_qualis,
-                                                 indice_paginas=self.gerarIndiceDePaginas(total_paginas, numero_pagina,
-                                                                                          prefixo),
-                                                 producoes=producoes_html)
-                self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
-        return total_producoes
+        # total_producoes = sum(len(v) for v in lista_completa.values())
+        #
+        # keys = sorted(lista_completa.keys(), reverse=True)
+        # if keys:  # apenas geramos páginas web para lista com pelo menos 1 elemento
+        #     max_elementos = int(self.grupo.obterParametro('global-itens_por_pagina'))
+        #     total_paginas = int(math.ceil(total_producoes / (max_elementos * 1.0)))  # dividimos os relatórios em grupos (e.g 1000 items)
+        #
+        #     grafico = self.gerar_grafico_de_producoes(lista_completa, titulo_pagina)  # FIXME: é o mesmo gráfico em todas as páginas
+        #
+        #     anos_indices_publicacoes = self.arranjar_publicacoes(lista_completa)
+        #     itens_por_pagina = self.chunks(anos_indices_publicacoes, max_elementos)
+        #     for numero_pagina, itens in enumerate(itens_por_pagina):
+        #         producoes_html = ''
+        #         for indice_na_pagina, (ano, indice_no_ano, publicacao) in enumerate(itens):
+        #             # armazenamos uma copia da publicacao (formato RIS)
+        #             if ris and self.grupo.obterParametro('relatorio-salvar_publicacoes_em_formato_ris'):
+        #                 self.salvarPublicacaoEmFormatoRIS(publicacao)
+        #
+        #             if indice_na_pagina == 0 or indice_no_ano == 0:
+        #                 if indice_na_pagina > 0:
+        #                     producoes_html += '</table></div>'
+        #                 producoes_html += '<div id="dv-year-{0}"><h3 class="year">{0}</h3> <table>'.format(
+        #                     ano if ano else '*itens sem ano')
+        #
+        #             producao_html = self.template_producao()
+        #             producao_html = producao_html.format(indice=indice_no_ano + 1,
+        #                                                  publicacao=publicacao.html(self.grupo.members_list.values()))
+        #             producoes_html += producao_html
+        #         producoes_html += '</table></div>'
+        #
+        #         pagina_html = self.template_pagina_de_producoes()
+        #         pagina_html = pagina_html.format(top=self.pagina_top(), bottom=self.paginaBottom(),
+        #                                          grafico=grafico.html(), height=grafico['chart']['height'],
+        #                                          titulo=titulo_pagina.decode("utf8"), numero_itens=str(total_producoes),
+        #                                          totais_qualis=totais_qualis,
+        #                                          indice_paginas=self.gerarIndiceDePaginas(total_paginas, numero_pagina,
+        #                                                                                   prefixo),
+        #                                          producoes=producoes_html)
+        #         self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
+        # return total_producoes
 
     def generate_bibliographical_production_pages(self, routes):
 
@@ -649,7 +648,8 @@ class WebPagesGenerator:
         estrato_area_ano_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         for ano, publicacoes in sorted(productions_by_year.items()):
             categories.append(ano)
-            for pub in publicacoes:
+            assert isinstance(publicacoes, pandas.DataFrame)
+            for i, pub in publicacoes.iterrows():
                 try:
                     if not pub.qualis:
                         logger.debug("qualis is None")

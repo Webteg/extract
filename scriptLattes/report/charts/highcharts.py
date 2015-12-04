@@ -55,10 +55,9 @@ class bgcolor(object):
         return self.colorstr
 
 
-# true = jsbool(True)
-# false = jsbool(False)
-true = 'true'
-false = 'false'
+true = jsbool(True)
+false = jsbool(False)
+
 
 def format_json(d):
     s = u''
@@ -70,7 +69,7 @@ def format_json(d):
                 s += format_json(k)
             elif isinstance(k, list):
                 s += format_json(k)
-            elif isinstance(k, str) or isinstance(k, unicode):
+            elif isinstance(k, str):  # or isinstance(k, unicode):
                 s += '\'' + k + '\''
             elif k is None:  # we explicitly want None
                 s += 'null'
@@ -81,14 +80,13 @@ def format_json(d):
         s += ']'
     elif isinstance(d, dict):
         s += '{' #if isinstance(d, dict) else '[\n'
-        keys = d.keys() #if isinstance(d, dict)
-        for k in keys:
-            s += (', \n' if k != keys[0] else '') + str(k) + ': '
+        for i, k in enumerate(d.keys()):
+            s += (', \n' if i != 0 else '') + str(k) + ': '
             if isinstance(d[k], dict):
                 s += format_json(d[k])
             elif isinstance(d[k], list):
                 s += format_json(d[k])
-            elif isinstance(d[k], str) or isinstance(d[k], unicode):
+            elif isinstance(d[k], str):  # or isinstance(d[k], unicode):
                 s += '\'' + d[k] + '\''
             elif d[k] is None:  # we explicitly want None
                 s += 'null'
@@ -205,8 +203,7 @@ jsondata = {
         # 'y': 40,
         # 'floating': true,
         'borderWidth': 1,
-        # 'backgroundColor': bgcolor(),
-        'backgroundColor': '(Highcharts.theme && Highcharts.theme.legendBackgroundColor || \'#FFFFFF\')',
+        'backgroundColor': bgcolor(),
         'shadow': true,
         # 'labelFormatter': jscmd('''function () {
         #         return this.options.stack + ' (click to hide)';

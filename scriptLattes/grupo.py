@@ -96,7 +96,7 @@ class Grupo:
         # self.labels_set.sort()
         # self.listaDeRotulosCores = [''] * len(self.labels_set)
 
-        self.journal_papers = JournalPapers(id=self.group_id)  # TODO: define a group id
+        self.journal_papers = JournalPapers(id=self.group_id, group_similar=True)  # TODO: define a group id
         self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
         self.books = Books(id=self.group_id)  # TODO: define a group id
         self.newspaper_texts = NewspaperTexts(id=self.group_id)  # TODO: define a group id
@@ -139,7 +139,7 @@ class Grupo:
 
     # FIXME: não usar config aqui; elas são no fundo filtros para os relatórios
     def compilarListasDeItems(self, config):
-        raise "método inutilizado"
+        raise "deprecated"
         self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
         self.aggregate_data()
 

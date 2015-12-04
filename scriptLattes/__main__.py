@@ -315,16 +315,8 @@ def cli():
                     continue
 
                 assert isinstance(cv_path, Path)
-                # with open(str(cv_path)) as f:
-                #     charset = chardet.detect(f.read())
-                for encoding in ["utf-8", "latin-1", "ascii"]:
-                    try:
-                        # with cv_path.open() as f:
-                        with open(str(cv_path)) as f:
-                            cv_lattes_content = f.read()#.decode(encoding)#.encode("utf-8")
-                    except UnicodeDecodeError:
-                        continue
-                    break
+                with cv_path.open() as f:
+                    cv_lattes_content = f.read()  # py2 dá erros difíceis de consertar # .decode(encoding)#.encode("utf-8")
                 logger.debug("Utilizando CV armazenado no cache: {}.".format(cv_path))
 
                 if use_xml:

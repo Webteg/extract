@@ -24,13 +24,12 @@
 
     {% if chart %}
         {% include "highchart.html" with context %}
-        {{chart}}
     {% endif %}
 
     Número total de itens: {{numero_itens}}
     <br>
-    {{totais_qualis}}
-    {{indice_paginas}}
+    <!--{{totais_qualis}}-->
+    <!--{{indice_paginas}}-->
 
     <!--{producoes}-->
     {% block list %}

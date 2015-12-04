@@ -24,7 +24,8 @@ class JournalPapers(Papers):
                'autores',
                'only_accepted']
 
-    def __init__(self, id, initial_data_frame=None):
+    def __init__(self, id, initial_data_frame=None, group_similar=False):
+        super().__init__(group_similar=group_similar)
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
         if initial_data_frame is not None:
@@ -45,6 +46,8 @@ class JournalPapers(Papers):
         papers_df['id_membro'] = self.id
         papers_df['only_accepted'] = only_accepted
         self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
+        if self.group_similar:
+            pass
 
     def append(self, papers):
         assert isinstance(papers, JournalPapers)
@@ -64,7 +67,7 @@ class JournalPapers(Papers):
         By default, return only published papers (i.e., ignore only accepted papers).
         :return: data frame with only_accepted papers filtered out
         """
-        return JournalPapers(self.id, initial_data_frame=self.data_frame[self.data_frame['only_accepted'] == False])
+        return JournalPapers(self.id, initial_data_frame=self.data_frame[self.data_frame['only_accepted'] == False], group_similar=self.group_similar)
 
     @property
     def only_accepted(self):

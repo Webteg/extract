@@ -308,6 +308,8 @@ class ParserLattesHTML(HTMLParser):
         # options = dict(output_xhtml=1, add_xml_decl=1, indent=1, tidy_mark=0)
         # cvLattesHTML = str(tidy.parseString(cvLattesHTML, **options)).decode("utf8")
 
+        # cvLattesHTML = cvLattesHTML.encode("utf-8")
+
         self.feed(cvLattesHTML)
 
     # ------------------------------------------------------------------------ #
