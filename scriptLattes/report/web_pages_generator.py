@@ -69,6 +69,7 @@ class WebPagesGenerator:
             # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
         ]
 
+    def generate(self):
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
         self.generate_bibliographical_production_pages(routes=self.bibliographical_productions_routes)

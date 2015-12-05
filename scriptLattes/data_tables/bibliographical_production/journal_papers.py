@@ -38,23 +38,11 @@ class JournalPapers(Papers):
         :param only_accepted: whether the papers in the list are only accepted for publication and not yet published
         :return:
         """
-        assert self.adjacency_matrix is None
-        papers = []
-        for paper in papers_list:
-            papers.append([getattr(paper, attribute, None) for attribute in self.columns])
-        papers_df = pd.DataFrame(papers, columns=self.columns)
-        papers_df['id_membro'] = self.id
-        papers_df['only_accepted'] = only_accepted
-        self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
-    def append(self, papers):
-        assert isinstance(papers, JournalPapers)
-        assert self.adjacency_matrix is None
-        self.data_frame = self.data_frame.append(papers.data_frame, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
+        super().add_from_parser(papers_list, only_accepted=only_accepted)
+        # papers_df = self._df_from_parser(papers_list)
+        # papers_df['id_membro'] = self.id
+        # papers_df['only_accepted'] = only_accepted
+        # self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)

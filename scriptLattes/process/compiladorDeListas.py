@@ -405,8 +405,6 @@ class CompiladorDeListas:
         # FIXME: lógica movida para o caller (Group)
         # FIXME: tratar opções
         raise "método inutilizado"
-        self.matrizesArtigoEmPeriodico = self.create_adjacency_and_weighted_matrices(self.grupo.members_indices, self.grupo.journal_papers.co_authors_list())
-        self.matrizesTrabalhoCompletoEmCongresso = self.create_adjacency_and_weighted_matrices(self.grupo.members_indices, self.grupo.event_papers.co_authors_list())
 
         # if self.grupo.obterParametro('grafo-incluir_artigo_em_periodico'):
         # self.matrizesArtigoEmPeriodico = self.criarMatrizes(self.listaCompletaArtigoEmPeriodico)

@@ -25,29 +25,6 @@ class Others(Papers):
         if initial_data_frame is not None:
             self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
 
-    def add_from_parser(self, productions_list):
-        """
-        Add a list of productions extracted by a parser.
-        :param productions_list: list of productions
-        :return:
-        """
-        assert self.adjacency_matrix is None
-        presentations = []
-        for production in productions_list:
-            presentations.append([getattr(production, attribute, None) for attribute in self.columns])
-        df = pd.DataFrame(presentations, columns=self.columns)
-        df['id_membro'] = self.id
-        self.data_frame = self.data_frame.append(df, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
-    def append(self, productions):
-        assert isinstance(productions, type(self))
-        assert self.adjacency_matrix is None
-        self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
         # TODO: ver se é preciso ignorar quando id_membro é o mesmo

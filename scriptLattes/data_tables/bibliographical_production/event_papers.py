@@ -35,28 +35,17 @@ class EventPapers(Papers):
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
         if initial_data_frame is not None:
-            self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
+            assert isinstance(initial_data_frame, pd.DataFrame)
+            # self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
+            self.data_frame = pd.DataFrame(initial_data_frame)
 
-    def add_from_parser(self, papers_list, papers_type):
-        # list of trabalhoEmCongresso
-        papers = {}
-        for column in self.columns[1:]:  # skip id_membro
-            attribute = column
-            if column in self.mapping_attributes:
-                attribute = self.mapping_attributes[column]
-            papers[column] = [getattr(paper, attribute, None) for paper in papers_list]
-        papers_df = pd.DataFrame(papers)
-        papers_df['id_membro'] = self.id
-        papers_df['type'] = papers_type
-        self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
-    def append(self, papers):
-        assert isinstance(papers, EventPapers)
-        self.data_frame = self.data_frame.append(papers.data_frame, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
+    # def add_from_parser(self, papers_list, type):
+    #     papers_df = self._df_from_parser(papers_list)
+    #     papers_df['id_membro'] = self.id
+    #     papers_df['type'] = type
+    #     self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
+    #     # if self.group_similar:
+    #     #     self.mark_similar()
 
     @staticmethod
     def is_similar(row1, row2):

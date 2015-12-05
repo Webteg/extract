@@ -33,7 +33,6 @@ from util.util import get_lattes_url
 
 
 class Membro:
-
     sexo = ''
     nomeEmCitacoesBibliograficas = ''
     bolsaProdutividade = ''
@@ -116,7 +115,7 @@ class Membro:
 
     # def __init__(self, idMembro, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano, xml=''):
 
-    def __init__(self, identificador, nome, periodo, rotulo, itemsDesdeOAno, itemsAteOAno):
+    def __init__(self, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano):
         self.id_lattes = str(identificador)
         self.nome_completo = nome  # nome.split(";")[0].strip().decode('utf8', 'replace')
         self.periodo = periodo
@@ -137,21 +136,20 @@ class Membro:
         #     self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
         self.url = get_lattes_url(self.id_lattes)
 
-        self.itemsDesdeOAno = itemsDesdeOAno
-        self.itemsAteOAno = itemsAteOAno
-        self.criarListaDePeriodos(self.periodo)
+        self.items_desde_ano = items_desde_ano
+        self.items_ate_ano = items_ate_ano
+        self.member_timespans = self.parse_timespans_list(self.periodo)
 
     def __lt__(self, other):
         return self.nome_completo < other.nome_completo
 
-    def criarListaDePeriodos(self, periodoDoMembro):
-        self.listaPeriodo = []
-        periodoDoMembro = re.sub('\s+', '', periodoDoMembro)
+    def parse_timespans_list(self, timespans_string):
+        timespans = []
+        timespans_string = re.sub('\s+', '', timespans_string)
 
-        if not periodoDoMembro:  # se nao especificado o periodo, entao aceitamos todos os items do CV Lattes
-            self.listaPeriodo = [[0, 10000]]
-        else:
-            lista = periodoDoMembro.split("&")
+        # TODO: ver se não é possível reajustar isso
+        if timespans_string:  # se nao especificado o periodo, entao aceitamos todos os items do CV Lattes
+            lista = timespans_string.split("&")
             for periodo in lista:
                 ano1, _, ano2 = periodo.partition("-")
 
@@ -161,11 +159,11 @@ class Membro:
                     ano2 = str(datetime.datetime.now().year)
 
                 if ano1.isdigit() and ano2.isdigit():
-                    self.listaPeriodo.append([int(ano1), int(ano2)])
+                    timespans.append([int(ano1), int(ano2)])
                 else:
-                    print("\n[AVISO IMPORTANTE] Periodo nao válido: {}. (periodo desconsiderado na lista)".format(periodo))
-                    print("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}\n".format(self.id_lattes,
-                                                                                  self.nome_completo.encode('utf8')))
+                    logger.warning("[AVISO IMPORTANTE] Período não válido: {}. (período desconsiderado na lista)".format(periodo))
+                    logger.warning("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}".format(self.id_lattes, self.nome_completo.encode('utf8')))
+        return timespans
 
     def carregar_dados_cv_lattes(self, parser):
         # Obtemos todos os dados do CV Lattes
@@ -190,9 +188,9 @@ class Membro:
         self.journal_papers.add_from_parser(parser.listaArtigoEmPeriodico)
         self.journal_papers.add_from_parser(parser.listaArtigoAceito, only_accepted=True)
 
-        self.event_papers.add_from_parser(parser.listaTrabalhoCompletoEmCongresso, EventPapers.Types.complete)
-        self.event_papers.add_from_parser(parser.listaResumoExpandidoEmCongresso, EventPapers.Types.expanded_abstract)
-        self.event_papers.add_from_parser(parser.listaResumoEmCongresso, EventPapers.Types.abstract)
+        self.event_papers.add_from_parser(parser.listaTrabalhoCompletoEmCongresso, type=EventPapers.Types.complete)
+        self.event_papers.add_from_parser(parser.listaResumoExpandidoEmCongresso, type=EventPapers.Types.expanded_abstract)
+        self.event_papers.add_from_parser(parser.listaResumoEmCongresso, type=EventPapers.Types.abstract)
 
         self.books.add_from_parser(parser.listaLivroPublicado)
         self.books.add_from_parser(parser.listaCapituloDeLivroPublicado, only_chapter=True)
@@ -290,6 +288,7 @@ class Membro:
         self.listaOrganizacaoDeEvento = self.filtrarItems(self.listaOrganizacaoDeEvento)
 
     def filtrarItems(self, lista):
+        # FIXME: refactor
         return list(filter(self.estaDentroDoPeriodo, lista))
 
         # Not pythonic
@@ -302,9 +301,10 @@ class Membro:
         # return lista
 
     def estaDentroDoPeriodo(self, objeto):
+        # FIXME: refactor
         if objeto.__module__ == 'orientacaoEmAndamento':
             objeto.ano = int(objeto.ano) if objeto.ano else 0  # Caso
-            if objeto.ano > self.itemsAteOAno:
+            if objeto.ano > self.items_ate_ano:
                 return 0
             else:
                 return 1
@@ -322,15 +322,15 @@ class Membro:
             objeto.anoConclusao = int(objeto.anoConclusao)
             objeto.ano = objeto.anoInicio  # Para comparação entre projetos
 
-            if objeto.anoInicio > self.itemsAteOAno and objeto.anoConclusao > self.itemsAteOAno\
-                or objeto.anoInicio < self.itemsDesdeOAno and objeto.anoConclusao < self.itemsDesdeOAno:
+            if objeto.anoInicio > self.items_ate_ano and objeto.anoConclusao > self.items_ate_ano \
+                or objeto.anoInicio < self.items_desde_ano and objeto.anoConclusao < self.items_desde_ano:
                 return 0
             else:
                 fora = 0
-                for per in self.listaPeriodo:
+                for per in self.member_timespans:
                     if objeto.anoInicio > per[1] and objeto.anoConclusao > per[1] or objeto.anoInicio < per[0] and objeto.anoConclusao < per[0]:
                         fora += 1
-                if fora == len(self.listaPeriodo):
+                if fora == len(self.member_timespans):
                     return 0
                 else:
                     return 1
@@ -341,11 +341,11 @@ class Membro:
                 return 1
             else:
                 objeto.ano = int(objeto.ano)
-                if objeto.ano < self.itemsDesdeOAno or objeto.ano > self.itemsAteOAno:
+                if objeto.ano < self.items_desde_ano or objeto.ano > self.items_ate_ano:
                     return 0
                 else:
                     retorno = 0
-                    for per in self.listaPeriodo:
+                    for per in self.member_timespans:
                         if per[0] <= objeto.ano <= per[1]:
                             retorno = 1
                             break
@@ -512,47 +512,47 @@ class Membro:
 
         else:
             totals = [
-                (u'- Número de colaboradores (identificado)',       len(self.listaIDLattesColaboradoresUnica)),
-                (u'- Artigos completos publicados em periódicos',   len(self.journal_papers)),
-                (u'- Livros publicados/organizados ou edições',     len(self.listaLivroPublicado)),
-                (u'- Capítulos de livros publicados',               len(self.listaCapituloDeLivroPublicado)),
-                (u'- Textos em jornais de notícias/revistas',       len(self.listaTextoEmJornalDeNoticia)),
+                (u'- Número de colaboradores (identificado)', len(self.listaIDLattesColaboradoresUnica)),
+                (u'- Artigos completos publicados em periódicos', len(self.journal_papers)),
+                (u'- Livros publicados/organizados ou edições', len(self.listaLivroPublicado)),
+                (u'- Capítulos de livros publicados', len(self.listaCapituloDeLivroPublicado)),
+                (u'- Textos em jornais de notícias/revistas', len(self.listaTextoEmJornalDeNoticia)),
                 (u'- Trabalhos completos publicados em congressos', len(self.listaTrabalhoCompletoEmCongresso)),
-                (u'- Resumos expandidos publicados em congressos',  len(self.listaResumoExpandidoEmCongresso)),
-                (u'- Resumos publicados em anais de congressos',    len(self.listaResumoEmCongresso)),
-                (u'- Artigos aceitos para publicação',              len(self.listaArtigoAceito)),
-                (u'- Apresentações de Trabalho',                    len(self.listaApresentacaoDeTrabalho)),
-                (u'- Demais tipos de produção bibliográfica',       len(self.listaOutroTipoDeProducaoBibliografica)),
-                (u'- Softwares com registro de patente',            len(self.listaSoftwareComPatente)),
-                (u'- Softwares sem registro de patente',            len(self.listaSoftwareSemPatente)),
-                (u'- Produtos tecnológicos',                        len(self.listaProdutoTecnologico)),
-                (u'- Processos ou técnicas',                        len(self.listaProcessoOuTecnica)),
-                (u'- Trabalhos técnicos',                           len(self.listaTrabalhoTecnico)),
-                (u'- Demais tipos de produção técnica',             len(self.listaOutroTipoDeProducaoTecnica)),
-                (u'- Patente',                                      len(self.listaPatente)),
-                (u'- Programa de computador',                       len(self.listaProgramaComputador)),
-                (u'- Desenho industrial',                           len(self.listaDesenhoIndustrial)),
-                (u'- Produção artística/cultural',                  len(self.listaProducaoArtistica)),
-                (u'- Orientações em andamento',                     ''),
-                (u'  . Supervições de pos doutorado',               len(self.listaOASupervisaoDePosDoutorado)),
-                (u'  . Tese de doutorado',                          len(self.listaOATeseDeDoutorado)),
-                (u'  . Dissertações de mestrado',                   len(self.listaOADissertacaoDeMestrado)),
-                (u'  . Monografías de especialização',              len(self.listaOAMonografiaDeEspecializacao)),
-                (u'  . TCC',                                        len(self.listaOATCC)),
-                (u'  . Iniciação científica',                       len(self.listaOAIniciacaoCientifica)),
-                (u'  . Orientações de outra natureza',              len(self.listaOAOutroTipoDeOrientacao)),
-                (u'- Orientações concluídas',                       ''),
-                (u'  . Supervições de pos doutorado',               len(self.listaOCSupervisaoDePosDoutorado)),
-                (u'  . Tese de doutorado',                          len(self.listaOCTeseDeDoutorado)),
-                (u'  . Dissertações de mestrado',                   len(self.listaOCDissertacaoDeMestrado)),
-                (u'  . Monografías de especialização',              len(self.listaOCMonografiaDeEspecializacao)),
-                (u'  . TCC',                                        len(self.listaOCTCC)),
-                (u'  . Iniciação científica',                       len(self.listaOCIniciacaoCientifica)),
-                (u'  . Orientações de outra natureza',              len(self.listaOCOutroTipoDeOrientacao)),
-                (u'- Projetos de pesquisa',                         len(self.listaProjetoDePesquisa)),
-                (u'- Prêmios e títulos',                            len(self.listaPremioOuTitulo)),
-                (u'- Participação em eventos',                      len(self.listaParticipacaoEmEvento)),
-                (u'- Organização de eventos',                       len(self.listaOrganizacaoDeEvento)),
+                (u'- Resumos expandidos publicados em congressos', len(self.listaResumoExpandidoEmCongresso)),
+                (u'- Resumos publicados em anais de congressos', len(self.listaResumoEmCongresso)),
+                (u'- Artigos aceitos para publicação', len(self.listaArtigoAceito)),
+                (u'- Apresentações de Trabalho', len(self.listaApresentacaoDeTrabalho)),
+                (u'- Demais tipos de produção bibliográfica', len(self.listaOutroTipoDeProducaoBibliografica)),
+                (u'- Softwares com registro de patente', len(self.listaSoftwareComPatente)),
+                (u'- Softwares sem registro de patente', len(self.listaSoftwareSemPatente)),
+                (u'- Produtos tecnológicos', len(self.listaProdutoTecnologico)),
+                (u'- Processos ou técnicas', len(self.listaProcessoOuTecnica)),
+                (u'- Trabalhos técnicos', len(self.listaTrabalhoTecnico)),
+                (u'- Demais tipos de produção técnica', len(self.listaOutroTipoDeProducaoTecnica)),
+                (u'- Patente', len(self.listaPatente)),
+                (u'- Programa de computador', len(self.listaProgramaComputador)),
+                (u'- Desenho industrial', len(self.listaDesenhoIndustrial)),
+                (u'- Produção artística/cultural', len(self.listaProducaoArtistica)),
+                (u'- Orientações em andamento', ''),
+                (u'  . Supervições de pos doutorado', len(self.listaOASupervisaoDePosDoutorado)),
+                (u'  . Tese de doutorado', len(self.listaOATeseDeDoutorado)),
+                (u'  . Dissertações de mestrado', len(self.listaOADissertacaoDeMestrado)),
+                (u'  . Monografías de especialização', len(self.listaOAMonografiaDeEspecializacao)),
+                (u'  . TCC', len(self.listaOATCC)),
+                (u'  . Iniciação científica', len(self.listaOAIniciacaoCientifica)),
+                (u'  . Orientações de outra natureza', len(self.listaOAOutroTipoDeOrientacao)),
+                (u'- Orientações concluídas', ''),
+                (u'  . Supervições de pos doutorado', len(self.listaOCSupervisaoDePosDoutorado)),
+                (u'  . Tese de doutorado', len(self.listaOCTeseDeDoutorado)),
+                (u'  . Dissertações de mestrado', len(self.listaOCDissertacaoDeMestrado)),
+                (u'  . Monografías de especialização', len(self.listaOCMonografiaDeEspecializacao)),
+                (u'  . TCC', len(self.listaOCTCC)),
+                (u'  . Iniciação científica', len(self.listaOCIniciacaoCientifica)),
+                (u'  . Orientações de outra natureza', len(self.listaOCOutroTipoDeOrientacao)),
+                (u'- Projetos de pesquisa', len(self.listaProjetoDePesquisa)),
+                (u'- Prêmios e títulos', len(self.listaPremioOuTitulo)),
+                (u'- Participação em eventos', len(self.listaParticipacaoEmEvento)),
+                (u'- Organização de eventos', len(self.listaOrganizacaoDeEvento)),
             ]
             width = max(len(item[0]) for item in totals)
             s += '\n'.join([u'{} {}'.format(label.ljust(width), value) for label, value in totals])

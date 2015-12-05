@@ -140,10 +140,10 @@ class Grupo:
     # FIXME: não usar config aqui; elas são no fundo filtros para os relatórios
     def compilarListasDeItems(self, config):
         raise "deprecated"
-        self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
-        self.aggregate_data()
+        # self.compilador = CompiladorDeListas(self)  # compilamos todo e criamos 'listasCompletas'
+        # self.aggregate_data()
 
-        self.create_colaboration_matrices()
+        # self.create_colaboration_matrices()
 
         # XXX: não sei para que serve o trecho abaixo
         # listas de nomes, rotulos e IDs

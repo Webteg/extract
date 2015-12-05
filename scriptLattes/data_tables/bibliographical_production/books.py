@@ -38,23 +38,12 @@ class Books(Papers):
         :param only_chapter: whether the books in the list are only book chapters and not full books
         :return:
         """
-        assert self.adjacency_matrix is None
-        books = []
-        for book in books_list:
-            books.append([getattr(book, attribute, None) for attribute in self.columns])
-        df = pd.DataFrame(books, columns=self.columns)
-        df['id_membro'] = self.id
-        df['only_chapter'] = only_chapter
-        self.data_frame = self.data_frame.append(df, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
-    def append(self, books):
-        assert isinstance(books, Books)
-        assert self.adjacency_matrix is None
-        self.data_frame = self.data_frame.append(books.data_frame, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
+        super().add_from_parser(books_list, only_chapter=only_chapter)
+        # assert self.adjacency_matrix is None
+        # books_df = self._df_from_parser(books_list)
+        # books_df['id_membro'] = self.id
+        # books_df['only_chapter'] = only_chapter
+        # self.data_frame = self.data_frame.append(books_df, ignore_index=True)
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)

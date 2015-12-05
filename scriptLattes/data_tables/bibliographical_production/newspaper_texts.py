@@ -30,32 +30,6 @@ class NewspaperTexts(Papers):
         if initial_data_frame is not None:
             self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
 
-    def add_from_parser(self, texts_list):
-        """
-        Add a list of newspaper texts extracted by a parser.
-        :param texts_list: the list of texts
-        :return:
-        """
-        assert self.adjacency_matrix is None
-        texts = {}
-        for column in self.columns[1:]:  # skip id_membro
-            attribute = column
-            if column in self.mapping_attributes:
-                attribute = self.mapping_attributes[column]
-            texts[column] = [getattr(text, attribute, None) for text in texts_list]
-        df = pd.DataFrame(texts, columns=self.columns)
-        df['id_membro'] = self.id
-        self.data_frame = self.data_frame.append(df, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
-    def append(self, books):
-        assert isinstance(books, type(self))
-        assert self.adjacency_matrix is None
-        self.data_frame = self.data_frame.append(books.data_frame, ignore_index=True)
-        if self.group_similar:
-            self.mark_similar()
-
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
         # TODO: ver se é preciso ignorar quando id_membro é o mesmo
