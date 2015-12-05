@@ -97,11 +97,11 @@ class Grupo:
         # self.listaDeRotulosCores = [''] * len(self.labels_set)
 
         self.journal_papers = JournalPapers(id=self.group_id, group_similar=True)  # TODO: define a group id
-        self.event_papers = EventPapers(id=self.group_id)  # TODO: define a group id
-        self.books = Books(id=self.group_id)  # TODO: define a group id
-        self.newspaper_texts = NewspaperTexts(id=self.group_id)  # TODO: define a group id
-        self.presentations = Presentations(id=self.group_id)  # TODO: define a group id
-        self.others = Others(id=self.group_id)  # TODO: define a group id
+        self.event_papers = EventPapers(id=self.group_id, group_similar=True)  # TODO: define a group id
+        self.books = Books(id=self.group_id, group_similar=True)  # TODO: define a group id
+        self.newspaper_texts = NewspaperTexts(id=self.group_id, group_similar=True)  # TODO: define a group id
+        self.presentations = Presentations(id=self.group_id, group_similar=True)  # TODO: define a group id
+        self.others = Others(id=self.group_id, group_similar=True)  # TODO: define a group id
         self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
         # self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
 

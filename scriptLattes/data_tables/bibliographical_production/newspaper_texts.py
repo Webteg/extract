@@ -23,7 +23,8 @@ class NewspaperTexts(Papers):
                'data',
                ]
 
-    def __init__(self, id, initial_data_frame=None):
+    def __init__(self, id, initial_data_frame=None, group_similar=False):
+        super().__init__(group_similar=group_similar)
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
         if initial_data_frame is not None:
@@ -41,17 +42,19 @@ class NewspaperTexts(Papers):
             attribute = column
             if column in self.mapping_attributes:
                 attribute = self.mapping_attributes[column]
-            texts[column] = [getattr(text, attribute, '') for text in texts_list]
+            texts[column] = [getattr(text, attribute, None) for text in texts_list]
         df = pd.DataFrame(texts, columns=self.columns)
         df['id_membro'] = self.id
-
-        # df['titulo'] = df['titulo'].str.decode("utf-8").str.encode("utf-8")
         self.data_frame = self.data_frame.append(df, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def append(self, books):
         assert isinstance(books, type(self))
         assert self.adjacency_matrix is None
         self.data_frame = self.data_frame.append(books.data_frame, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
@@ -60,6 +63,6 @@ class NewspaperTexts(Papers):
             return True
         return False
 
-    @property
-    def all(self):
-        return NewspaperTexts(self.id, initial_data_frame=self.data_frame)
+    # @property
+    # def all(self):
+    #     return NewspaperTexts(self.id, initial_data_frame=self.data_frame)

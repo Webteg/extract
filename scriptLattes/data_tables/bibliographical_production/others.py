@@ -18,7 +18,8 @@ class Others(Papers):
                'natureza',  # tipo de apresentacao
                ]
 
-    def __init__(self, id, initial_data_frame=None):
+    def __init__(self, id, initial_data_frame=None, group_similar=False):
+        super().__init__(group_similar=group_similar)
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
         if initial_data_frame is not None:
@@ -37,11 +38,15 @@ class Others(Papers):
         df = pd.DataFrame(presentations, columns=self.columns)
         df['id_membro'] = self.id
         self.data_frame = self.data_frame.append(df, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def append(self, productions):
         assert isinstance(productions, type(self))
         assert self.adjacency_matrix is None
         self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
@@ -50,6 +55,6 @@ class Others(Papers):
             return True
         return False
 
-    @property
-    def all(self):
-        return Others(self.id, initial_data_frame=self.data_frame)
+    # @property
+    # def all(self):
+    #     return Others(self.id, initial_data_frame=self.data_frame)

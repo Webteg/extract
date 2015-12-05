@@ -24,7 +24,8 @@ class Books(Papers):
                'only_chapter',
                ]
 
-    def __init__(self, id, initial_data_frame=None):
+    def __init__(self, id, initial_data_frame=None, group_similar=False):
+        super().__init__(group_similar=group_similar)
         self.id = id
         self.data_frame = pd.DataFrame(columns=self.columns)
         if initial_data_frame is not None:
@@ -45,11 +46,15 @@ class Books(Papers):
         df['id_membro'] = self.id
         df['only_chapter'] = only_chapter
         self.data_frame = self.data_frame.append(df, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def append(self, books):
         assert isinstance(books, Books)
         assert self.adjacency_matrix is None
         self.data_frame = self.data_frame.append(books.data_frame, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
@@ -64,9 +69,9 @@ class Books(Papers):
         By default, return only published papers (i.e., ignore only accepted papers).
         :return: data frame with only_accepted papers filtered out
         """
-        return Books(self.id, initial_data_frame=self.data_frame[self.data_frame['only_chapter'] == False])
+        return Books(self.id, initial_data_frame=self.data_frame[self.data_frame['only_chapter'] == False], group_similar=self.group_similar)
 
     @property
     def only_chapter(self):
-        return Books(self.id, initial_data_frame=self.data_frame[self.data_frame['only_chapter'] == True])
+        return Books(self.id, initial_data_frame=self.data_frame[self.data_frame['only_chapter'] == True], group_similar=self.group_similar)
 

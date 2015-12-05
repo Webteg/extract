@@ -67,7 +67,16 @@ class Papers:
         return pd.pivot_table(self.data_frame, index=column).sort_index(ascending=ascending)
 
     def ordered_dict_by(self, key_by, ascending=True):
-        group_dict = {
-            key: self.data_frame[self.data_frame[key_by] == key] for key in self.data_frame[key_by].unique()
-            }
+        if 'similar' not in self.data_frame.columns:
+            self.mark_similar()
+
+        if self.group_similar:
+            # ignore rows marked as similar to another
+            group_dict = {
+                key: self.data_frame[(self.data_frame[key_by] == key) & (self.data_frame['similar'] == self.data_frame.index)] for key in self.data_frame[key_by].unique()
+                }
+        else:
+            group_dict = {
+                key: self.data_frame[self.data_frame[key_by] == key] for key in self.data_frame[key_by].unique()
+                }
         return OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=not ascending))

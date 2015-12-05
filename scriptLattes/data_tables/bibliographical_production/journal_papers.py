@@ -41,18 +41,20 @@ class JournalPapers(Papers):
         assert self.adjacency_matrix is None
         papers = []
         for paper in papers_list:
-            papers.append([getattr(paper, attribute) for attribute in self.columns[1:-1]])  # skip id_membro and only_accepted
-        papers_df = pd.DataFrame(papers, columns=self.columns[1:-1])
+            papers.append([getattr(paper, attribute, None) for attribute in self.columns])
+        papers_df = pd.DataFrame(papers, columns=self.columns)
         papers_df['id_membro'] = self.id
         papers_df['only_accepted'] = only_accepted
         self.data_frame = self.data_frame.append(papers_df, ignore_index=True)
         if self.group_similar:
-            pass
+            self.mark_similar()
 
     def append(self, papers):
         assert isinstance(papers, JournalPapers)
         assert self.adjacency_matrix is None
         self.data_frame = self.data_frame.append(papers.data_frame, ignore_index=True)
+        if self.group_similar:
+            self.mark_similar()
 
     def is_similar(self, row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
@@ -71,5 +73,5 @@ class JournalPapers(Papers):
 
     @property
     def only_accepted(self):
-        return JournalPapers(self.id, initial_data_frame=self.data_frame[self.data_frame['only_accepted'] == True])
+        return JournalPapers(self.id, initial_data_frame=self.data_frame[self.data_frame['only_accepted'] == True], group_similar=self.group_similar)
 
