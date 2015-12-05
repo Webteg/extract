@@ -30,15 +30,6 @@ class EventPapers(Papers):
                'type',  # completo, resumo, resumo_expandido
                'qualis']
 
-    def __init__(self, id, initial_data_frame=None, group_similar=False):
-        super().__init__(group_similar=group_similar)
-        self.id = id
-        self.data_frame = pd.DataFrame(columns=self.columns)
-        if initial_data_frame is not None:
-            assert isinstance(initial_data_frame, pd.DataFrame)
-            # self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
-            self.data_frame = pd.DataFrame(initial_data_frame)
-
     # def add_from_parser(self, papers_list, type):
     #     papers_df = self._df_from_parser(papers_list)
     #     papers_df['id_membro'] = self.id

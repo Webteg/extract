@@ -24,12 +24,12 @@ class Books(Papers):
                'only_chapter',
                ]
 
-    def __init__(self, id, initial_data_frame=None, group_similar=False):
-        super().__init__(group_similar=group_similar)
-        self.id = id
-        self.data_frame = pd.DataFrame(columns=self.columns)
-        if initial_data_frame is not None:
-            self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
+    # def __init__(self, id, initial_data_frame=None, group_similar=False):
+    #     super().__init__(group_similar=group_similar)
+    #     self.id = id
+    #     self.data_frame = pd.DataFrame(columns=self.columns)
+    #     if initial_data_frame is not None:
+    #         self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
 
     def add_from_parser(self, books_list, only_chapter=False):
         """

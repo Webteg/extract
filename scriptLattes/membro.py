@@ -121,12 +121,16 @@ class Membro:
         self.periodo = periodo
         self.rotulo = rotulo
 
-        self.journal_papers = JournalPapers(self.id_lattes)
-        self.event_papers = EventPapers(self.id_lattes)
-        self.books = Books(self.id_lattes)
-        self.newspaper_texts = NewspaperTexts(self.id_lattes)
-        self.presentations = Presentations(self.id_lattes)
-        self.others = Others(self.id_lattes)
+        self.items_desde_ano = items_desde_ano
+        self.items_ate_ano = items_ate_ano
+        self.member_timespans = self.parse_timespans_list(self.periodo)
+
+        self.journal_papers = JournalPapers(self.id_lattes, timespan=self.member_timespans)
+        self.event_papers = EventPapers(self.id_lattes, timespan=self.member_timespans)
+        self.books = Books(self.id_lattes, timespan=self.member_timespans)
+        self.newspaper_texts = NewspaperTexts(self.id_lattes, timespan=self.member_timespans)
+        self.presentations = Presentations(self.id_lattes, timespan=self.member_timespans)
+        self.others = Others(self.id_lattes, timespan=self.member_timespans)
 
         # replaced by util.get_lattes_url
         # p = re.compile('[a-zA-Z]+')
@@ -136,9 +140,6 @@ class Membro:
         #     self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
         self.url = get_lattes_url(self.id_lattes)
 
-        self.items_desde_ano = items_desde_ano
-        self.items_ate_ano = items_ate_ano
-        self.member_timespans = self.parse_timespans_list(self.periodo)
 
     def __lt__(self, other):
         return self.nome_completo < other.nome_completo

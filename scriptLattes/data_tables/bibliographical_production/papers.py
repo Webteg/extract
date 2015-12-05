@@ -3,9 +3,7 @@
 from abc import abstractmethod, ABCMeta
 from collections import OrderedDict
 
-import numpy
 import pandas as pd
-from theano.tensor.subtensor import as_index_variable
 
 from data_tables.util import create_adjacency_matrix, create_weighted_matrix
 
@@ -13,7 +11,7 @@ from data_tables.util import create_adjacency_matrix, create_weighted_matrix
 class Papers:
     __metaclass__ = ABCMeta
 
-    columns = ['id_membro']
+    columns = ['id_membro', 'ano']
     mapping_attributes = {}
 
     # id = None
@@ -21,10 +19,22 @@ class Papers:
     adjacency_matrix = None
     weighted_matrix = None
 
-    def __init__(self, group_similar=False, since_year=None, until_year=None):
+    def __init__(self, id, initial_data_frame=None, group_similar=False, timespan=None):
+        """
+        :param initial_data_frame: initial content to be added
+        :param group_similar: whether similar entries (by is_similar) should be ignored; if True, the column 'id_membro' is converted to frozenset and
+        its values from similar entries are united.
+        :param timespan: should be a single pair tuple (since_year, until_year) or a list of such tuples (in this case, items will be dropped from the data
+        frame only if they don't fall inside any of the spans).
+        :return:
+        """
+        self.id = id
         self.group_similar = group_similar
-        self.since_year = since_year
-        self.until_year = until_year
+        self.timespan = timespan
+        self.data_frame = pd.DataFrame(columns=self.columns)
+        self.data_frame['ano'] = pd.to_numeric(self.data_frame['ano'])
+        if initial_data_frame is not None:
+            self.data_frame = self.data_frame.append(initial_data_frame, ignore_index=True)
 
     def add_from_parser(self, productions_list, **kwargs):
         """
@@ -63,11 +73,12 @@ class Papers:
             data_frame_to_append = productions
 
         # Filter by timespan
-        if self.since_year:
-            if isinstance(self.since_year, list):  # So this is an specific timespan (defined in the list, not the config)
+        if self.timespan:
+            data_frame_to_append['ano'] = pd.to_numeric(data_frame_to_append['ano'])
+            if isinstance(self.timespan, list):  # So this is a set of non-exclusive timespans (defined in the list, not the config)
                 pass
             else:
-                pass
+                data_frame_to_append = data_frame_to_append[(data_frame_to_append.ano >= self.timespan[0]) & (data_frame_to_append.ano <= self.timespan[1])]
 
         # Deal with duplicated entries
         if self.group_similar:
