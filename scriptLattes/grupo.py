@@ -182,6 +182,7 @@ class Grupo:
     def identify_publications_qualis(self, qualis):
         logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
         qualis.analyse_journal_papers(self.journal_papers)
+        qualis.analyse_event_papers(self.event_papers)
 
         # for membro in self.members_list.values():
         #     qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros

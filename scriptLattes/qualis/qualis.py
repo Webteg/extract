@@ -28,6 +28,7 @@ import fileinput
 
 import pandas
 
+from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from qualis.qualisextractor import QualisExtractor
 from scriptLattes.util.util import similaridade_entre_cadeias
@@ -115,7 +116,17 @@ class Qualis:
             if area_estrato_dict:
                 papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
 
+    def analyse_event_papers(self, papers):
+        assert isinstance(papers, EventPapers)
+        if 'qualis' not in papers.data_frame.columns:
+            papers.data_frame['qualis'] = None
+        for index, paper in papers.data_frame.iterrows():
+            area_estrato_dict = self.qextractor.get_qualis_by_event(paper.evento)
+            if area_estrato_dict:
+                papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
+
     def analisar_publicacoes(self, membro):
+        raise "Substituído por métodos específicos"
         # Percorrer lista de publicacoes buscando e contabilizando os qualis
         for index, publicacao in membro.journal_papers:
             # qualis, similar = self.buscaQualis('P', pub.revista)
@@ -135,6 +146,7 @@ class Qualis:
                 publicacao.qualis = None
                 publicacao.qualissimilar = None
 
+        # FIXME: trecho abaixo precisa ser usado para gerar a tabela de produção qualificada por membro
         agregacao = self.agregar_qualis(membro.journal_papers)
         if agregacao:
             membro.tabela_qualis = pandas.DataFrame(data=agregacao,

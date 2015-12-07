@@ -106,12 +106,110 @@ class QualisExtractor(object):
         if arquivo_qualis_de_congressos:
             assert isinstance(arquivo_qualis_de_congressos, Path)
             self.events_qualis_data_frame = pd.read_csv(arquivo_qualis_de_congressos.as_uri(), sep="\t")
+            self.events_qualis_data_frame.rename(columns={'Sigla': 'sigla', 'Nome': 'evento', 'Estrato': 'estrato'},
+                                                 inplace=True)
 
         self.events_qualis_area = area_qualis_de_congressos
 
         # self.init_session()
         self.initialized = False
         self.url2 = None
+
+    def get_qualis_by_issn(self, issn):
+        """
+        Retorna Qualis do respectivo ISSN. Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
+
+        :param issn: ISSN tem que estar no formato XXXX-YYYY
+        """
+        logger.info('Extraindo qualis do ISSN {}...'.format(issn))
+
+        issn_data = self.qualis_data_frame[self.qualis_data_frame['issn'] == issn]
+        if issn_data.empty and self.extract_online:
+            issn_data = self.extract_online_qualis_by_issn(issn)
+            if issn_data.empty:
+                # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
+                issn_data.loc[0] = [issn, None, None, None]
+            if self.extract_online:
+                # Descarta ISSN antigo da cache
+                self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
+            self.qualis_data_frame = self.qualis_data_frame.append(issn_data, ignore_index=True)
+
+        issn_data = issn_data.dropna()  # descarta ISSN's sem Qualis
+
+        if self.areas_to_extract:
+            issn_data = issn_data[issn_data['area'].str.endswith('|'.join(self.areas_to_extract))]
+
+        # XXX: note que se houver chaves repetidas, só o último valor é salvo. Neste caso aqui não há problema, já que cada área só tem uma avaliação.
+        qualis = dict(zip(issn_data['area'], issn_data['estrato']))
+
+        return qualis
+
+    def get_qualis_by_title(self, journal_title):
+        """
+        Retorna o Qualis a partir do nome do periódico. Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
+        :param journal_title:
+        """
+        logger.info('Extraindo qualis do periódico "{}"...'.format(journal_title))
+
+        data = self.qualis_data_frame[self.qualis_data_frame['periodico'] == journal_title]
+        if data.empty and self.extract_online:
+            data = self.extract_online_qualis_by_title(journal_title)
+            if data.empty:
+                # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
+                data.loc[0] = [None, journal_title, None, None]
+            else:
+                if self.extract_online:
+                    # Descarta ISSN antigo da cache
+                    if data['issn']:
+                        issn = data['issn'].unique()[0]
+                        self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
+                    else:
+                        self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['periodico'] != journal_title]
+            self.qualis_data_frame = self.qualis_data_frame.append(data, ignore_index=True)
+
+        # data = data.dropna()  # descarta ISSN's sem Qualis
+
+        if self.areas_to_extract:
+            data = data[data['area'].str.endswith('|'.join(self.areas_to_extract))]
+
+        # XXX: note que se houver chaves repetidas, só o último valor é salvo. Neste caso aqui não há problema, já que cada área só tem uma avaliação.
+        qualis = dict(zip(data['area'], data['estrato']))
+
+        return qualis
+
+        # qualis = self.publicacoes.get(name)
+        '''if qualis != None: return qualis,1
+        else:
+            iqualis = -1
+            r = 0
+            pkeys = self.publicacoes.keys()
+            for i in xrange(0,pkeys):
+                nr = similaridade_entre_cadeias( name, pkeys[i], qualis=True)
+                if nr > r:
+                    r = nr
+                    iqualis = i
+            if r > 0:
+                return self.publicacoes.get(pkeys[iqualis]),0
+        '''
+        return None
+
+    def get_qualis_by_event(self, event_title):
+        """
+        Retorna o Qualis a partir do nome do evento, buscando strings similares.
+        Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
+        :param event_title:
+        """
+        logger.info("Extraindo qualis do evento '{}'...".format(event_title))
+
+        data = self.events_qualis_data_frame[self.events_qualis_data_frame['evento'] == event_title]
+
+        if self.areas_to_extract:
+            data = data[data['area'].str.endswith('|'.join(self.areas_to_extract))]
+
+        # qualis = dict(zip(data['area'], data['estrato']))
+        qualis = dict(zip(self.events_qualis_area, data['estrato']))
+
+        return qualis
 
     def get_areas(self, document):
         tree = etree.HTML(document)
@@ -332,35 +430,6 @@ class QualisExtractor(object):
 
         return qualis_data_frame
 
-    def get_qualis_by_issn(self, issn):
-        """
-        Retorna Qualis do respectivo ISSN. Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
-
-        :param issn: ISSN tem que estar no formato XXXX-YYYY
-        """
-        logger.info('Extraindo qualis do ISSN {}...'.format(issn))
-
-        issn_data = self.qualis_data_frame[self.qualis_data_frame['issn'] == issn]
-        if issn_data.empty and self.extract_online:
-            issn_data = self.extract_online_qualis_by_issn(issn)
-            if issn_data.empty:
-                # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
-                issn_data.loc[0] = [issn, None, None, None]
-            if self.extract_online:
-                # Descarta ISSN antigo da cache
-                self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
-            self.qualis_data_frame = self.qualis_data_frame.append(issn_data, ignore_index=True)
-
-        issn_data = issn_data.dropna()  # descarta ISSN's sem Qualis
-
-        if self.areas_to_extract:
-            issn_data = issn_data[issn_data['area'].str.endswith('|'.join(self.areas_to_extract))]
-
-        # XXX: note que se houver chaves repetidas, só o último valor é salvo. Neste caso aqui não há problema, já que cada área só tem uma avaliação.
-        qualis = dict(zip(issn_data['area'], issn_data['estrato']))
-
-        return qualis
-
     def extract_online_qualis_by_title(self, journal_title):
         """
         Extrai a classificação Qualis do dado periódico a partir do seu nome. O sistema webqualis da CAPES é acessado e
@@ -403,54 +472,6 @@ class QualisExtractor(object):
             qualis_data_frame = qualis_data_frame.append(partial_data_frame, ignore_index=True)
 
         return qualis_data_frame
-
-    def get_qualis_by_title(self, journal_title):
-        """
-        Retorna o Qualis a partir do nome do periódico. Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
-        """
-        logger.info('Extraindo qualis do periódico "{}"...'.format(journal_title))
-
-        data = self.qualis_data_frame[self.qualis_data_frame['periodico'] == journal_title]
-        if data.empty and self.extract_online:
-            data = self.extract_online_qualis_by_title(journal_title)
-            if data.empty:
-                # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
-                data.loc[0] = [None, journal_title, None, None]
-            else:
-                if self.extract_online:
-                    # Descarta ISSN antigo da cache
-                    if data['issn']:
-                        issn = data['issn'].unique()[0]
-                        self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
-                    else:
-                        self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['periodico'] != journal_title]
-            self.qualis_data_frame = self.qualis_data_frame.append(data, ignore_index=True)
-
-        # data = data.dropna()  # descarta ISSN's sem Qualis
-
-        if self.areas_to_extract:
-            data = data[data['area'].isin(self.areas_to_extract)]
-
-        # XXX: note que se houver chaves repetidas, só o último valor é salvo. Neste caso aqui não há problema, já que cada área só tem uma avaliação.
-        qualis = dict(zip(data['area'], data['estrato']))
-
-        return qualis
-
-        # qualis = self.publicacoes.get(name)
-        '''if qualis != None: return qualis,1
-        else:
-            iqualis = -1
-            r = 0
-            pkeys = self.publicacoes.keys()
-            for i in xrange(0,pkeys):
-                nr = similaridade_entre_cadeias( name, pkeys[i], qualis=True)
-                if nr > r:
-                    r = nr
-                    iqualis = i
-            if r > 0:
-                return self.publicacoes.get(pkeys[iqualis]),0
-        '''
-        return None
 
     @staticmethod
     def has_more_content(html_document):
