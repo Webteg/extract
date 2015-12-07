@@ -199,20 +199,6 @@ class ArtigoEmPeriodico:
 
     def html(self, listaDeMembros):
         raise "deprecated"
-        s = self.autores + '. <b>' + self.titulo + '</b>. <font color=#330066>' + self.revista + '</font>. '
-        s+= 'v. ' + self.volume + ', '  if not self.volume==''  else ''
-        s+= 'n. ' + self.numero + ', '  if not self.numero== '' else ''
-        s+= 'p. ' + self.paginas + ', ' if not self.paginas=='' else ''
-        s += 'issn: ' + self.issn + ', ' if not self.issn == ''    else ''
-        s+= str(self.ano) + '.'         if str(self.ano).isdigit() else '.'
-
-        if not self.doi=='':
-            s+= ' <a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'
-
-        s += menuHTMLdeBuscaPB(self.titulo)
-        s += formata_qualis(self.qualis, self.qualissimilar)
-        return s
-
 
     def ris(self):
         paginas = self.paginas.split('-')

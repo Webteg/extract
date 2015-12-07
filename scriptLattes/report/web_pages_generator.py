@@ -637,6 +637,7 @@ class WebPagesGenerator:
 
     @staticmethod
     def gerar_grafico_de_producoes(productions_by_year, titulo):
+        assert isinstance(productions_by_year, dict)
         # FIXME: replace by package pandas-highcharts
         chart = highchart(type=chart_type.column)
         chart.set_y_title(u'Frequência')
@@ -669,7 +670,7 @@ class WebPagesGenerator:
 
         series = []
         if not estrato_area_ano_freq.keys():  # produções vazias
-            logger.debug("produções vazias")
+            logger.debug("Nenhuma produção: {}".format(type(productions_by_year.values())))
         elif len(list(estrato_area_ano_freq.keys())) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
             chart.settitle(titulo)
             chart['plotOptions']['column']['stacking'] = None
@@ -705,12 +706,12 @@ class WebPagesGenerator:
             # chart['yAxis']['stackLabels']['textAlign'] = 'right'
 
             drilldown_series = []
-            for estrato, area_ano_freq in sorted(estrato_area_ano_freq.items()):
+            for estrato, area_ano_freq in sorted(estrato_area_ano_freq.items(), key=lambda x: (x[0] is not None, x[0])):  # Py3 raises error when sorting None values
                 if not estrato:
                     estrato = 'Sem Qualis'
                 data = []
                 # for area, ano_freq in area_ano_freq.items():
-                for area in sorted(areas_map.keys()):
+                for area in sorted(areas_map.keys(), key=lambda x: (x is not None, x)):
                     ano_freq = area_ano_freq[area]
                     freq = [ano_freq[ano] for ano in categories]
                     if not area:
@@ -1245,37 +1246,3 @@ def menuHTMLdeBuscaPA(titulo):
     return s
 
 
-"""def formata_qualis(qualis, qualissimilar):
-    s = ''
-    if not qualis==None:
-        if qualis=='':
-            qualis = 'Qualis nao identificado'
-
-        if qualis=='Qualis nao identificado':
-            # Qualis nao identificado - imprime em vermelho
-            s += '<font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font> ('+qualissimilar+')'
-        else:
-            if qualissimilar=='':
-                # Casamento perfeito - imprime em verde
-                s += '<font color="#336600"><b>Qualis: ' + qualis + '</b></font>'
-            else:
-                # Similar - imprime em laranja
-                s += '<font color="#FF9933"><b>Qualis: ' + qualis + '</b></font> ('+qualissimilar+')'
-    return s
-    """
-
-
-def formata_qualis(qualis, qualissimilar):
-    s = ''
-
-    if not qualis:
-        s += '<font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>'
-    else:
-        s += '<font color="#336600"><b>Qualis: </b></font> '
-        if type(qualis) is str:
-            s += '<font class="area"><b>SEM_AREA</b></font> - <b>' + qualis + '</b>&nbsp'
-        else:
-            l = ['<font class="area"><b>' + area + '</b></font> - <b>' + q + '</b>' for area, q in
-                 sorted(qualis.items(), key=lambda x: x[0])]
-            s += '&nbsp|&nbsp'.join(l)
-    return s

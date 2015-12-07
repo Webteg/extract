@@ -96,6 +96,10 @@ class QualisExtractor(object):
                 self.journals_qualis_data_frame = pd.read_csv(f, sep="\t")
                 self.journals_qualis_data_frame.rename(columns={'ISSN': 'issn', 'Título': 'periodico', 'Área de Avaliação': 'area', 'Estrato': 'estrato'},
                                                        inplace=True)
+                self.journals_qualis_data_frame['issn'] = self.journals_qualis_data_frame['issn'].str.strip()
+                self.journals_qualis_data_frame['periodico'] = self.journals_qualis_data_frame['periodico'].str.strip()
+                self.journals_qualis_data_frame['area'] = self.journals_qualis_data_frame['area'].str.strip()
+                self.journals_qualis_data_frame['estrato'] = self.journals_qualis_data_frame['estrato'].str.strip()
             self.qualis_data_frame = self.qualis_data_frame.append(self.journals_qualis_data_frame, ignore_index=True)
 
         self.events_qualis_data_frame = None

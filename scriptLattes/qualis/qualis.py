@@ -103,6 +103,18 @@ class Qualis:
 
         # self.congressos = carregar_qualis_de_arquivo(arquivo_qualis_de_congressos)
 
+    def analyse_journal_papers(self, papers):
+        assert isinstance(papers, JournalPapers)
+        if 'qualis' not in papers.data_frame.columns:
+            papers.data_frame['qualis'] = None
+        for index, paper in papers.data_frame.iterrows():
+            if paper.issn:
+                area_estrato_dict = self.qextractor.get_qualis_by_issn(paper.issn)
+            else:
+                area_estrato_dict = self.qextractor.get_qualis_by_title(paper.revista)
+            if area_estrato_dict:
+                papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
+
     def analisar_publicacoes(self, membro):
         # Percorrer lista de publicacoes buscando e contabilizando os qualis
         for index, publicacao in membro.journal_papers:

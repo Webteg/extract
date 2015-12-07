@@ -17,3 +17,40 @@
 </font><br>
 
 <!--s += formata_qualis(self.qualis, self.qualissimilar)-->
+
+{% if production.qualis %}
+    <font color="#336600"><b>Qualis: </b></font>
+    {% for area, estrato in production.qualis.items()|sort %}
+        <font class="area"><b>{{area}}</b></font> - <b>{{estrato}}</b>
+    {% endfor %}
+{% else %}
+    <font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>
+{% endif %}
+
+
+<!--if type(qualis) is str:-->
+    <!--s += '<font class="area"><b>SEM_AREA</b></font> - <b>' + qualis + '</b>&nbsp'-->
+<!--else:-->
+    <!--l = ['<font class="area"><b>' + area + '</b></font> - <b>' + q + '</b>' for area, q in-->
+         <!--sorted(qualis.items(), key=lambda x: x[0])]-->
+    <!--s += '&nbsp|&nbsp'.join(l)-->
+
+
+<!--"""def formata_qualis(qualis, qualissimilar):-->
+    <!--s = ''-->
+    <!--if not qualis==None:-->
+        <!--if qualis=='':-->
+            <!--qualis = 'Qualis nao identificado'-->
+
+        <!--if qualis=='Qualis nao identificado':-->
+            <!--# Qualis nao identificado - imprime em vermelho-->
+            <!--s += '<font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font> ('+qualissimilar+')'-->
+        <!--else:-->
+            <!--if qualissimilar=='':-->
+                <!--# Casamento perfeito - imprime em verde-->
+                <!--s += '<font color="#336600"><b>Qualis: ' + qualis + '</b></font>'-->
+            <!--else:-->
+                <!--# Similar - imprime em laranja-->
+                <!--s += '<font color="#FF9933"><b>Qualis: ' + qualis + '</b></font> ('+qualissimilar+')'-->
+    <!--return s-->
+    <!--"""-->

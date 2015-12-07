@@ -179,6 +179,24 @@ class Grupo:
         # AuthorRank
         # self.author_rank_vector = AuthorRank(self.co_authorship_normalized_weighted_matrix, 100).rank_vector  # FIXME: por que 100 iteracoes?
 
+    def identify_publications_qualis(self, qualis):
+        logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
+        qualis.analyse_journal_papers(self.journal_papers)
+
+        # for membro in self.members_list.values():
+        #     qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
+
+        # FIXME: save cache
+        # if self.diretorioCache:
+        # filename = (self.diretorioCache or '/tmp') + '/qualis.data'
+        # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
+        # self.qualis.qextractor.save_data(filename)
+
+        # FIXME: calcular qualis de eventos (precisa ler do arquivo csv)
+        # self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
+        #                                        self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
+        #                                        self.compilador.listaCompletaResumoExpandidoEmCongresso)
+
     # FIXME: finish refactoring
     def gerarXMLdeGrupo(self):
         geradorDeXml = GeradorDeXML(self)
@@ -228,22 +246,6 @@ class Grupo:
     def gerarMapaDeGeolocalizacao(self):
         if self.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
-
-    def identificarQualisEmPublicacoes(self, qualis):
-        logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
-        for membro in self.members_list.values():
-            qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
-
-        # FIXME: save cache
-        # if self.diretorioCache:
-        # filename = (self.diretorioCache or '/tmp') + '/qualis.data'
-        # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
-        # self.qualis.qextractor.save_data(filename)
-
-        # FIXME: calcular qualis de eventos (precisa ler do arquivo csv)
-        # self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
-        #                                        self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-        #                                        self.compilador.listaCompletaResumoExpandidoEmCongresso)
 
     def salvarVetorDeProducoes(self, vetor, nomeArquivo):
         dir = self.obterParametro('global-diretorio_de_saida')

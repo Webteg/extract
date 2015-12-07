@@ -363,7 +363,7 @@ def cli():
                             arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
                             area_qualis_de_congressos=area_qualis_de_congressos)
 
-            group.identificarQualisEmPublicacoes(qualis)  # obrigatorio
+            group.identify_publications_qualis(qualis)  # obrigatorio
 
         # TODO: decidir se é aqui ou em report
         if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
@@ -411,7 +411,7 @@ def cli():
 
         # process
         # group.compilarListasDeItems()  # obrigatorio
-        # group.identificarQualisEmPublicacoes()  # obrigatorio
+        # group.identify_publications_qualis()  # obrigatorio
         # group.calcularInternacionalizacao()  # obrigatorio
         # # group.imprimirMatrizesDeFrequencia()
 
