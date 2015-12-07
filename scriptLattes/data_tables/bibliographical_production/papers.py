@@ -73,10 +73,11 @@ class Papers:
             data_frame_to_append = productions
 
         # Filter by timespan
+        # TODO: make this dynamic, when porting to a web framework
         if self.timespan:
             data_frame_to_append['ano'] = pd.to_numeric(data_frame_to_append['ano'])
             if isinstance(self.timespan, list):  # So this is a set of non-exclusive timespans (defined in the list, not the config)
-                pass
+                raise "FIXME: implementar períodos de tempo para membro, lidos do arquivo de listas"
             else:
                 data_frame_to_append = data_frame_to_append[(data_frame_to_append.ano >= self.timespan[0]) & (data_frame_to_append.ano <= self.timespan[1])]
 
@@ -141,6 +142,9 @@ class Papers:
 
     def __len__(self):
         return len(self.data_frame)
+
+    def __iter__(self):
+        return self.data_frame.iterrows()
 
     def pivoted_by(self, column, ascending=True):
         return pd.pivot_table(self.data_frame, index=column).sort_index(ascending=ascending)

@@ -63,9 +63,7 @@ class Grupo:
     rotulos = None
     geolocalizacoes = None
 
-    qualis = None
-
-    def __init__(self, name, ids_df, group_id=1, desde_ano=0, ate_ano=None, qualis_de_congressos=None, areas_qualis=None):
+    def __init__(self, name, ids_df, group_id=1, desde_ano=0, ate_ano=None):
         self.name = name
         self.group_id = group_id
 
@@ -104,13 +102,6 @@ class Grupo:
         self.others = Others(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
         self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
         # self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
-
-        # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
-        read_from_cache = True if cache.file('qualis.data') else False
-        self.qualis = qualis.Qualis(read_from_cache=read_from_cache,
-                                    data_file_path=cache.file('qualis.data'),
-                                    arquivo_qualis_de_congressos=qualis_de_congressos,
-                                    arquivo_areas_qualis=areas_qualis)
 
     @property
     def labels_set(self):
@@ -238,10 +229,10 @@ class Grupo:
         if self.obterParametro('mapa-mostrar_mapa_de_geolocalizacao'):
             self.mapaDeGeolocalizacao = MapaDeGeolocalizacao(self)
 
-    def identificarQualisEmPublicacoes(self):
+    def identificarQualisEmPublicacoes(self, qualis):
         logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
         for membro in self.members_list.values():
-            self.qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
+            qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
 
         # FIXME: save cache
         # if self.diretorioCache:

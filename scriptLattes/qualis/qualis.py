@@ -28,6 +28,7 @@ import fileinput
 
 import pandas
 
+from data_tables.bibliographical_production.journal_papers import JournalPapers
 from qualis.qualisextractor import QualisExtractor
 from scriptLattes.util.util import similaridade_entre_cadeias
 from scriptLattes.util.util import find_file
@@ -79,8 +80,11 @@ class Qualis:
     qtdPB4 = {}  # Total de trabalhos completos em congressos por Qualis
     qtdPB5 = {}  # Total de resumos expandidos em congressos por Qualis
 
-    def __init__(self, read_from_cache=True, data_file_path=None, arquivo_qualis_de_congressos=None,
-                 arquivo_areas_qualis=None):
+    def __init__(self, data_file_path=None,
+                 arquivo_qualis_de_periodicos=None,
+                 arquivo_areas_qualis=None,
+                 arquivo_qualis_de_congressos=None,
+                 area_qualis_de_congressos=None):
         """
         arquivo_qualis_de_congressos: arquivo CSV de qualis de congressos # FIXME: só funciona para uma área
         data_file_path: arquivo cache de qualis extraídos anteriormente; é atualizado ao final da execução
@@ -88,22 +92,27 @@ class Qualis:
 
         # self.periodicos = self.carregar_qualis_de_arquivo(grupo.obterParametro('global-arquivo_qualis_de_periodicos'))
         # qualis extractor -> extrai qualis diretamente da busca online do qualis
-        self.qextractor = QualisExtractor(read_from_cache, str(arquivo_areas_qualis), data_file_path)
+        self.qextractor = QualisExtractor(data_file_path=data_file_path,
+                                          arquivo_qualis_de_periodicos=arquivo_qualis_de_periodicos,
+                                          arquivo_areas_qualis=arquivo_areas_qualis,
+                                          arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
+                                          area_qualis_de_congressos=area_qualis_de_congressos)
 
         # self.qextractor.extract_qualis()
         # self.qextractor.save_data(data_file_path)
 
-        self.congressos = carregar_qualis_de_arquivo(arquivo_qualis_de_congressos)
+        # self.congressos = carregar_qualis_de_arquivo(arquivo_qualis_de_congressos)
 
     def analisar_publicacoes(self, membro):
         # Percorrer lista de publicacoes buscando e contabilizando os qualis
-        for publicacao in membro.listaArtigoEmPeriodico:
+        for index, publicacao in membro.journal_papers:
             # qualis, similar = self.buscaQualis('P', pub.revista)
             # pub.qualis = qualis
             if publicacao.issn:
                 publicacao.qualis = self.qextractor.get_qualis_by_issn(publicacao.issn)
 
             # FIXME: utilizaria o comportamento antigo (ler qualis de um CSV), mas nao funciona se a configuracao global-arquivo_qualis_de_periodicos nao for definida
+            # agora é usar_cache_qualis = sim
             # elif not self.extrair_qualis_online:
             # qualis, similar = self.buscaQualis('P', pub.revista)
             # pub.qualis = qualis
@@ -114,7 +123,7 @@ class Qualis:
                 publicacao.qualis = None
                 publicacao.qualissimilar = None
 
-        agregacao = self.agregar_qualis(membro.listaArtigoEmPeriodico)
+        agregacao = self.agregar_qualis(membro.journal_papers)
         if agregacao:
             membro.tabela_qualis = pandas.DataFrame(data=agregacao,
                                                     columns=['ano', 'area', 'estrato', 'freq'])
@@ -170,7 +179,7 @@ class Qualis:
         return None, None
 
     def busca_qualis_congressos(self, nome):
-        # Percorrer lista de periodicos tentando casar com nome usando funcao similaridade_entre_cadeias(str1, str2) de scriptLattes.py
+        # Percorrer lista de periodicos tentando casar com nome usando funcao similaridade_entre_cadeias(str1, str2)
         if self.congressos.get(nome):
             return self.congressos.get(nome), ''  # Retorna Qualis do nome exato encontrado - Casamento perfeito
         else:
@@ -191,8 +200,9 @@ class Qualis:
 
     @staticmethod
     def agregar_qualis(publicacoes):
+        assert isinstance(publicacoes, JournalPapers)
         ano_area_estrato_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for publicacao in publicacoes:
+        for index, publicacao in publicacoes:
             if publicacao.qualis:
                 for area, estrato in publicacao.qualis.items():
                     ano_area_estrato_freq[publicacao.ano][area][estrato] += 1

@@ -47,6 +47,7 @@ from fetch.download_html import download_html
 from grupo import Grupo
 from persist.cache import cache
 from persist.store import Store
+from qualis.qualis import Qualis
 from report.charts.collaboration_graph import CollaborationGraph
 from report.web_pages_generator import WebPagesGenerator
 from scriptLattes.log import configure_stream
@@ -255,22 +256,10 @@ def cli():
 
     ids_df = read_list_file(ids_file_path)
 
-    qualis_de_congressos = None
-    areas_qualis = None
-    if config['geral'].get('identificar_publicacoes_com_qualis'):
-        if config['geral']['usar_cache_qualis']:
-            cache.new_file('qualis.data')
-        if config['geral']['arquivo_qualis_de_congressos']:
-            qualis_de_congressos = util.find_file(Path(config['geral']['arquivo_qualis_de_congressos']), config_file_path)
-        if config['geral']['arquivo_areas_qualis']:
-            areas_qualis = util.find_file(Path(config['geral']['arquivo_areas_qualis']), config_file_path)
-
     group = Grupo(name=config['geral'].get('nome_do_grupo'),
                   ids_df=ids_df,
                   desde_ano=config['geral']['itens_desde_o_ano'],
-                  ate_ano=config['geral']['itens_ate_o_ano'],
-                  qualis_de_congressos=qualis_de_congressos,
-                  areas_qualis=areas_qualis)
+                  ate_ano=config['geral']['itens_ate_o_ano'])
     # group.imprimirListaDeParametros()
     # group.imprimirListaDeRotulos()
 
@@ -351,9 +340,30 @@ def cli():
         group.aggregate_data()
         # FIXME: uncomment group.create_colaboration_matrices()
 
-        if config['geral']['identificar_publicacoes_com_qualis']:
-            # FIXME: verificar se está OK
-            group.identificarQualisEmPublicacoes()  # obrigatorio
+        if config['geral'].get('identificar_publicacoes_com_qualis'):
+            cache_file = None
+            if config['geral']['usar_cache_qualis']:
+                cache_file = cache.new_file('qualis.data')
+            arquivo_qualis_de_periodicos = None
+            if config['geral']['arquivo_qualis_de_periodicos']:
+                arquivo_qualis_de_periodicos = util.find_file(Path(config['geral']['arquivo_qualis_de_periodicos']), config_file_path)
+            arquivo_areas_qualis = None
+            if config['geral']['arquivo_areas_qualis']:
+                arquivo_areas_qualis = util.find_file(Path(config['geral']['arquivo_areas_qualis']), config_file_path)
+            arquivo_qualis_de_congressos = None
+            if config['geral']['arquivo_qualis_de_congressos']:
+                arquivo_qualis_de_congressos = util.find_file(Path(config['geral']['arquivo_qualis_de_congressos']), config_file_path)
+            area_qualis_de_congressos = None
+            if config['geral']['area_qualis_de_congressos']:
+                area_qualis_de_congressos = config['geral']['area_qualis_de_congressos']
+            # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
+            qualis = Qualis(data_file_path=cache_file,
+                            arquivo_qualis_de_periodicos=arquivo_qualis_de_periodicos,
+                            arquivo_areas_qualis=arquivo_areas_qualis,
+                            arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
+                            area_qualis_de_congressos=area_qualis_de_congressos)
+
+            group.identificarQualisEmPublicacoes(qualis)  # obrigatorio
 
         # TODO: decidir se é aqui ou em report
         if config['grafo'].get('mostrar_grafo_de_colaboracoes'):

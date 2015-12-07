@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import sys
+from pathlib import Path
 
 py2 = sys.version_info[0] < 3
 
@@ -31,7 +32,6 @@ else:
     _urllib = urllib.request
     _urlerror = urllib.error
 
-import codecs
 import logging
 import pickle
 import datetime
@@ -60,12 +60,13 @@ def getvalue(attrs):
 
 class QualisExtractor(object):
     # Constructor
-    def __init__(self, read_from_cache=True, arquivo_areas_qualis=None, data_file_path=None):
-        self.read_from_cache = read_from_cache  # extrair online ou offline ?
+    def __init__(self, data_file_path=None,
+                 arquivo_qualis_de_periodicos=None,
+                 arquivo_areas_qualis=None,
+                 arquivo_qualis_de_congressos=None,
+                 area_qualis_de_congressos=None):
 
-        # self.publicacao = {}  #{'titulo': {'area': 'estrato'}}
-        # self.issn = {}  #{'issn': {'area': 'estrato'}}
-        self.qualis_data_frame = pd.DataFrame(columns=['issn', 'periodico', 'area', 'estrato'])
+        self.extract_online = False if data_file_path else True  # extrair online ou offline ?
 
         self.areas = []
         self.areas_to_extract = []
@@ -73,11 +74,36 @@ class QualisExtractor(object):
         self.dtnow = datetime.datetime.now()
         self.update_time = 15
 
-        if arquivo_areas_qualis:
-            self.parse_areas_file(arquivo_areas_qualis)
-
         if data_file_path:
             self.load_data(data_file_path)
+
+        if arquivo_areas_qualis:
+            self.areas_to_extract = self.parse_areas_file(arquivo_areas_qualis)
+
+        # self.publicacao = {}  #{'titulo': {'area': 'estrato'}}
+        # self.issn = {}  #{'issn': {'area': 'estrato'}}
+        self.qualis_data_frame = pd.DataFrame(columns=['issn', 'periodico', 'area', 'estrato'])
+
+        self.journals_qualis_data_frame = None
+        if arquivo_qualis_de_periodicos:
+            assert isinstance(arquivo_qualis_de_periodicos, Path)
+            # XXX: na verdade, arquivo baixado da plataforma sucupira é um CSV, e não um XLS
+            # self.journals_qualis_data_frame = pd.read_excel(arquivo_qualis_de_periodicos.as_uri())#, index_col=0)
+            # ids = pandas.read_csv(ids_file_path.open(), sep="[\t,;]", header=None, engine='python', encoding='utf-8', skip_blank_lines=True, converters={0: lambda x: str(x)})
+            # TODO: the following doesn't work even when setting the encoding (had to first open the file):
+            # self.journals_qualis_data_frame = pd.read_csv(arquivo_qualis_de_periodicos.as_uri(), sep="\t")
+            with arquivo_qualis_de_periodicos.open(encoding="latin1") as f:
+                self.journals_qualis_data_frame = pd.read_csv(f, sep="\t")
+                self.journals_qualis_data_frame.rename(columns={'ISSN': 'issn', 'Título': 'periodico', 'Área de Avaliação': 'area', 'Estrato': 'estrato'},
+                                                       inplace=True)
+            self.qualis_data_frame = self.qualis_data_frame.append(self.journals_qualis_data_frame, ignore_index=True)
+
+        self.events_qualis_data_frame = None
+        if arquivo_qualis_de_congressos:
+            assert isinstance(arquivo_qualis_de_congressos, Path)
+            self.events_qualis_data_frame = pd.read_csv(arquivo_qualis_de_congressos.as_uri(), sep="\t")
+
+        self.events_qualis_area = area_qualis_de_congressos
 
         # self.init_session()
         self.initialized = False
@@ -132,26 +158,28 @@ class QualisExtractor(object):
         #     arq3 = urllib2.urlopen(req3)
         #     a3 = arq3.read()
 
-    def parse_areas_file(self, afile):
-        '''
+    @staticmethod
+    def parse_areas_file(a_file):
+        """
         Formato do arquivo:
         Nome da area
         Nome da area 2
         ...
-        '''
-        if not afile:
-            return False
-        f = codecs.open(afile, 'r', 'utf-8')
-        lines = f.read()
-        f.close()
-        lines = lines.split('\n')
-        areas = []
+        """
+        if not a_file:
+            return None
+        assert isinstance(a_file, Path)
+        # f = codecs.open(a_file, 'r', 'utf-8')
+        # lines = f.read()
+        # f.close()
+        with a_file.open() as f:
+            lines = f.readlines()
+        areas_to_extract = []
         for line in lines:
-            val = line.partition('#')[0]
-            val = val.strip()
-            if val:
-                self.areas_to_extract.append(val.upper())
-        return True
+            value = line.partition('#')[0].strip()
+            if value:
+                areas_to_extract.append(value.upper())
+        return areas_to_extract
 
     def should_update_area(self, area):
         lupdt = self.areas_last_update.get(area)
@@ -172,8 +200,8 @@ class QualisExtractor(object):
             more = 1
             # FIXME: armazenar mapeamento do nome da área para seu código, e utilizar o código nas URLs abaixo.
             reqn = _urllib.Request(self.url2,
-                               'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
-                                   area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&consultaPublicaClassificacaoForm%3AbtnPesquisarTituloPorArea=Pesquisar&javax.faces.ViewState=j_id2')
+                                   'consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
+                                       area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&consultaPublicaClassificacaoForm%3AbtnPesquisarTituloPorArea=Pesquisar&javax.faces.ViewState=j_id2')
             arqn = _urllib.urlopen(reqn)
 
             data = []
@@ -181,9 +209,9 @@ class QualisExtractor(object):
             logger.info('Extraindo qualis da area: {}'.format(area))
             while more == 1:
                 reqn = _urllib.Request(self.url2,
-                                   'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
-                                       area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3AscrollerArea&consultaPublicaClassificacaoForm%3AscrollerArea=' + str(
-                                       scroller) + '&AJAX%3AEVENTS_COUNT=1&')
+                                       'AJAXREQUEST=_viewRoot&consultaPublicaClassificacaoForm=consultaPublicaClassificacaoForm&consultaPublicaClassificacaoForm%3AsomAreaAvaliacao=' + str(
+                                           area) + '&consultaPublicaClassificacaoForm%3AsomEstrato=org.jboss.seam.ui.NoSelectionConverter.noSelectionValue&javax.faces.ViewState=j_id3&ajaxSingle=consultaPublicaClassificacaoForm%3AscrollerArea&consultaPublicaClassificacaoForm%3AscrollerArea=' + str(
+                                           scroller) + '&AJAX%3AEVENTS_COUNT=1&')
 
                 # arqn = urllib2.urlopen (reqn)
                 tries = 10
@@ -206,9 +234,9 @@ class QualisExtractor(object):
                 more = self.parse_content(arqn)  # FIXME: funcionamento de parse_content mudou
                 scroller += 1
 
-    def load_data(self, filename='data'):
+    def load_data(self, filename='qualis.data'):
         try:
-            logger.debug('Carregando dados Qualis do arquivo \'{}\''.format(filename))
+            logger.debug("Carregando dados Qualis do arquivo '{}'".format(filename))
             f = open(filename, 'r')
             data = pickle.load(f)
             # self.issn = data[0]
@@ -224,10 +252,10 @@ class QualisExtractor(object):
             return False
 
     def save_data(self, filename='data'):
-        logger.debug('Salvando dados Qualis no arquivo \'{}\''.format(filename))
-        f = open(filename, 'w')
+        logger.debug("Salvando dados Qualis no arquivo '{}'".format(filename))
         # data = (self.issn, self.publicacao, self.areas, self.areas_last_update)
         data = (self.qualis_data_frame, self.areas, self.areas_last_update)
+        f = open(filename, 'w')
         pickle.dump(data, f)
         f.close()
 
@@ -237,9 +265,9 @@ class QualisExtractor(object):
                 return i
         return None
 
-    def get_area_by_cod(self, cod):
+    def get_area_by_code(self, code):
         for i in self.areas:
-            if i[0] == cod:
+            if i[0] == code:
                 return i
 
     @staticmethod
@@ -273,6 +301,7 @@ class QualisExtractor(object):
         :param issn: string do issn a ser extraido (deve estar no formato 1234-5678)
         :return: um pandas DataFrame com as colunas [issn, nome periodico, area, estrato]
         """
+        raise "FIXME: atualizar extração qualis: qualis online migrou para a plataforma Sucupira"
         qualis_data_frame = pd.DataFrame(columns=['issn', 'periodico', 'area', 'estrato'])
 
         # self.initialized = False
@@ -303,17 +332,17 @@ class QualisExtractor(object):
         """
         Retorna Qualis do respectivo ISSN. Restringe as areas se elas tiverem sido especificadas (ver parse_areas_file).
 
-        NOTA: ISSN tem que estar no formato XXXX-YYYY
+        :param issn: ISSN tem que estar no formato XXXX-YYYY
         """
         logger.info('Extraindo qualis do ISSN {}...'.format(issn))
 
         issn_data = self.qualis_data_frame[self.qualis_data_frame['issn'] == issn]
-        if issn_data.empty or not self.read_from_cache:
+        if issn_data.empty and self.extract_online:
             issn_data = self.extract_online_qualis_by_issn(issn)
             if issn_data.empty:
                 # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
                 issn_data.loc[0] = [issn, None, None, None]
-            if not self.read_from_cache:
+            if self.extract_online:
                 # Descarta ISSN antigo da cache
                 self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
             self.qualis_data_frame = self.qualis_data_frame.append(issn_data, ignore_index=True)
@@ -321,7 +350,7 @@ class QualisExtractor(object):
         issn_data = issn_data.dropna()  # descarta ISSN's sem Qualis
 
         if self.areas_to_extract:
-            issn_data = issn_data[issn_data['area'].isin(self.areas_to_extract)]
+            issn_data = issn_data[issn_data['area'].str.endswith('|'.join(self.areas_to_extract))]
 
         # XXX: note que se houver chaves repetidas, só o último valor é salvo. Neste caso aqui não há problema, já que cada área só tem uma avaliação.
         qualis = dict(zip(issn_data['area'], issn_data['estrato']))
@@ -339,9 +368,10 @@ class QualisExtractor(object):
         em que a tabela dos resultados anteriores estava. Por isso há um tratamento especial abaixo para lidar com
         o caso de ISSNs com várias páginas de resultado.
 
-        :param issn: string do issn a ser extraido (deve estar no formato 1234-5678)
+        :param journal_title:
         :return: um pandas DataFrame com as colunas [issn, nome periodico, area, estrato]
         """
+        raise "FIXME: atualizar extração qualis: qualis online migrou para a plataforma Sucupira"
         qualis_data_frame = pd.DataFrame(columns=['issn', 'periodico', 'area', 'estrato'])
 
         # self.initialized = False
@@ -377,13 +407,13 @@ class QualisExtractor(object):
         logger.info('Extraindo qualis do periódico "{}"...'.format(journal_title))
 
         data = self.qualis_data_frame[self.qualis_data_frame['periodico'] == journal_title]
-        if data.empty or not self.read_from_cache:
+        if data.empty and self.extract_online:
             data = self.extract_online_qualis_by_title(journal_title)
             if data.empty:
                 # adiciona o issn informando que não há Qualis associado; poupará requisições futuras
                 data.loc[0] = [None, journal_title, None, None]
             else:
-                if not self.read_from_cache:
+                if self.extract_online:
                     # Descarta ISSN antigo da cache
                     if data['issn']:
                         issn = data['issn'].unique()[0]

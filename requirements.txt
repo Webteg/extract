@@ -22,3 +22,4 @@ pandas >= 0.17.0
 tables
 HTMLParser
 lxml
+xlrd
