@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import re
 import sys
 from pathlib import Path
 
@@ -212,8 +213,9 @@ class QualisExtractor(object):
             return False
 
         # data = self.events_qualis_data_frame[self.events_qualis_data_frame['evento'] == event_title]
+        event_acronyms = re.split('[\s-]+', event_title)
         data = self.events_qualis_data_frame[self.events_qualis_data_frame.apply(
-            lambda x: Levenshtein.ratio(x['evento'], event_title) > 0.8, axis=1)]
+            lambda x: Levenshtein.ratio(x['evento'], event_title) >= 0.8 or x['sigla'] in event_acronyms, axis=1)]
 
         # qualis = dict(zip(data['area'], data['estrato']))
         area = [self.events_qualis_area] * len(data['estrato'])
