@@ -17,6 +17,10 @@ limitations under the License.
 import sys
 from pathlib import Path
 
+import Levenshtein
+
+from util.util import similaridade_entre_cadeias
+
 py2 = sys.version_info[0] < 3
 
 if py2:
@@ -164,6 +168,7 @@ class QualisExtractor(object):
                         issn = data['issn'].unique()[0]
                         self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['issn'] != issn]
                     else:
+                        # FIXME: usar casamento aproximado
                         self.qualis_data_frame = self.qualis_data_frame[self.qualis_data_frame['periodico'] != journal_title]
             self.qualis_data_frame = self.qualis_data_frame.append(data, ignore_index=True)
 
@@ -201,13 +206,18 @@ class QualisExtractor(object):
         """
         logger.info("Extraindo qualis do evento '{}'...".format(event_title))
 
-        data = self.events_qualis_data_frame[self.events_qualis_data_frame['evento'] == event_title]
+        def is_similar(self, row, str2):
+            if similaridade_entre_cadeias(row['evento'], str2):
+                return True
+            return False
 
-        if self.areas_to_extract:
-            data = data[data['area'].str.endswith('|'.join(self.areas_to_extract))]
+        # data = self.events_qualis_data_frame[self.events_qualis_data_frame['evento'] == event_title]
+        data = self.events_qualis_data_frame[self.events_qualis_data_frame.apply(
+            lambda x: Levenshtein.ratio(x['evento'], event_title) > 0.8, axis=1)]
 
         # qualis = dict(zip(data['area'], data['estrato']))
-        qualis = dict(zip(self.events_qualis_area, data['estrato']))
+        area = [self.events_qualis_area] * len(data['estrato'])
+        qualis = dict(zip(area, data['estrato']))
 
         return qualis
 

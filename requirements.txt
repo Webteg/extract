@@ -7,7 +7,7 @@ matplotlib
 robobrowser
 numpy >= 1.10.0
 pygraphviz
-scipy
+scipy >= 0.16.0
 #BeautifulSoup
 beautifulsoup4
 python_Levenshtein

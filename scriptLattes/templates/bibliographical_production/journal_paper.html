@@ -16,8 +16,6 @@
   <a href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}">busca Google</a> ]
 </font><br>
 
-<!--s += formata_qualis(self.qualis, self.qualissimilar)-->
-
 {% if production.qualis %}
     <font color="#336600"><b>Qualis: </b></font>
     {% for area, estrato in production.qualis.items()|sort %}

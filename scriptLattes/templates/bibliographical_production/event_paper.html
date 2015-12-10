@@ -16,59 +16,12 @@
   <a href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}">busca Google</a> ]
 </font><br>
 
-<!--s += formata_qualis(self.qualis, self.qualissimilar)-->
-<!--def formata_qualis(qualis, qualissimilar):-->
-    <!--s = ''-->
+{% if production.qualis %}
+    <font color="#336600"><b>Qualis: </b></font>
+    {% for area, estrato in production.qualis.items()|sort %}
+        <font class="area"><b>{{area if area else "Área não especificada"}}</b></font> - <b>{{estrato}}</b>
+    {% endfor %}
+{% else %}
+    <font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>
+{% endif %}
 
-    <!--if not qualis:-->
-        <!--s += '<font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>'-->
-    <!--else:-->
-        <!--s += '<font color="#336600"><b>Qualis: </b></font> '-->
-        <!--if type(qualis) is str:-->
-            <!--s += '<font class="area"><b>SEM_AREA</b></font> - <b>' + qualis + '</b>&nbsp'-->
-        <!--else:-->
-            <!--l = ['<font class="area"><b>' + area + '</b></font> - <b>' + q + '</b>' for area, q in-->
-                 <!--sorted(qualis.items(), key=lambda x: x[0])]-->
-            <!--s += '&nbsp|&nbsp'.join(l)-->
-    <!--return s-->
-
-<!--trabalho completo-->
-        <!--s = self.autores + '. <b>' + self.titulo + '</b>. '-->
-
-        <!--s += 'Em: <font color=#330066>' + self.nomeDoEvento + '</font>, ' if not self.nomeDoEvento == ''  else ''-->
-        <!--s += 'v. ' + self.volume + ', ' if not self.volume == ''  else ''-->
-        <!--s += 'p. ' + self.paginas + ', ' if not self.paginas == '' else ''-->
-        <!--s += str(self.ano) + '.' if str(self.ano).isdigit() else '.'-->
-
-        <!--if not self.doi == '':-->
-            <!--s += ' <a href="' + self.doi + '" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'-->
-
-        <!--s += menuHTMLdeBuscaPB(self.titulo)-->
-        <!--# TODO: a lógica para qualis de conferencias é outra (provavelmente precisará recair na lógica antiga do scriptLattes, ou seja, exigir um CSV)-->
-        <!--# s += formata_qualis(self.qualis, self.qualissimilar)-->
-
-<!--resumo-->
-		<!--s = self.autores + '. <b>' + self.titulo + '</b>. '-->
-		<!--s+= 'Em: ' + self.nomeDoEvento + ', '  if not self.nomeDoEvento==''  else ''-->
-		<!--s+= 'v. ' + self.volume + ', '  if not self.volume==''  else ''-->
-		<!--s+= 'n. ' + self.numero + ', '  if not self.numero== '' else ''-->
-		<!--s+= 'p. ' + self.paginas + ', ' if not self.paginas=='' else ''-->
-		<!--s+= str(self.ano) + '. '         if str(self.ano).isdigit() else '. '-->
-
-		<!--if not self.doi=='':-->
-			<!--s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'-->
-
- 		<!--s+= menuHTMLdeBuscaPB(self.titulo)-->
-
-<!--resumo expandido-->
-        <!--s = self.autores + '. <b>' + self.titulo + '</b>. '-->
-        <!--s+= 'Em: ' + self.nomeDoEvento + ', '  if not self.nomeDoEvento==''  else ''-->
-        <!--s+= 'v. ' + self.volume + ', '  if not self.volume==''  else ''-->
-        <!--s+= 'p. ' + self.paginas + ', ' if not self.paginas=='' else ''-->
-        <!--s+= str(self.ano) + '. '         if str(self.ano).isdigit() else '. '-->
-
-        <!--if not self.doi=='':-->
-            <!--s+= '<a href="'+self.doi+'" target="_blank" style="PADDING-RIGHT:4px;"><img border=0 src="doi.png"></a>'-->
-
-        <!--s+= menuHTMLdeBuscaPB(self.titulo)-->
-        <!--# s+= formata_qualis(self.qualis, self.qualissimilar)-->

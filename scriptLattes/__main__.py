@@ -81,9 +81,13 @@ salvar_informacoes_em_formato_xml = boolean(default='não')
 
 identificar_publicacoes_com_qualis = boolean(default='não')
 usar_cache_qualis = boolean(default='sim')
+# extrair_qualis_online = boolean(default='não')
 arquivo_areas_qualis = string(default=None)
 arquivo_qualis_de_congressos = string(default=None)
 arquivo_qualis_de_periodicos = string(default=None)
+area_qualis_de_congressos = string(default=None)
+
+usar_tabela_de_pontuacoes = string(default=None)
 
 # ---------------------------------------------------------------------------- #
 # RELATÓRIOS DE PRODUÇÃO EM C,T & A                                            #

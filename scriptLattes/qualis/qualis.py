@@ -90,8 +90,11 @@ class Qualis:
         arquivo_qualis_de_congressos: arquivo CSV de qualis de congressos # FIXME: só funciona para uma área
         data_file_path: arquivo cache de qualis extraídos anteriormente; é atualizado ao final da execução
         """
+        self.arquivo_qualis_de_periodicos = arquivo_qualis_de_periodicos
+        self.arquivo_areas_qualis = arquivo_areas_qualis
+        self.arquivo_qualis_de_congressos = arquivo_qualis_de_congressos
+        self.area_qualis_de_congressos = area_qualis_de_congressos
 
-        # self.periodicos = self.carregar_qualis_de_arquivo(grupo.obterParametro('global-arquivo_qualis_de_periodicos'))
         # qualis extractor -> extrai qualis diretamente da busca online do qualis
         self.qextractor = QualisExtractor(data_file_path=data_file_path,
                                           arquivo_qualis_de_periodicos=arquivo_qualis_de_periodicos,
@@ -106,6 +109,9 @@ class Qualis:
 
     def analyse_journal_papers(self, papers):
         assert isinstance(papers, JournalPapers)
+        if self.qextractor.journals_qualis_data_frame is None:
+            logger.info("Tabela Qualis de periódicos não informada. Ignorando análise.")
+            return
         if 'qualis' not in papers.data_frame.columns:
             papers.data_frame['qualis'] = None
         for index, paper in papers.data_frame.iterrows():
@@ -118,6 +124,9 @@ class Qualis:
 
     def analyse_event_papers(self, papers):
         assert isinstance(papers, EventPapers)
+        if self.qextractor.events_qualis_data_frame is None:
+            logger.info("Tabela Qualis de congressos não informada. Ignorando análise.")
+            return
         if 'qualis' not in papers.data_frame.columns:
             papers.data_frame['qualis'] = None
         for index, paper in papers.data_frame.iterrows():
