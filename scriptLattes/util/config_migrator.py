@@ -34,7 +34,7 @@ logger = logging.getLogger()
 __version__ = '0.0.1'
 
 rename_sections = {'global': 'geral'}
-
+rename_keys = {'extrair_qualis_online': 'usar_cache_qualis'}
 
 def is_last_version(config_file_path):
     config = ConfigObj(str(config_file_path))
@@ -74,6 +74,8 @@ def migrate_config_file(file_path):
             section, new_key = key.split('-', 1)
             if section in rename_sections.keys():
                 section = rename_sections[section]
+            if new_key in rename_keys.keys():
+                new_key = rename_keys[new_key]
             if section not in new_config.sections:
                 new_config[section] = {}
                 new_config.comments[section] = config.comments[key]
