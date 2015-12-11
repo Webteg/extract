@@ -346,7 +346,7 @@ def cli():
             if config['geral']['arquivo_qualis_de_congressos']:
                 arquivo_qualis_de_congressos = util.find_file(Path(config['geral']['arquivo_qualis_de_congressos']), config_file_path)
             area_qualis_de_congressos = None
-            if config['geral']['area_qualis_de_congressos']:
+            if config['geral'].get('area_qualis_de_congressos'):
                 area_qualis_de_congressos = config['geral']['area_qualis_de_congressos']
             qualis_scoring_table_file = None
             if config['geral'].get('tabela_de_pontuacoes_qualis'):

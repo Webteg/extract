@@ -7,7 +7,7 @@ import logging
 import os
 import re
 import unicodedata
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 
 import dateutil
@@ -347,7 +347,7 @@ class WebPagesGenerator:
         # assert isinstance(productions, pandas.DataFrame)
         productions_by_year = productions.ordered_dict_by(key_by=group_by, ascending=ascending)
         template_vars["grouped_productions"] = productions_by_year
-        chart = self.gerar_grafico_de_producoes(productions_by_year, title)
+        chart = self.gerar_grafico_de_producoes(productions_by_year)
         # jsondata = json.dumps(chart)
         # jsondata = chart.json()
         template_vars["chart"] = chart  #{"jsondata": jsondata, "height": chart['chart']['height']}
@@ -445,34 +445,26 @@ class WebPagesGenerator:
                 "Demais tipos de produção bibliográfica", "PB9")
 
     @staticmethod
-    def gerar_grafico_de_producoes(productions_by_year, titulo, detect_chart_type=True):
+    def gerar_grafico_de_producoes(productions_by_year):
         # FIXME: remover método e gerar gráfico nos templates
         """
         :param productions_by_year:
-        :param titulo:
-        :param detect_chart_type: if True, data is checked for Qualis information, in which case the frequency is grouped by area;
-                                  if False, a normal frequency chart by year is generated.
         :return:
         """
         assert isinstance(productions_by_year, dict)
-        # FIXME: replace by package pandas-highcharts
-        chart = highchart(type=chart_type.column)
-        chart.set_y_title(u'Frequência')
-        # chart.set_x_title(u'Ano')
-        # chart.set_x_categories(sorted(productions_by_year.keys()))
-        # chart['xAxis']['type'] = 'categories'
 
-        categories = []
-        areas_map = {None: 0}
+        categories = sorted(productions_by_year.keys())
+        year_frequency = OrderedDict({year: len(productions_by_year[year]) for year in categories})
+
+        areas_map = {'': 0}
         estrato_area_ano_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         for ano, publicacoes in sorted(productions_by_year.items()):
-            categories.append(ano)
             assert isinstance(publicacoes, pandas.DataFrame)
             for i, pub in publicacoes.iterrows():
                 try:
                     if not pub.qualis:
                         logger.debug("qualis is None")
-                        estrato_area_ano_freq[None][None][ano] += 1  # sem qualis
+                        estrato_area_ano_freq[''][''][ano] += 1  # sem qualis
                     else:
                         if type(pub.qualis) is str:  # sem area
                             logger.debug("publicação com qualis string (sem área): '{}'".format(pub.qualis))
@@ -483,9 +475,9 @@ class WebPagesGenerator:
                                     areas_map[area] = len(areas_map)
                 except AttributeError:
                     logger.debug(u"publicação sem atributo qualis")
-                    estrato_area_ano_freq[None][None][ano] += 1  # producao que nao tem qualis
+                    estrato_area_ano_freq[''][''][ano] += 1  # producao que nao tem qualis
 
-        return {'data': estrato_area_ano_freq, 'categories': categories}
+        return {'data': year_frequency, 'categories': categories, 'qualis_data': estrato_area_ano_freq}
 
         series = []
         if not estrato_area_ano_freq.keys():  # produções vazias
@@ -692,8 +684,8 @@ class WebPagesGenerator:
 
     @staticmethod
     def chunks(lista, tamanho):
-        ''' Retorna sucessivos chunks de 'tamanho' a partir da 'lista'
-        '''
+        """ Retorna sucessivos chunks de 'tamanho' a partir da 'lista'
+        """
         for i in range(0, len(lista), tamanho):
             yield lista[i:i + tamanho]
 

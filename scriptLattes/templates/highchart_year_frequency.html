@@ -8,7 +8,7 @@
         $(function () {
             $('#highchart').highcharts({
                 legend: {
-                    enabled: 'false',
+                    enabled: false,
                     title: {text: 'Grupo'},
                     backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor || '#FFFFFF'),
                     align: 'right',
@@ -48,7 +48,7 @@
                 },
                 title: {text: 'Apresentações de trabalho'},
                 plotOptions: {
-                    series: {shadow: 'true'},
+                    series: {shadow: true},
                     bar: {
                         dataLabels: {enabled: false},
                         stacking: 'normal'
@@ -64,13 +64,13 @@
     <div id="highchart" style="min-width: 310px; max-width: 1920px; height: 400px; margin: 0"></div>
 {% endblock %}
 
-{% macro series(estrato_area_ano_freq, categories) -%}
+{% macro series(year_frequency, categories) -%}
     [{
         name: 'Total',
         data: [
             {% for ano in categories %}
                 [
-                    {{ano}}, {{estrato_area_ano_freq[None][None][ano]}}
+                    {{ano}}, {{year_frequency[ano]}}
                 ],
             {% endfor %}
         ]

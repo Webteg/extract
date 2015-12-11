@@ -56,8 +56,8 @@
                 },
                 column: {stacking: null}
             },
-            series: {{series(chart.estrato_area_ano_freq, chart.categories)}},
-            drilldown: {{drilldown(chart.estrato_area_ano_freq, chart.categories)}},
+            series: {{series(chart.qualis_data, chart.categories)}},
+            drilldown: {{drilldown(chart.qualis_data, chart.categories)}}
         });
     });
 </script>
@@ -67,14 +67,14 @@
 
 {% macro series(estrato_area_ano_freq, categories) -%}
     [
-        {% for estrato, area_ano_freq in estrato_area_ano_freq.items()|dictsort %}
+        {% for estrato, area_ano_freq in estrato_area_ano_freq.items() %}
         {
-            name: {{estrato|default('Sem Qualis', true)}},
+            name: "{{estrato|default('Sem Qualis', true)}}",
             data: [
-                {% for area, ano_freq in area_ano_freq|dictsort %}
+                {% for area, ano_freq in area_ano_freq.items() %}
                     {
-                        name: {{area|default('Sem área', true)}},
-                        drilldown: {{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}},
+                        name: "{{area|default('Sem área', true)}}",
+                        drilldown: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
                         y: {{ ano_freq.values()|sum() }}
                     },
                     // data.append({'name': area, 'y': sum([ano_freq[ano] for ano in categories]), 'drilldown': area + estrato})
@@ -82,20 +82,20 @@
             ],
         },
         {% endfor %}
-    ],
+    ]
 {%- endmacro %}
 
 {% macro drilldown(estrato_area_ano_freq, categories) -%}
     {
         series: [
-            {% for estrato, area_ano_freq in estrato_area_ano_freq|dictsort %}
+            {% for estrato, area_ano_freq in estrato_area_ano_freq.items() %}
                 {
-                    name: {{estrato|default('Sem Qualis', true)}},
+                    name: "{{estrato|default('Sem Qualis', true)}}",
                     data: [
-                        {% for area, ano_freq in area_ano_freq|dictsort %}
+                        {% for area, ano_freq in area_ano_freq.items() %}
                             {
-                                name: {{estrato|default('Sem Qualis', true)}},
-                                id: {{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}},
+                                name: "{{estrato|default('Sem Qualis', true)}}",
+                                id: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
                                 data: [
                                     {% for ano in categories %}
                                         [
@@ -109,6 +109,6 @@
                     ],
                 },
             {% endfor %}
-        ],
-    },
+        ]
+    }
 {%- endmacro %}
