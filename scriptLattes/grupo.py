@@ -182,23 +182,22 @@ class Grupo:
     def identify_publications_qualis(self, qualis):
         logger.info("[IDENTIFICANDO QUALIS EM PRODUÇÕES DO GRUPO]")
         qualis.analyse_journal_papers(self.journal_papers)
-        qualis.analyse_event_papers(self.event_papers)
+        qualis.analyse_event_papers(self.event_papers)  # Artigos e resumos expandidos estão juntos no mesmo data frame
 
         logger.info("[IDENTIFICANDO QUALIS EM PRODUÇÕES DE CADA MEMBRO]")
         for member in self.members_list.values():
             qualis.analyse_journal_papers(member.journal_papers)
             qualis.analyse_event_papers(member.event_papers)
 
+            # FIXME: STOP; finish implementing production scoring
+            # score_df = qualis.compute_journal_papers_score(member.journal_papers)
+            # member.set_scoring(score_df)
+
         # FIXME: save cache
         # if self.diretorioCache:
         # filename = (self.diretorioCache or '/tmp') + '/qualis.data'
         # self.qualis.qextractor.save_data(self.diretorioCache + '/' + filename)
         # self.qualis.qextractor.save_data(filename)
-
-        # FIXME: calcular qualis de eventos (precisa ler do arquivo csv)
-        # self.qualis.calcular_totais_dos_qualis(self.compilador.listaCompletaArtigoEmPeriodico,
-        #                                        self.compilador.listaCompletaTrabalhoCompletoEmCongresso,
-        #                                        self.compilador.listaCompletaResumoExpandidoEmCongresso)
 
     # FIXME: finish refactoring
     def gerarXMLdeGrupo(self):

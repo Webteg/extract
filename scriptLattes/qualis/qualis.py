@@ -109,9 +109,9 @@ class Qualis:
                                           arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
                                           area_qualis_de_congressos=area_qualis_de_congressos)
 
-        self.scoring_table = None
+        self.scoring_table_config = None
         if scoring_table_path:
-            self.load_scoring_table(scoring_table_path)
+            self.scoring_table_config = self.load_scoring_table(scoring_table_path)
 
         # self.qextractor.extract_qualis()
         # self.qextractor.save_data(data_file_path)
@@ -141,16 +141,27 @@ class Qualis:
         for index, paper in papers.data_frame.iterrows():
             area_estrato_dict = self.qextractor.get_qualis_by_event(paper.evento)
             if area_estrato_dict:
-                papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
+                papers.data_frame.set_value(index, 'qualis', area_estrato_dict)
 
-    def load_scoring_table(self, file_path):
+    @staticmethod
+    def load_scoring_table(file_path):
         assert isinstance(file_path, Path)
         spec = scoring_table_spec.split("\n")
         config = ConfigObj(infile=str(file_path), configspec=spec, file_error=False)
         validator = Validator()
         res = config.validate(validator, copy=True)
+        errors = [section for section, value in res.items() if not value]
+        if errors:
+            logger.error("Configuração inválida na(s) seção(ões): {}".format(errors))
         return config
 
+    def compute_journal_papers_score(self, journal_papers_df):
+        if not self.scoring_table_config:
+            logger.debug("No scoring information provided; ignoring.")
+            return None
+        # qualis
+
+        # fator de impacto
 
     def analisar_publicacoes(self, membro):
         raise Exception("Substituído por métodos específicos")
