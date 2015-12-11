@@ -180,12 +180,14 @@ class Grupo:
         # self.author_rank_vector = AuthorRank(self.co_authorship_normalized_weighted_matrix, 100).rank_vector  # FIXME: por que 100 iteracoes?
 
     def identify_publications_qualis(self, qualis):
-        logger.info("[IDENTIFICANDO QUALIS EM PUBLICAÇÕES]")
+        logger.info("[IDENTIFICANDO QUALIS EM PRODUÇÕES DO GRUPO]")
         qualis.analyse_journal_papers(self.journal_papers)
         qualis.analyse_event_papers(self.event_papers)
 
-        # for membro in self.members_list.values():
-        #     qualis.analisar_publicacoes(membro)  # Qualis - Adiciona Qualis as publicacoes dos membros
+        logger.info("[IDENTIFICANDO QUALIS EM PRODUÇÕES DE CADA MEMBRO]")
+        for member in self.members_list.values():
+            qualis.analyse_journal_papers(member.journal_papers)
+            qualis.analyse_event_papers(member.event_papers)
 
         # FIXME: save cache
         # if self.diretorioCache:

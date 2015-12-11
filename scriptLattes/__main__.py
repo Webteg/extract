@@ -360,14 +360,19 @@ def cli():
             area_qualis_de_congressos = None
             if config['geral']['area_qualis_de_congressos']:
                 area_qualis_de_congressos = config['geral']['area_qualis_de_congressos']
+            qualis_scoring_table_file = None
+            if config['geral'].get('tabela_de_pontuacoes_qualis'):
+                qualis_scoring_table_file = util.find_file(Path(config['geral']['tabela_de_pontuacoes_qualis']), config_file_path)
             # FIXME: atualizar extração do qualis (decidir se é melhor um pacote separado); de qualquer forma, é necessário agora extrair da plataforma sucupira
             qualis = Qualis(data_file_path=cache_file,
                             arquivo_qualis_de_periodicos=arquivo_qualis_de_periodicos,
                             arquivo_areas_qualis=arquivo_areas_qualis,
                             arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
-                            area_qualis_de_congressos=area_qualis_de_congressos)
+                            area_qualis_de_congressos=area_qualis_de_congressos,
+                            scoring_table_path=qualis_scoring_table_file)
 
             group.identify_publications_qualis(qualis)  # obrigatorio
+
 
         # TODO: decidir se é aqui ou em report
         if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
@@ -378,6 +383,9 @@ def cli():
                                            weight_collaborations=config['grafo'].get('mostrar_aresta_proporcional_ao_numero_de_colaboracoes'))
 
     if arguments['report']:
+        if config['geral'].get('criar_paginas_jsp'):
+            raise Exception("Formato JSP não mais suportado (configuração geral.criar_paginas_jsp)")
+
         # if config['relatorio']['incluir_internacionalizacao']:
         #     lista_doi = group.calcularInternacionalizacao()  # obrigatorio
         #     if lista_doi and output_directory:
@@ -389,9 +397,6 @@ def cli():
 
         # # group.gerarGraficosDeBarras() # java charts
         # group.gerarMapaDeGeolocalizacao()  # obrigatorio
-
-        if config['geral'].get('criar_paginas_jsp'):
-            raise "Formato JSP não mais suportado (configuração geral.criar_paginas_jsp)"
 
         pages = WebPagesGenerator(group, output_directory, version=scriptLattes.__version__, admin_email=config['geral'].get('email_do_admin'))  # obrigatorio
         pages.generate()

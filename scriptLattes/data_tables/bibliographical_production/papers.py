@@ -89,7 +89,7 @@ class Papers:
                 if similar.any().any():  # double any's because on empty similar any returns bool by column
                     duplicated.append(i)
                     self.data_frame.ix[similar, 'id_membro'] = self.data_frame.ix[similar, 'id_membro'].apply(lambda x: x | frozenset({row.id_membro}))
-            data_frame_to_append['id_membro'] = data_frame_to_append['id_membro'].apply(lambda x: frozenset({x}))
+            data_frame_to_append.loc[:, 'id_membro'] = data_frame_to_append['id_membro'].apply(lambda x: frozenset({x}))
             self.data_frame = self.data_frame.append(data_frame_to_append[~data_frame_to_append.index.isin(duplicated)], ignore_index=True)
         else:
             self.data_frame = self.data_frame.append(data_frame_to_append, ignore_index=True)

@@ -27,65 +27,72 @@ import re
 import fileinput
 
 import pandas
+from configobj import ConfigObj
+from pathlib import Path
 
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from qualis.qualisextractor import QualisExtractor
 from scriptLattes.util.util import similaridade_entre_cadeias
 from scriptLattes.util.util import find_file
+from validate import Validator
 
 logger = logging.getLogger(__name__)
 
 
-def padronizar_nome(nome):
-    nome = nome.replace(u"\u00A0", " ")
-    nome = nome.replace(u"\u2010", " ")
-    nome = nome.replace(u"-", " ")
+scoring_table_spec = """
+# Tabela de pontuação de produçao
 
-    # nome = re.sub(r"\(.*\)", " ", nome)
-    # nome = re.sub(r"\(", " ", nome)
-    # nome = re.sub(r"\)", " ", nome)
-    nome = re.sub("\s+", ' ', nome)
-    nome = nome.strip()
-    return nome
+[artigos em periódicos]
+# 1. ARTIGOS PUBLICADOS EM PERIÓDICOS CIENTÍFICOS com  ISSN.
+# Cada artigo será pontuado pelo Qualis OU pelo Fator de Impacto, o que for maior.
+    [[qualis]]
+        A1 = integer
+        A2 = integer
+        B1 = integer
+        B2 = integer
+        B3 = integer
+        B4 = integer
+        B5 = integer
+        C  = integer
+        sem qualis = integer
 
+    [[fator de impacto]]
+        # Especifique intervalos "x < F.I. <= y" no formato "x, y" (use '_' para -infinito e + infinito)
+        3,0 <  _  = integer
+        2,5 < 3,0 = integer
+        2,0 < 2,5 = integer
+        1,6 < 2,0 = integer
+        1,2 < 1,6 = integer
+        0,8 < 1,2 = integer
+        0,5 < 0,8 = integer
+         _  < 0,5 = integer
 
-def carregar_qualis_de_arquivo(arquivo):
-    lista = {}
-    if arquivo:
-        arquivo = find_file(arquivo)
-
-        for linha in fileinput.input(arquivo):
-            linha = linha.replace("\r", "")
-            linha = linha.replace("\n", "")
-
-            campos = linha.split('\t')
-            sigla = campos[0].rstrip().decode("utf8")  # ISSN de periodicos ou SIGLA de congressos
-            nome = campos[1].rstrip().decode("utf8")  # Nome do periodico ou evento
-            qualis = campos[2].rstrip()  # Estrato Qualis
-
-            nome = padronizar_nome(nome)
-            sigla = padronizar_nome(sigla)
-
-            lista[nome] = qualis
-            lista[sigla] = qualis  # Armazena a sigla/issn do evento/periodico
-
-        logger.info('[QUALIS]: {} itens adicionados do arquivo {}'.format(len(lista), arquivo))
-    return lista
-
+[artigos em eventos]
+    A1 = integer
+    A2 = integer
+    B1 = integer
+    B2 = integer
+    B3 = integer
+    B4 = integer
+    B5 = integer
+    C = integer
+    Sem Qualis = integer
+"""
 
 class Qualis:
-    periodicos = {}
-    congressos = {}
-    qtdPB0 = {}  # Total de artigos em periodicos por Qualis
-    qtdPB4 = {}  # Total de trabalhos completos em congressos por Qualis
-    qtdPB5 = {}  # Total de resumos expandidos em congressos por Qualis
+    # periodicos = {}
+    # congressos = {}
+    # qtdPB0 = {}  # Total de artigos em periodicos por Qualis
+    # qtdPB4 = {}  # Total de trabalhos completos em congressos por Qualis
+    # qtdPB5 = {}  # Total de resumos expandidos em congressos por Qualis
 
     def __init__(self, data_file_path=None,
                  arquivo_qualis_de_periodicos=None,
                  arquivo_areas_qualis=None,
                  arquivo_qualis_de_congressos=None,
-                 area_qualis_de_congressos=None):
+                 area_qualis_de_congressos=None,
+                 scoring_table_path=None):
         """
         arquivo_qualis_de_congressos: arquivo CSV de qualis de congressos # FIXME: só funciona para uma área
         data_file_path: arquivo cache de qualis extraídos anteriormente; é atualizado ao final da execução
@@ -102,10 +109,12 @@ class Qualis:
                                           arquivo_qualis_de_congressos=arquivo_qualis_de_congressos,
                                           area_qualis_de_congressos=area_qualis_de_congressos)
 
+        self.scoring_table = None
+        if scoring_table_path:
+            self.load_scoring_table(scoring_table_path)
+
         # self.qextractor.extract_qualis()
         # self.qextractor.save_data(data_file_path)
-
-        # self.congressos = carregar_qualis_de_arquivo(arquivo_qualis_de_congressos)
 
     def analyse_journal_papers(self, papers):
         assert isinstance(papers, JournalPapers)
@@ -120,7 +129,7 @@ class Qualis:
             else:
                 area_estrato_dict = self.qextractor.get_qualis_by_title(paper.revista)
             if area_estrato_dict:
-                papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
+                papers.data_frame.set_value(index, 'qualis', area_estrato_dict)
 
     def analyse_event_papers(self, papers):
         assert isinstance(papers, EventPapers)
@@ -134,8 +143,17 @@ class Qualis:
             if area_estrato_dict:
                 papers.data_frame.ix[index, 'qualis'] = area_estrato_dict
 
+    def load_scoring_table(self, file_path):
+        assert isinstance(file_path, Path)
+        spec = scoring_table_spec.split("\n")
+        config = ConfigObj(infile=str(file_path), configspec=spec, file_error=False)
+        validator = Validator()
+        res = config.validate(validator, copy=True)
+        return config
+
+
     def analisar_publicacoes(self, membro):
-        raise "Substituído por métodos específicos"
+        raise Exception("Substituído por métodos específicos")
         # Percorrer lista de publicacoes buscando e contabilizando os qualis
         for index, publicacao in membro.journal_papers:
             # qualis, similar = self.buscaQualis('P', pub.revista)

@@ -912,6 +912,7 @@ class WebPagesGenerator:
 
     @staticmethod
     def producao_qualis(elemento, membro):
+        raise Exception("Método parece não ser mais utilizado.")
         tabela_template = u"<table style=\"width: 100%; display: block; overflow-x: auto;\"><tbody>" \
                           u"<br><span style=\"font-size:14px;\"><b>Totais de publicações com Qualis:</b></span><br><br>" \
                           u"<div style=\"width:100%; overflow-x:scroll;\">{body}</div>" \
@@ -1163,6 +1164,7 @@ class WebPagesGenerator:
         self.salvarPagina("producao_membros" + self.extensaoPagina, html)
 
     def pagina_top(self, cabecalho=''):
+        raise Exception("Método inutilizado")
         nome_grupo = self.grupo.obterParametro('global-nome_do_grupo').decode("utf8")
 
         s = self.html1

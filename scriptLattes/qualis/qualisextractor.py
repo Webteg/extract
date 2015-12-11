@@ -207,15 +207,15 @@ class QualisExtractor(object):
         """
         logger.info("Extraindo qualis do evento '{}'...".format(event_title))
 
-        def is_similar(self, row, str2):
-            if similaridade_entre_cadeias(row['evento'], str2):
+        def is_similar_to_event(x):
+            if Levenshtein.ratio(x['evento'], event_title) >= 0.8 or Levenshtein.ratio(x['evento'], event_title) >= 0.5 and x['sigla'] in event_acronyms:
                 return True
             return False
 
         # data = self.events_qualis_data_frame[self.events_qualis_data_frame['evento'] == event_title]
         event_acronyms = re.split('[\s-]+', event_title)
         data = self.events_qualis_data_frame[self.events_qualis_data_frame.apply(
-            lambda x: Levenshtein.ratio(x['evento'], event_title) >= 0.8 or x['sigla'] in event_acronyms, axis=1)]
+            lambda x: is_similar_to_event(x), axis=1)]
 
         # qualis = dict(zip(data['area'], data['estrato']))
         area = [self.events_qualis_area] * len(data['estrato'])
