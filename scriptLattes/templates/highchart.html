@@ -99,10 +99,8 @@
         background2: '#E0E0E8'
     };
     Highcharts.setOptions(Highcharts.theme);
-    $(function () {
-        $('#highchart').highcharts({{ chart.jsondata }});
-    });
 </script>
 
-<div id="highchart" style="min-width: 310px; max-width: 1920px; height: {{chart.height}}; margin: 0"></div>
+{% block highchart_data %}
 
+{% endblock %}

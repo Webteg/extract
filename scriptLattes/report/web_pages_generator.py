@@ -3,7 +3,6 @@
 # filename: geradorDePaginasWeb
 
 import datetime
-import json
 import logging
 import os
 import re
@@ -20,7 +19,7 @@ from pandas.core.indexing import IndexingError
 import membro
 from report import file_generator
 from report.charts.graficoDeInternacionalizacao import *
-from report.charts.highcharts import highchart, chart_type, jscmd
+from report.charts.highcharts import highchart, chart_type
 
 logger = logging.getLogger('scriptLattes')
 
@@ -56,17 +55,22 @@ class WebPagesGenerator:
         # Format: (page, title, object, template)
         # template is a relative path; check self.jinja initialization
         self.bibliographical_productions_routes = [
-            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
+            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published,
+             "bibliographical_production/journal_papers_list.html"),
             ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
-            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
-            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
-            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete,
+             "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract,
+             "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract,
+             "bibliographical_production/event_papers_list.html"),
             ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
             ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
             ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
             ("PB8-0.html", u"Apresentações de trabalho ", self.grupo.presentations, "bibliographical_production/presentations_list.html"),
             ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.grupo.others, "bibliographical_production/others_list.html"),
-            # ("PB-0.html",  u"Total de produção bibliográfica", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_production.html"),
+            ("PB-0.html", u"Produção bibliográfica total", self.grupo.bibliographical_productions,
+             "bibliographical_production/bibliographical_productions_list.html"),
         ]
 
     def generate(self):
@@ -345,8 +349,8 @@ class WebPagesGenerator:
         template_vars["grouped_productions"] = productions_by_year
         chart = self.gerar_grafico_de_producoes(productions_by_year, title)
         # jsondata = json.dumps(chart)
-        jsondata = chart.json()
-        template_vars["chart"] = {"jsondata": jsondata, "height": chart['chart']['height']}
+        # jsondata = chart.json()
+        template_vars["chart"] = chart  #{"jsondata": jsondata, "height": chart['chart']['height']}
 
         s = template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -439,6 +443,88 @@ class WebPagesGenerator:
             self.nPB9 = self.generate_production_page(
                 self.grupo.compilador.listaCompletaOutroTipoDeProducaoBibliografica,
                 "Demais tipos de produção bibliográfica", "PB9")
+
+    @staticmethod
+    def gerar_grafico_de_producoes(productions_by_year, titulo, detect_chart_type=True):
+        # FIXME: remover método e gerar gráfico nos templates
+        """
+        :param productions_by_year:
+        :param titulo:
+        :param detect_chart_type: if True, data is checked for Qualis information, in which case the frequency is grouped by area;
+                                  if False, a normal frequency chart by year is generated.
+        :return:
+        """
+        assert isinstance(productions_by_year, dict)
+        # FIXME: replace by package pandas-highcharts
+        chart = highchart(type=chart_type.column)
+        chart.set_y_title(u'Frequência')
+        # chart.set_x_title(u'Ano')
+        # chart.set_x_categories(sorted(productions_by_year.keys()))
+        # chart['xAxis']['type'] = 'categories'
+
+        categories = []
+        areas_map = {None: 0}
+        estrato_area_ano_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        for ano, publicacoes in sorted(productions_by_year.items()):
+            categories.append(ano)
+            assert isinstance(publicacoes, pandas.DataFrame)
+            for i, pub in publicacoes.iterrows():
+                try:
+                    if not pub.qualis:
+                        logger.debug("qualis is None")
+                        estrato_area_ano_freq[None][None][ano] += 1  # sem qualis
+                    else:
+                        if type(pub.qualis) is str:  # sem area
+                            logger.debug("publicação com qualis string (sem área): '{}'".format(pub.qualis))
+                        else:
+                            for area, estrato in sorted(pub.qualis.items()):
+                                estrato_area_ano_freq[estrato][area][ano] += 1
+                                if area not in areas_map:
+                                    areas_map[area] = len(areas_map)
+                except AttributeError:
+                    logger.debug(u"publicação sem atributo qualis")
+                    estrato_area_ano_freq[None][None][ano] += 1  # producao que nao tem qualis
+
+        return {'data': estrato_area_ano_freq, 'categories': categories}
+
+        series = []
+        if not estrato_area_ano_freq.keys():  # produções vazias
+            logger.debug("Nenhuma produção: {}".format(type(productions_by_year.values())))
+        elif not detect_chart_type or len(list(estrato_area_ano_freq.keys())) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
+
+            # freq = [estrato_area_ano_freq[None][None][ano] for ano in categories]
+            # series.append({'name': u'Total', 'data': freq})
+            # chart.set_x_categories(categories)
+
+            data = [[ano, estrato_area_ano_freq[None][None][ano]] for ano in categories]
+            # for ano in categories:
+            #     freq = estrato_area_ano_freq[None][None][ano]
+            #     data.append([ano, freq])
+            series.append({'name': u'Total', 'data': data})
+
+        else:  # gráficos com informações sobre qualis
+            drilldown_series = []
+            for estrato, area_ano_freq in sorted(estrato_area_ano_freq.items(),
+                                                 key=lambda x: (x[0] is not None, x[0])):  # Py3 raises error when sorting None values
+                if not estrato:
+                    estrato = 'Sem Qualis'
+                data = []
+                # for area, ano_freq in area_ano_freq.items():
+                for area in sorted(areas_map.keys(), key=lambda x: (x is not None, x)):
+                    ano_freq = area_ano_freq[area]
+                    freq = [ano_freq[ano] for ano in categories]
+                    if not area:
+                        area = u'Sem área'
+                    data.append({'name': area, 'y': sum(freq), 'drilldown': area + estrato})
+
+                    drilldown_series.append({'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
+                one_serie = {'name': estrato, 'data': data}  # , 'stack': area}
+                series.append(one_serie)
+            chart['drilldown'] = {'series': drilldown_series}
+
+        # chart.set_series(series)
+        # return chart
+        return series
 
     def gerarPaginasDeProducoesTecnicas(self):
         self.nPT0 = 0
@@ -634,98 +720,6 @@ class WebPagesGenerator:
             <tr valign="top"><td>{indice}. &nbsp;</td> <td>{publicacao}</td></tr>
             '''
         return s
-
-    @staticmethod
-    def gerar_grafico_de_producoes(productions_by_year, titulo):
-        assert isinstance(productions_by_year, dict)
-        # FIXME: replace by package pandas-highcharts
-        chart = highchart(type=chart_type.column)
-        chart.set_y_title(u'Frequência')
-        # chart.set_x_title(u'Ano')
-        # chart.set_x_categories(sorted(productions_by_year.keys()))
-        # chart['xAxis']['type'] = 'categories'
-
-        categories = []
-        areas_map = {None: 0}
-        estrato_area_ano_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for ano, publicacoes in sorted(productions_by_year.items()):
-            categories.append(ano)
-            assert isinstance(publicacoes, pandas.DataFrame)
-            for i, pub in publicacoes.iterrows():
-                try:
-                    if not pub.qualis:
-                        logger.debug("qualis is None")
-                        estrato_area_ano_freq[None][None][ano] += 1  # sem qualis
-                    else:
-                        if type(pub.qualis) is str:  # sem area
-                            logger.debug("publicação com qualis string (sem área): '{}'".format(pub.qualis))
-                        else:
-                            for area, estrato in sorted(pub.qualis.items()):
-                                estrato_area_ano_freq[estrato][area][ano] += 1
-                                if area not in areas_map:
-                                    areas_map[area] = len(areas_map)
-                except AttributeError:
-                    logger.debug(u"publicação sem atributo qualis")
-                    estrato_area_ano_freq[None][None][ano] += 1  # producao que nao tem qualis
-
-        series = []
-        if not estrato_area_ano_freq.keys():  # produções vazias
-            logger.debug("Nenhuma produção: {}".format(type(productions_by_year.values())))
-        elif len(list(estrato_area_ano_freq.keys())) == 1 and None in estrato_area_ano_freq.keys():  # gráfico normal sem qualis
-            chart.settitle(titulo)
-            chart['plotOptions']['column']['stacking'] = None
-            chart['chart']['height'] = 400
-            # chart['legend']['title'] = {'text': 'Ano'}
-            # chart['legend']['enabled'] = jscmd('false')
-            chart['legend']['enabled'] = 'false'
-            chart['xAxis']['type'] = 'category'
-
-            # freq = [estrato_area_ano_freq[None][None][ano] for ano in categories]
-            # series.append({'name': u'Total', 'data': freq})
-            # chart.set_x_categories(categories)
-
-            data = []
-            for ano in categories:
-                freq = estrato_area_ano_freq[None][None][ano]
-                data.append([ano, freq])
-            series.append({'name': u'Total', 'data': data})
-
-            # for ano, pub in sorted(productions_by_year.items()):
-            #     series.append({'name': ano, 'data': [len(pub)]}) #, 'y': [len(pub)]})
-        else:  # temos informações sobre qualis
-            chart.settitle(u'Publicações por ano agrupadas por área e estrato Qualis')
-            chart['chart']['type'] = 'bar'
-            chart['chart']['height'] = 1080
-            # chart['plotOptions']['column']['stacking'] = 'normal'
-            chart['plotOptions']['bar']['stacking'] = 'normal'
-            chart['legend']['title'] = {'text': 'Estrato Qualis'}
-            # chart['legend']['enabled'] = jscmd('true')
-            chart['legend']['enabled'] = 'true'
-            chart['xAxis']['type'] = 'category'
-            # chart['yAxis']['stackLabels']['rotation'] = 90
-            # chart['yAxis']['stackLabels']['textAlign'] = 'right'
-
-            drilldown_series = []
-            for estrato, area_ano_freq in sorted(estrato_area_ano_freq.items(), key=lambda x: (x[0] is not None, x[0])):  # Py3 raises error when sorting None values
-                if not estrato:
-                    estrato = 'Sem Qualis'
-                data = []
-                # for area, ano_freq in area_ano_freq.items():
-                for area in sorted(areas_map.keys(), key=lambda x: (x is not None, x)):
-                    ano_freq = area_ano_freq[area]
-                    freq = [ano_freq[ano] for ano in categories]
-                    if not area:
-                        area = u'Sem área'
-                    data.append({'name': area, 'y': sum(freq), 'drilldown': area + estrato})
-
-                    drilldown_series.append(
-                        {'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
-                one_serie = {'name': estrato, 'data': data}  # , 'stack': area}
-                series.append(one_serie)
-            chart['drilldown'] = {'series': drilldown_series}
-        chart.set_series(series)
-
-        return chart
 
     def gerarIndiceDePaginas(self, numeroDePaginas, numeroDePaginaAtual, prefixo):
         if numeroDePaginas == 1:
@@ -1246,5 +1240,3 @@ def menuHTMLdeBuscaPA(titulo):
            <a href="http://www.bing.com/search?q=' + titulo + '">busca Bing</a> ] \
          </font><br>'
     return s
-
-

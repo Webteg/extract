@@ -1,0 +1,78 @@
+{% extends "highchart.html" %}
+
+{% block highchart_data %}
+    <script type="text/javascript">
+//        $(function () {
+//            $('#highchart').highcharts({ chart.jsondata });
+//        });
+        $(function () {
+            $('#highchart').highcharts({
+                legend: {
+                    enabled: 'false',
+                    title: {text: 'Grupo'},
+                    backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor || '#FFFFFF'),
+                    align: 'right',
+                    shadow: true,
+                    verticalAlign: 'middle',
+                    borderWidth: 1,
+                    layout: 'vertical'
+                },
+                credits: {enabled: false},
+                tooltip: {
+                    enabled: true,
+                    valueSuffix: '',
+                    headerFormat: '<span style="font-size: 10px">{point.key}{point.stack}{series.stack}</span><br/>',
+                    pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>',
+                    shared: false
+                },
+                chart: {
+                    height: 400,
+                    type: 'column'
+                },
+                subtitle: { text: ''},
+                yAxis: {
+                    title: {
+                        align: 'middle',
+                        text: 'Frequência'
+                    },
+                    min: 0,
+                    labels: {overflow: 'justify'},
+                    stackLabels: {
+                        enabled: true,
+                        format: '{stack}'
+                    }
+                },
+                xAxis: {
+                    title: {text: ''},
+                    type: 'category'
+                },
+                title: {text: 'Apresentações de trabalho'},
+                plotOptions: {
+                    series: {shadow: 'true'},
+                    bar: {
+                        dataLabels: {enabled: false},
+                        stacking: 'normal'
+                    },
+                    column: {stacking: null}
+                },
+                series: {{series(chart.data, chart.categories)}}
+            });
+        });
+
+    </script>
+
+    <div id="highchart" style="min-width: 310px; max-width: 1920px; height: 400px; margin: 0"></div>
+{% endblock %}
+
+{% macro series(estrato_area_ano_freq, categories) -%}
+    [{
+        name: 'Total',
+        data: [
+            {% for ano in categories %}
+                [
+                    {{ano}}, {{estrato_area_ano_freq[None][None][ano]}}
+                ],
+            {% endfor %}
+        ]
+    }]
+{%- endmacro %}

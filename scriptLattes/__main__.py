@@ -56,9 +56,8 @@ from validate import Validator
 
 logger = logging.getLogger(__name__)
 
-
 # FIXME: implementar opção de gravar arquivo de configuração padrão (http://www.voidspace.org.uk/python/configobj.html#copy-mode)
-
+# UPDATE: ver config_migrator
 default_configuration = u"""
 # ---------------------------------------------------------------------------- #
 # INFORMAÇÕS GERAIS                                                            #
@@ -218,7 +217,6 @@ def read_list_file(ids_file_path):
 def cli():
     arguments = docopt(__doc__, argv=None, help=True, version='9.0.0', options_first=False)
 
-    """Add some useful functionality here or import from a submodule."""
     # configure root logger to print to STDERR
     if arguments['--verbose']:
         configure_stream(level='DEBUG')
@@ -253,16 +251,18 @@ def cli():
         if not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-    ids_file_path = util.find_file(Path(config['geral']['arquivo_de_entrada']), config_file_path)
+    ids_file_path = util.find_file(Path(config['geral'].get('arquivo_de_entrada')), config_file_path)
     if not ids_file_path:
+        logger.error(
+            "Configuração do arquivo de entrada inválida ou não informada: '{} = {}'".format('arquivo_de_entrada', config['geral'].get('arquivo_de_entrada')))
         return -1
 
     ids_df = read_list_file(ids_file_path)
 
     group = Grupo(name=config['geral'].get('nome_do_grupo'),
                   ids_df=ids_df,
-                  desde_ano=config['geral']['itens_desde_o_ano'],
-                  ate_ano=config['geral']['itens_ate_o_ano'])
+                  desde_ano=config['geral'].get('itens_desde_o_ano'),
+                  ate_ano=config['geral'].get('itens_ate_o_ano'))
     # group.imprimirListaDeParametros()
     # group.imprimirListaDeRotulos()
 
@@ -297,19 +297,18 @@ def cli():
                     # sera procurada a coautoria endogena com os outros membro.
                     # para isso é necessario indicar o nome abreviado no arquivo .list
                     # FIXME: verificar se ainda funciona
-                    raise "FIXME: membro sem lattes ainda não implementado"
+                    raise Exception("FIXME: membro sem lattes ainda não implementado")
                     continue
                 try:
                     cv_path = (cache.directory / id_lattes).resolve()
                 except OSError:
-                    logger.error(
-                        "O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
+                    logger.error("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
                     continue
 
                 assert isinstance(cv_path, Path)
                 with cv_path.open() as f:
                     cv_lattes_content = f.read()  # py2 dá erros difíceis de consertar # .decode(encoding)#.encode("utf-8")
-                logger.debug("Utilizando CV armazenado no cache: {}.".format(cv_path))
+                logger.debug("Utilizando CV armazenado na cache: {}.".format(cv_path))
 
                 if use_xml:
                     # TODO: verificar se realmente isto é necessário
@@ -319,19 +318,10 @@ def cli():
                                                                  'replace') + extended_chars + special_chars
                     cvs_content['xml'][id_lattes] = cv_lattes_content
                 else:
-                    # extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
-                    # special_chars = ' -'''
-                    # #cvLattesHTML  = cvLattesHTML.decode('ascii','replace')+extended_chars+special_chars
-                    # cvLattesHTML = cvLattesHTML.decode('iso-8859-1', 'replace') + extended_chars + special_chars
                     cvs_content['html'][id_lattes] = cv_lattes_content
 
     if arguments['extract'] or arguments['process'] or arguments['report']:
         # extrair/carregar
-        # for id_lattes in ids['identificador']:
-        #     if use_xml:
-        #         parser = ParserLattesXML(id_lattes, cvs_content['xml'][id_lattes])
-        #     else:
-        #         parser = ParserLattesHTML(id_lattes, cvs_content['html'][id_lattes])
         if use_xml:
             group.extract_cvs_data(ParserLattesXML, cvs_content['xml'])  # obrigatorio
         else:
@@ -339,7 +329,6 @@ def cli():
 
     if arguments['process'] or arguments['report'] or arguments['all']:
         # processar/carregar
-        # group.compilarListasDeItems(config['relatorio'])  # obrigatorio
         group.aggregate_data()
         # FIXME: uncomment group.create_colaboration_matrices()
 
@@ -371,7 +360,6 @@ def cli():
                             scoring_table_path=qualis_scoring_table_file)
 
             group.identify_publications_qualis(qualis)  # obrigatorio
-
 
         # TODO: decidir se é aqui ou em report
         if config['grafo'].get('mostrar_grafo_de_colaboracoes'):
@@ -411,9 +399,9 @@ def cli():
         #
         # ids_file_path = util.find_file(Path(config['geral']['arquivo_de_entrada']), config_file_path)
 
-    # XXX: fluxo antigo; apenas para referência
-    # if criarDiretorio('global-diretorio_de_saida')):
-    # if 'diretorio_de_saida' in config['geral']:
+        # XXX: fluxo antigo; apenas para referência
+        # if criarDiretorio('global-diretorio_de_saida')):
+        # if 'diretorio_de_saida' in config['geral']:
         # extract
         # group.extract_cvs_data(parser)  # obrigatorio
 

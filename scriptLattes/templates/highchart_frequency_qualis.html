@@ -1,0 +1,114 @@
+{% extends "highchart.html" %}
+
+{% block highchart_data %}
+<script type="text/javascript">
+    //        $(function () {
+    //            $('#highchart').highcharts({ chart.jsondata });
+    //        });
+
+    $(function () {
+        $('#highchart').highcharts({
+            legend: {
+                enabled: 'true',
+                title: {text: 'Estrato Qualis'},
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor || '#FFFFFF'),
+                align: 'right',
+                shadow: true,
+                verticalAlign: 'middle',
+                borderWidth: 1,
+                layout: 'vertical'
+            },
+            credits: {enabled: false},
+            tooltip: {
+                enabled: true,
+                valueSuffix: '',
+                headerFormat: '<span style="font-size: 10px">{point.key}{point.stack}{series.stack}</span><br/>',
+                pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>',
+                shared: false
+            },
+            chart: {
+                height: 1080,
+                type: 'bar'
+            },
+            subtitle: {text: ''},
+            yAxis: {
+                title: {
+                    align: 'middle',
+                    text: 'Frequência'
+                },
+                min: 0,
+                labels: {overflow: 'justify'},
+                stackLabels: {
+                    enabled: true,
+                    format: '{stack}'
+                }
+            },
+            xAxis: {
+                title: {text: ''},
+                type: 'category'
+            },
+            title: {text: 'Publicações por ano agrupadas por área e estrato Qualis'},
+            plotOptions: {
+                series: {shadow: 'true'},
+                bar: {
+                    dataLabels: {enabled: false},
+                    stacking: 'normal'
+                },
+                column: {stacking: null}
+            },
+            series: {{series(chart.estrato_area_ano_freq, chart.categories)}},
+            drilldown: {{drilldown(chart.estrato_area_ano_freq, chart.categories)}},
+        });
+    });
+</script>
+
+<div id="highchart" style="min-width: 310px; max-width: 1920px; height: 1080px; margin: 0"></div>
+{% endblock %}
+
+{% macro series(estrato_area_ano_freq, categories) -%}
+    [
+        {% for estrato, area_ano_freq in estrato_area_ano_freq.items()|dictsort %}
+        {
+            name: {{estrato|default('Sem Qualis', true)}},
+            data: [
+                {% for area, ano_freq in area_ano_freq|dictsort %}
+                    {
+                        name: {{area|default('Sem área', true)}},
+                        drilldown: {{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}},
+                        y: {{ ano_freq.values()|sum() }}
+                    },
+                    // data.append({'name': area, 'y': sum([ano_freq[ano] for ano in categories]), 'drilldown': area + estrato})
+                {% endfor %}
+            ],
+        },
+        {% endfor %}
+    ],
+{%- endmacro %}
+
+{% macro drilldown(estrato_area_ano_freq, categories) -%}
+    {
+        series: [
+            {% for estrato, area_ano_freq in estrato_area_ano_freq|dictsort %}
+                {
+                    name: {{estrato|default('Sem Qualis', true)}},
+                    data: [
+                        {% for area, ano_freq in area_ano_freq|dictsort %}
+                            {
+                                name: {{estrato|default('Sem Qualis', true)}},
+                                id: {{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}},
+                                data: [
+                                    {% for ano in categories %}
+                                        [
+                                            {{ano}}, {{ano_freq[ano]}}
+                                        ],
+                                    {% endfor %}
+                                ],
+                            },
+                            // drilldown_series.append({'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
+                        {% endfor %}
+                    ],
+                },
+            {% endfor %}
+        ],
+    },
+{%- endmacro %}

@@ -4,9 +4,13 @@ __author__ = 'kepler'
 
 
 class Store:
+    """
+    Utility methods for accessing HDF5 storage through pandas.
+    Check http://pandas.pydata.org/pandas-docs/stable/io.html#io-hdf5
+    """
     def __init__(self, store_file_path=None):
         self.store_file_path = store_file_path
-        self.store = HDFStore(str(store_file_path), mode='a')
+        self.store = HDFStore(str(store_file_path), mode='a', complevel=9, complib='zlib')
 
     def put(self, name, data_frame):
         self.store.put(name, data_frame, format="table", append=True)

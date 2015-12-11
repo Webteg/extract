@@ -22,9 +22,11 @@
 
     <h3>{{subtitle}}</h3>
 
-    {% if chart %}
-        {% include "highchart.html" with context %}
-    {% endif %}
+    {% block chart %}
+        {% if chart %}
+            {% include "highchart_year_frequency.html" with context %}
+        {% endif %}
+    {% endblock chart %}
 
     Número total de itens: {{numero_itens}}
     <br>

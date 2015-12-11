@@ -27,7 +27,7 @@ import re
 import fileinput
 
 import pandas
-from configobj import ConfigObj
+from configobj import ConfigObj, flatten_errors
 from pathlib import Path
 
 from data_tables.bibliographical_production.event_papers import EventPapers
@@ -150,12 +150,14 @@ class Qualis:
         config = ConfigObj(infile=str(file_path), configspec=spec, file_error=False)
         validator = Validator()
         res = config.validate(validator, copy=True)
-        errors = [section for section, value in res.items() if not value]
-        if errors:
+        if isinstance(res, dict):  # dict of failures
+            errors = flatten_errors(config, res)
             logger.error("Configuração inválida na(s) seção(ões): {}".format(errors))
+            return None
         return config
 
     def compute_journal_papers_score(self, journal_papers_df):
+        # FIXME: finish implementing
         if not self.scoring_table_config:
             logger.debug("No scoring information provided; ignoring.")
             return None

@@ -81,7 +81,6 @@ class Grupo:
         # util.criarDiretorio(self.diretorioDoi)
 
         # carregamos a lista de membros
-
         self.members_list = {}
         for index, row in ids_df.iterrows():
             self.members_list[row.identificador] = Membro(row['identificador'], row['nome'], row['periodo'],
@@ -89,19 +88,15 @@ class Grupo:
         self.members_indices = {lattes_id: index for index, lattes_id in enumerate(self.members_list.keys())}
 
         self.ids_df = ids_df
-        # XXX: following lines replaced by property method below
-        # self.labels_set = ids_df['rotulo'].unique()
-        # self.labels_set.sort()
-        # self.listaDeRotulosCores = [''] * len(self.labels_set)
 
-        self.journal_papers = JournalPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
-        self.event_papers = EventPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
-        self.books = Books(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
-        self.newspaper_texts = NewspaperTexts(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
-        self.presentations = Presentations(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
-        self.others = Others(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))  # TODO: define a group id
+        self.journal_papers = JournalPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.event_papers = EventPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.books = Books(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.newspaper_texts = NewspaperTexts(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.presentations = Presentations(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.others = Others(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
-        # self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers)
+        self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others)
 
     @property
     def labels_set(self):
@@ -114,7 +109,7 @@ class Grupo:
                 parsed_content = parser(id_lattes, cv_content)
                 # TODO: FIXME: refatorar usando pandas para filtrar
                 self.members_list[id_lattes].carregar_dados_cv_lattes(parsed_content)
-                self.members_list[id_lattes].filtrarItemsPorPeriodo()
+                # self.members_list[id_lattes].filtrarItemsPorPeriodo()
                 logger.debug(u"{}".format(self.members_list[id_lattes]))
 
     def aggregate_data(self):

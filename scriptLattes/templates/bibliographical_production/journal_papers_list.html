@@ -1,5 +1,11 @@
 {% extends "bibliographical_production/list.html" %}
 
+{% block chart %}
+    {% if chart %}
+        {% include "highchart_year_frequency.html" with context %}
+    {% endif %}
+{% endblock chart %}
+
 {% block list_item %}
     {% include "bibliographical_production/journal_paper.html" with context %}
 {% endblock %}

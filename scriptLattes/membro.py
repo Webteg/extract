@@ -289,6 +289,7 @@ class Membro:
         self.listaOrganizacaoDeEvento = self.filtrarItems(self.listaOrganizacaoDeEvento)
 
     def filtrarItems(self, lista):
+        raise Exception("Método inutilizado")
         # FIXME: refactor
         return list(filter(self.estaDentroDoPeriodo, lista))
 
@@ -302,6 +303,7 @@ class Membro:
         # return lista
 
     def estaDentroDoPeriodo(self, objeto):
+        raise Exception("Método inutilizado")
         # FIXME: refactor
         if objeto.__module__ == 'orientacaoEmAndamento':
             objeto.ano = int(objeto.ano) if objeto.ano else 0  # Caso
