@@ -2,7 +2,12 @@
 
 {% block chart %}
     {% if chart %}
-        {% include "highchart_frequency_qualis.html" with context %}
+        {% if False and 'qualis_data' in chart.keys() %}
+        <!--Ignorando Qualis por enquanto (gráfico não funciona) -->
+            {% include "highchart_frequency_qualis.html" with context %}
+        {% else %}
+            {% include "highchart_year_frequency.html" with context %}
+        {% endif %}
     {% endif %}
 {% endblock chart %}
 

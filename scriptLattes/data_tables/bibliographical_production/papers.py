@@ -155,6 +155,9 @@ class Papers:
             }
         return OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=not ascending))
 
+    def have_qualis(self):
+        return 'qualis' in self.data_frame.columns and self.data_frame.qualis.any()
+
     def filter_by_year(self):
         if not objeto.ano:  # se nao for identificado o ano sempre o mostramos na lista
             objeto.ano = 0

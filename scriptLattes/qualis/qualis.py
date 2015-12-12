@@ -26,7 +26,7 @@ import logging
 import re
 import fileinput
 
-import pandas
+import pandas as pd
 from configobj import ConfigObj, flatten_errors
 from pathlib import Path
 
@@ -165,6 +165,48 @@ class Qualis:
 
         # fator de impacto
 
+    @staticmethod
+    def pivot_qualis_productions_by_year(productions_df, years=None):
+        """
+
+        :param productions_df: data frame containing columns 'ano' and 'qualis'
+        :param years: iterable of years; if None, only consider years appearing in productions_df
+        :return:
+        """
+        assert isinstance(productions_df, pd.DataFrame)
+        # qualis_series = productions_df.qualis.dropna().apply(lambda x: pd.DataFrame({'area': [k for k in x.keys()], 'estrato': [v for v in x.values()]}))
+        # q = productions_df.ix[qualis_series.index]
+        q = productions_df.ix[productions_df.qualis.dropna().index, ['ano', 'qualis']]
+        # a = q.apply(lambda x: {'area': [k for k in x.qualis.keys()], 'ano': [x.ano] * len(x.qualis), 'estrato': [v for v in x.qualis.values()]}, axis=1)
+        c = q.apply(lambda x: {'ano': [x.ano] * len(x.qualis.keys()), 'area': list(x.qualis.keys()), 'estrato': list(x.qualis.values())}, axis=1)
+        d = pd.DataFrame(columns=['ano', 'estrato', 'area'])
+        for row in c:
+            d = d.append(pd.DataFrame(row), ignore_index=True)
+        d['freq'] = 1
+
+        # e = d.pivot_table(values='freq', index=['ano', 'area', 'estrato'], dropna=True, fill_value=0, margins=False, aggfunc=sum)
+        # ano   area                   estrato
+        # 2011  CIÊNCIA DA COMPUTAÇÃO  A1         1
+        #                              B5         1
+        #       ENGENHARIAS IV         A2         2
+        # 2012  CIÊNCIA DA COMPUTAÇÃO  A1         1
+        #       ENGENHARIAS IV         A1         1
+        #                              A2         2
+
+        e = d.pivot_table(values='freq', index=['estrato', 'area'], columns=['ano'], dropna=True, fill_value=0, margins=False, aggfunc=sum)
+        # ano                            2011  2012
+        # estrato area
+        # A1      CIÊNCIA DA COMPUTAÇÃO     1     1
+        #         ENGENHARIAS IV            0     1
+        # A2      ENGENHARIAS IV            2     1
+        # B5      CIÊNCIA DA COMPUTAÇÃO     1     0
+
+        for year in years:
+            if year not in e.columns.get_values():
+                e[year] = 0
+
+        return e
+
     def analisar_publicacoes(self, membro):
         raise Exception("Substituído por métodos específicos")
         # Percorrer lista de publicacoes buscando e contabilizando os qualis
@@ -189,33 +231,15 @@ class Qualis:
         # FIXME: trecho abaixo precisa ser usado para gerar a tabela de produção qualificada por membro
         agregacao = self.agregar_qualis(membro.journal_papers)
         if agregacao:
-            membro.tabela_qualis = pandas.DataFrame(data=agregacao,
+            membro.tabela_qualis = pd.DataFrame(data=agregacao,
                                                     columns=['ano', 'area', 'estrato', 'freq'])
         else:
-            membro.tabela_qualis = pandas.DataFrame(columns=['ano', 'area', 'estrato', 'freq'])
+            membro.tabela_qualis = pd.DataFrame(columns=['ano', 'area', 'estrato', 'freq'])
 
         # XXX: pensar em usar pivot_table
         # pd.pivot_table(h, values='freq', index=['area', 'estrato'], columns=['ano'])
         # p = pd.pivot_table(data=df, index='area', columns=['ano', 'estrato'], values='freq')
         # p.fillna(0)
-
-        if self.congressos:
-            for pub in membro.listaTrabalhoCompletoEmCongresso:
-                qualis, similar = self.busca_qualis_congressos(pub.nomeDoEvento)
-                if not qualis:
-                    if self.congressos.get(pub.sigla):
-                        qualis = self.congressos.get(pub.sigla)  # Retorna Qualis da sigla com nome do evento
-                        similar = pub.sigla
-                    else:
-                        qualis = u"Qualis não identificado"  # FIXME: conferir se não deve ser None (ver na geração de gráfico)
-                        similar = pub.nomeDoEvento
-                pub.qualis = qualis
-                pub.qualissimilar = similar
-
-            for pub in membro.listaResumoExpandidoEmCongresso:
-                qualis, similar = self.busca_qualis_congressos(pub.nomeDoEvento)
-                pub.qualis = qualis if qualis else u"Qualis não identificado"
-                pub.qualissimilar = similar
 
     def calcular_totais_dos_qualis(self, artigo_em_periodico, trabalho_completo_em_congresso,
                                    resumo_expandido_em_congresso):
@@ -256,6 +280,7 @@ class Qualis:
 
     @staticmethod
     def totais_dos_qualis_por_tipo(lista_completa):  # FIXME: remover
+        raise Exception("Método inutilizado")
         qtd = defaultdict(int)
         for ano, publicacoes in lista_completa.items():
             for publicacao in publicacoes:
@@ -264,6 +289,7 @@ class Qualis:
 
     @staticmethod
     def agregar_qualis(publicacoes):
+        raise Exception("Método inutilizado")
         assert isinstance(publicacoes, JournalPapers)
         ano_area_estrato_freq = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         for index, publicacao in publicacoes:

@@ -1,11 +1,17 @@
 {% extends "bibliographical_production/list.html" %}
 
+{% block chart %}
+    {% if chart %}
+        {% include "highchart_year_frequency.html" with context %}
+    {% endif %}
+{% endblock chart %}
+
 {% block list_item %}
 
     {{production.autores}}.
     <b>{{production.titulo}}</b>.
-    {{production.ano}}.
-    <i>{{production.natureza}}</i>.
+    {{production.ano|int}}.
+    <i>{{production.natureza|default('', true)}}</i>.
 
     <br>
     <font size=-1>

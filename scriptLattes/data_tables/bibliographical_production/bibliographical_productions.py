@@ -1,5 +1,6 @@
 # *-* coding: utf-8 *-*
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+import pandas as pd
 
 __author__ = 'kepler'
 
@@ -24,9 +25,13 @@ class BibliographicalProductions:
         return sum(len(production) for production in self.productions.values())
 
     def ordered_dict_by(self, key_by, ascending=True):
-        group_dict = {
-            key: production.data_frame[production.data_frame[key_by] == key]
-            for production in self.productions.values()
-            for key in production.data_frame[key_by].unique()
-            }
+        group_dict = {}
+        for production in self.productions.values():
+            for key in production.data_frame[key_by].unique():
+                if key not in group_dict.keys():
+                    group_dict[key] = pd.DataFrame(columns=['autores', 'titulo', 'ano', 'natureza'])
+                group_dict[key] = group_dict[key].append(production.data_frame.ix[production.data_frame[key_by] == key, ['autores', 'titulo', 'ano', 'natureza']]).fillna('')
         return OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=not ascending))
+
+    def have_qualis(self):
+        return False

@@ -3,6 +3,7 @@
 # filename: geradorDePaginasWeb
 
 import datetime
+
 import logging
 import os
 import re
@@ -14,12 +15,13 @@ import dateutil
 import pandas
 from jinja2.environment import Environment
 from jinja2.loaders import PackageLoader
-from pandas.core.indexing import IndexingError
+
 
 import membro
+from qualis import qualis
 from report import file_generator
-from report.charts.graficoDeInternacionalizacao import *
 from report.charts.highcharts import highchart, chart_type
+import pandas as pd
 
 logger = logging.getLogger('scriptLattes')
 
@@ -55,22 +57,17 @@ class WebPagesGenerator:
         # Format: (page, title, object, template)
         # template is a relative path; check self.jinja initialization
         self.bibliographical_productions_routes = [
-            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published,
-             "bibliographical_production/journal_papers_list.html"),
+            ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
             ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
-            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete,
-             "bibliographical_production/event_papers_list.html"),
-            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract,
-             "bibliographical_production/event_papers_list.html"),
-            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract,
-             "bibliographical_production/event_papers_list.html"),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
             ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
             ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
             ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
             ("PB8-0.html", u"Apresentações de trabalho ", self.grupo.presentations, "bibliographical_production/presentations_list.html"),
             ("PB9-0.html", u"Demais tipos de produção bibliográfica ", self.grupo.others, "bibliographical_production/others_list.html"),
-            ("PB-0.html", u"Produção bibliográfica total", self.grupo.bibliographical_productions,
-             "bibliographical_production/bibliographical_productions_list.html"),
+            ("PB-0.html", u"Produção bibliográfica total", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_productions_list.html"),
         ]
 
     def generate(self):
@@ -347,12 +344,25 @@ class WebPagesGenerator:
         # assert isinstance(productions, pandas.DataFrame)
         productions_by_year = productions.ordered_dict_by(key_by=group_by, ascending=ascending)
         template_vars["grouped_productions"] = productions_by_year
-        chart = self.gerar_grafico_de_producoes(productions_by_year)
+
+        # chart = self.gerar_grafico_de_producoes(productions_by_year)
         # jsondata = json.dumps(chart)
         # jsondata = chart.json()
-        template_vars["chart"] = chart  #{"jsondata": jsondata, "height": chart['chart']['height']}
+        # template_vars["chart"] = chart  #{"jsondata": jsondata, "height": chart['chart']['height']}
+
+        # year_frequency = productions.data_frame.groupby('ano').aggregate('count').id_membro.sort_index(ascending=True).to_dict()
+        # categories = sorted(productions.data_frame['ano'].unique())
+        year_frequency = {year: len(productions) for year, productions in productions_by_year.items()}
+        categories = list(range(self.grupo.items_desde_ano, self.grupo.items_ate_ano+1))
+        print(categories)
+
+        template_vars["chart"] = {'data': year_frequency, 'categories': categories}
+        if productions.have_qualis() and False:  # FIXME: fix chart with Qualis
+            qualis_df = qualis.Qualis.pivot_qualis_productions_by_year(productions.data_frame, years=categories)
+            template_vars["chart"]['qualis_data'] = qualis_df
 
         s = template.render(template_vars).encode("utf-8")
+
         file_path = self.output_directory / file_name
         file_generator.save_string_to_file(s, file_path)
 
@@ -510,8 +520,7 @@ class WebPagesGenerator:
                     data.append({'name': area, 'y': sum(freq), 'drilldown': area + estrato})
 
                     drilldown_series.append({'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
-                one_serie = {'name': estrato, 'data': data}  # , 'stack': area}
-                series.append(one_serie)
+                series.append({'name': estrato, 'data': data})  # , 'stack': area}
             chart['drilldown'] = {'series': drilldown_series}
 
         # chart.set_series(series)

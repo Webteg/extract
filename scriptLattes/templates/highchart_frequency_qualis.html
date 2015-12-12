@@ -67,20 +67,21 @@
 
 {% macro series(estrato_area_ano_freq, categories) -%}
     [
-        {% for estrato, area_ano_freq in estrato_area_ano_freq.items() %}
-        {
-            name: "{{estrato|default('Sem Qualis', true)}}",
-            data: [
-                {% for area, ano_freq in area_ano_freq.items() %}
-                    {
-                        name: "{{area|default('Sem área', true)}}",
-                        drilldown: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
-                        y: {{ ano_freq.values()|sum() }}
-                    },
-                    // data.append({'name': area, 'y': sum([ano_freq[ano] for ano in categories]), 'drilldown': area + estrato})
-                {% endfor %}
-            ],
-        },
+        {% for estrato in estrato_area_ano_freq.index.get_level_values(0) %}
+            {
+                name: "{{estrato|default('Sem Qualis', true)}}",
+                data: [
+                    {% for area in estrato_area_ano_freq.ix[estrato].index %}
+                        {
+                            name: "{{area|default('Sem área', true)}}",
+                            y: {{ estrato_area_ano_freq.ix[estrato, area]|sum() }},
+                            drilldown: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
+                        },
+                        // data.append({'name': area, 'y': sum([ano_freq[ano] for ano in categories]), 'drilldown': area + estrato})
+                        // series = [{'name': estrato, 'data': {'name': area, 'y': sum(freq), 'drilldown': area + estrato}}]
+                    {% endfor %}
+                ],
+            },
         {% endfor %}
     ]
 {%- endmacro %}
@@ -88,24 +89,17 @@
 {% macro drilldown(estrato_area_ano_freq, categories) -%}
     {
         series: [
-            {% for estrato, area_ano_freq in estrato_area_ano_freq.items() %}
+            {% for estrato, area in estrato_area_ano_freq.index.get_values() %}
                 {
+                    id: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
                     name: "{{estrato|default('Sem Qualis', true)}}",
                     data: [
-                        {% for area, ano_freq in area_ano_freq.items() %}
-                            {
-                                name: "{{estrato|default('Sem Qualis', true)}}",
-                                id: "{{area|default('Sem área', true)}}{{estrato|default('Sem Qualis', true)}}",
-                                data: [
-                                    {% for ano in categories %}
-                                        [
-                                            {{ano}}, {{ano_freq[ano]}}
-                                        ],
-                                    {% endfor %}
-                                ],
-                            },
-                            // drilldown_series.append({'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
+                        {% for ano in categories %}
+                            [
+                                {{ano}}, {{estrato_area_ano_freq.ix[estrato, area][ano]|default(-1, true)}}
+                            ],
                         {% endfor %}
+                        // drilldown_series.append({'id': area + estrato, 'name': estrato, 'data': [[ano, ano_freq[ano]] for ano in categories]})
                     ],
                 },
             {% endfor %}

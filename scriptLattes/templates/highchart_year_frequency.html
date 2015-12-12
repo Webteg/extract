@@ -46,7 +46,7 @@
                     title: {text: ''},
                     type: 'category'
                 },
-                title: {text: 'Apresentações de trabalho'},
+                title: {text: 'Publicações por ano'},
                 plotOptions: {
                     series: {shadow: true},
                     bar: {
@@ -70,7 +70,7 @@
         data: [
             {% for ano in categories %}
                 [
-                    {{ano}}, {{year_frequency[ano]}}
+                    {{ano}}, {{year_frequency[ano]|default(0, true)}}
                 ],
             {% endfor %}
         ]

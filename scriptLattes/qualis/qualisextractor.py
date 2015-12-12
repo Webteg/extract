@@ -276,9 +276,10 @@ class QualisExtractor(object):
     def parse_areas_file(a_file):
         """
         Formato do arquivo:
-        Nome da area
+        Nome da area 1
         Nome da area 2
         ...
+        :param a_file:
         """
         if not a_file:
             return None
