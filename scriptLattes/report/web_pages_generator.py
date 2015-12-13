@@ -70,6 +70,11 @@ class WebPagesGenerator:
             ("PB-0.html", u"Produção bibliográfica total", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_productions_list.html"),
         ]
 
+        bibliographical_productions_index = [
+            (page, title, len(production)) for page, title, production, _ in self.bibliographical_productions_routes
+            ]
+        self.global_template_vars["bibliographical_productions_index"] = bibliographical_productions_index
+
     def generate(self):
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
@@ -116,11 +121,6 @@ class WebPagesGenerator:
         # Ou
         # if self.grupo.obterParametro('mapa-mostrar_mapa_de_geolocalizacao')
         # <body onload="initialize()" onunload="GUnload()"> # FIXME: initialize é do mapa
-
-        bibliographical_productions_index = [
-            (page, title, len(production)) for page, title, production, _ in self.bibliographical_productions_routes
-            ]
-        template_vars["bibliographical_productions_index"] = bibliographical_productions_index
 
         s = index_template.render(template_vars).encode("utf-8")
         file_path = self.output_directory / file_name
@@ -354,7 +354,6 @@ class WebPagesGenerator:
         # categories = sorted(productions.data_frame['ano'].unique())
         year_frequency = {year: len(productions) for year, productions in productions_by_year.items()}
         categories = list(range(self.grupo.items_desde_ano, self.grupo.items_ate_ano+1))
-        print(categories)
 
         template_vars["chart"] = {'data': year_frequency, 'categories': categories}
         if productions.have_qualis() and False:  # FIXME: fix chart with Qualis

@@ -3,19 +3,11 @@
 
 {% block title %}{{group_name}}{% endblock %}
 
-{% block content %}
-
-<h3 id="producao_bibliografica">Produção bibliográfica</h3>
-<ul>
-    {% if bibliographical_productions_index %}
-        {% for page, title, count in bibliographical_productions_index %}
-            <li>
-                <a href="{{page}}">{{title}}</a> ({{count}})
-            </li>
-        {% endfor %}
-    {% else %}
-        <i>Nenhum item achado nos currículos Lattes</i>
-    {% endif %}
-</ul>
-
+{% block container %}
+<div class="row">
+    <div class="twelve columns">
+        <h2>{{group_name}}</h2>
+        {% block content %}{% endblock %}
+    </div>
+</div>
 {% endblock %}

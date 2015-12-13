@@ -18,9 +18,24 @@
     <!--</script>-->
 {% endblock %}
 
-{% block content %}
+{% block sidemenu %}
+<h5 id="producao_bibliografica">Produção bibliográfica</h5>
+<ul class="sidenav">
+    {% if bibliographical_productions_index %}
+        {% for page, title, count in bibliographical_productions_index %}
+            <li>
+                <a href="{{page}}">{{title}}</a> ({{count}})
+            </li>
+        {% endfor %}
+    {% else %}
+        <i>Nenhum item achado nos currículos Lattes</i>
+    {% endif %}
+</ul>
+{% endblock %}
 
-    <h3>{{subtitle}}</h3>
+
+{% block content %}
+    <h4>{{subtitle}}</h4>
 
     {% block chart %}
         {% if chart %}

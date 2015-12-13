@@ -19,24 +19,29 @@
 
 {% endblock %}
 
-{% block content %}
+{% block container %}
+<div class="row">
+    <div class="twelve columns">
+        <h2>{{group_name}}</h2>
 
 <h3>Lista de membros</h3>
 
 <table id="membros" class="collapse-box">
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th class="centered"><b><font size=-1>Bolsa de produtividade<br>em pesquisa</font></b></th>
-        <th class="centered"><b><font size=-1>Período de<br>análise individual</font></b></th>
-        <th class="centered"><b><font size=-1>Data de<br>atualização do CV</font></b></th>
-        <th class="centered"></th>
-    </tr>
-
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>Bolsa de produtividade em pesquisa</th>
+            <th>Período de análise individual</th>
+            <th>Data de atualização do CV</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
     {% for membro in members_list|sort %}
-        <tr class="testetabela">
+        <tr>
             <td valign="center" height="40px">{{loop.index}}.</td>
             <td valign="top" height="40px"><img src="{{membro.foto}}" width="40px"></td>
             <td><a href="{{membro.url}}">{{membro.nome_completo}}</a></td>
@@ -56,8 +61,11 @@
             </td>
         </tr>
     {% endfor %}
-
+    </tbody>
 </table>
+
+    </div>
+</div>
 
 
 <!--<script>-->
