@@ -66,3 +66,35 @@ ul.sidenav li a:hover {
     background-color: #4CAF50;
     color: white;
 }
+
+.small {
+    font-size: xx-small;
+}
+
+img.logo {
+    max-width: 24px;
+}
+
+/*footer {*/
+    /*position: fixed;*/
+    /*bottom: 0;*/
+/*}*/
+
+footer .container {
+    background-color: #e8e8e8;
+    /*color: white;*/
+    padding: 2em 5em;
+}
+
+footer .row:last-child {
+    margin-top: 1em;
+}
+
+footer .footer-center {
+    text-align: center;
+}
+
+footer .footer-right a {
+    color: #222;
+    font-size: 3rem;
+}

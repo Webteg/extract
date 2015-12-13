@@ -385,7 +385,7 @@ def cli():
         # # group.gerarGraficosDeBarras() # java charts
         # group.gerarMapaDeGeolocalizacao()  # obrigatorio
 
-        pages = WebPagesGenerator(group, output_directory, version=scriptLattes.__version__, admin_email=config['geral'].get('email_do_admin'))  # obrigatorio
+        pages = WebPagesGenerator(group, output_directory, admin_email=config['geral'].get('email_do_admin'))  # obrigatorio
         pages.generate()
         # report.file_generator.gerarArquivosTemporarios(group)  # obrigatorio
         util.copy_report_files(output_directory)

@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %} | {{ nome_do_grupo }}</title>
     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/skeleton.css">
     <link rel="stylesheet" href="css/report.css">
@@ -85,36 +86,53 @@
         </div>
     </div>
     {% endblock container %}
+
+    <div class="row u-pull-right">
+        <p>
+            {% if since_year and until_year %}
+            <br>
+            (*) Relatório criado com produções desde {{since_year}} até {{until_year}}
+            {% endif %}
+
+            <br>
+            Data de processamento: {{timestamp}}
+            <br>
+        </p>
+    </div>
 </div>
 
 <footer>
-    <div class="container">
+    <div class="container u-full-width u-max-full-width">
         <div class="row">
-            <div class="u-full-width">
-                <p>
-                    {% if since_year and until_year %}
-                    <br>
-                    (*) Relatório criado com produções desde {{since_year}} até {{until_year}}
-                    {% endif %}
-
-                    <br>
-                    Data de processamento: {{timestamp}}
-                    <br>
-                </p>
-            </div>
-        </div>
-        <div class="row">
-            <div id="footer">
+            <div id="twelve columns">
                 {% block footer %}
-                Este arquivo foi gerado automaticamente por <a href="https://bitbucket.org/scriptlattes/scriptlattes">scriptLattes {{version}}</a>
+                Este arquivo foi gerado automaticamente por <a href="{{uri}}">{{scriptLattes}} {{version}}</a>
                 (desenvolvido no <a href="http://nuvem.ufabc.edu.br/">NUVEM/UFABC</a> e no <a href="http://ccsl.ime.usp.br/">CCSL-IME/USP</a> por <a
                     href="http://professor.ufabc.edu.br/~jesus.mena/">Jesús P. Mena-Chalco</a> e <a href="http://www.ime.usp.br/~cesar">Roberto M. Cesar-Jr</a>
-                e no <a href="http://www.unipampa.edu.br/alegrete/">LEA/UNIPAMPA</a> por <a href="http://www.github.com/kepler">Fabio N. Kepler</a> e colaboradores).
+                e no <a href="http://www.unipampa.edu.br/alegrete/">LEA/UNIPAMPA</a> por <a href="http://www.github.com/kepler">Fabio N. Kepler</a> e
+                colaboradores).
                 <br>
-                Os resultados estão sujeitos a falhas devido a inconsistências no preenchimento dos currículos Lattes. Caso note alguma falha, por favor, contacte o
+                Os resultados estão sujeitos a falhas devido a inconsistências no preenchimento dos currículos Lattes. Caso note alguma falha, por favor,
+                contacte o
                 responsável por esta página:
                 <a href="mailto:{{admin_email}}">{{admin_email}}</a>.
                 {% endblock %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="three columns">
+                <strong>{{scriptLattes}} 2016</strong><br/>
+                {{license}}
+            </div>
+            <div class="six columns footer-center">
+                {{author}}<br/>
+                {{email}}
+            </div>
+            <div class="three columns footer-right">
+                <a class="u-pull-right" href="{{uri}}">
+                    <i class="fa fa-bitbucket"></i>
+                </a>
             </div>
         </div>
 

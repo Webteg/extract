@@ -10,11 +10,6 @@
 {% endif %}
 
 <br>
-<font size=-1>
-[ <a href="http://scholar.google.com/scholar?hl=en&lr=&q={{production.titulo|e}}&btnG=Search">cita&ccedil;&otilde;es Google Scholar</a> |
-  <a href="http://academic.research.microsoft.com/Search?query={{production.titulo|e}}">cita&ccedil;&otilde;es Microsoft Acad&ecirc;mico</a> |
-  <a href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}">busca Google</a> ]
-</font><br>
 
 {% if production.qualis %}
     <font color="#336600"><b>Qualis: </b></font>
@@ -22,7 +17,7 @@
         <font class="area"><b>{{area}}</b></font> - <b>{{estrato}}</b>
     {% endfor %}
 {% else %}
-    <font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>
+    <!--<font color="#8B0000"><b>Qualis: N&atilde;o identificado</b></font>-->
 {% endif %}
 
 

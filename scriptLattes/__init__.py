@@ -15,7 +15,7 @@ import logging
 # http://patorjk.com/software/taag/#p=display&f=Calvin%20S&t=scriptLattes
 __banner__ = r"""
 ┌─┐┌─┐┬─┐┬┌─┐┌┬┐╦  ┌─┐┌┬┐┌┬┐┌─┐┌─┐
-└─┐│  ├┬┘│├─┘ │ ║  ├─┤ │  │ ├┤ └─┐  by Jesús P. Mena-Chalco
+└─┐│  ├┬┘│├─┘ │ ║  ├─┤ │  │ ├┤ └─┐
 └─┘└─┘┴└─┴┴   ┴ ╩═╝┴ ┴ ┴  ┴ └─┘└─┘
 """
 

@@ -18,6 +18,7 @@ from jinja2.loaders import PackageLoader
 
 
 import membro
+import scriptLattes
 from qualis import qualis
 from report import file_generator
 from report.charts.highcharts import highchart, chart_type
@@ -29,7 +30,7 @@ logger = logging.getLogger('scriptLattes')
 class WebPagesGenerator:
     # arquivoRis = None
 
-    def __init__(self, grupo, output_directory, version, admin_email=None, google_analytics_key=None):
+    def __init__(self, grupo, output_directory, admin_email=None, google_analytics_key=None):
         assert isinstance(output_directory, Path)
 
         self.grupo = grupo
@@ -44,9 +45,13 @@ class WebPagesGenerator:
         #     self.arquivoRis = open(self.dir + "/" + prefix + "publicacoes.ris", 'w')
 
         self.global_template_vars = {
-            # "group": self.grupo,
             "group_name": self.grupo.name,
-            "version": version,
+            "scriptLattes": scriptLattes.__title__,
+            "version": scriptLattes.__version__,
+            "author": scriptLattes.__author__,
+            "email": scriptLattes.__email__,
+            "uri": scriptLattes.__uri__,
+            "license": scriptLattes.__license__,
             # "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
         }
         if admin_email:
@@ -420,7 +425,6 @@ class WebPagesGenerator:
         # return total_producoes
 
     def generate_bibliographical_production_pages(self, routes):
-
         for page, title, productions, template in routes:
             self.generate_production_page(productions, group_by='ano', ascending=False,
                                           template_name=template,  # self.grupo.compilador.listaCompletaPB,

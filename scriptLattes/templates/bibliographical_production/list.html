@@ -53,11 +53,27 @@
         {% for pivot, productions in grouped_productions.items() %}
             <div id="dv-year-{{pivot}}"><h3 class="year">{{pivot}}</h3>
                 <table>
-                    {% for i, production in productions.iterrows() %}
+                    {% for i, production in productions.sort_values(['autores', 'titulo']).iterrows() %}
                         <tr valign="top">
-                            <td>{{loop.index}}. &nbsp;</td>
+                            <td>{{loop.index}}. </td>
                             <td>
                                 {% block list_item scoped %}
+                                {% endblock %}
+                            </td>
+                            <td>
+                                {% block list_item_actions scoped %}
+                                    <a class="small" href="http://scholar.google.com/scholar?hl=en&lr=&q={{production.titulo|e}}&btnG=Search"
+                                       alt="cita&ccedil;&otilde;es no Google Scholar" title="cita&ccedil;&otilde;es no Google Scholar">
+                                        <img class="logo" src="https://www.google.com/images/icons/product/scholar-32.png"/>
+                                    </a>
+                                    <a class="small" href="http://academic.research.microsoft.com/Search?query={{production.titulo|e}}"
+                                       alt="cita&ccedil;&otilde;es no Microsoft Acad&ecirc;mico" title="cita&ccedil;&otilde;es no Microsoft Acad&ecirc;mico">
+                                        <img class="logo" src="https://pbs.twimg.com/profile_images/558060418/academic_logo_400x400.png"/>
+                                    </a>
+                                    <a class="small" href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}"
+                                       alt="busca no Google" title="busca no Google">
+                                        <img class="logo" src="https://www.google.com/images/branding/product/1x/gsa_32dp.png"/>
+                                    </a>
                                 {% endblock %}
                             </td>
                         </tr>

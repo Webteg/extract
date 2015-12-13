@@ -1,25 +1,22 @@
 {% extends "bibliographical_production/list.html" %}
 
-
 {% block chart %}
     {% if chart %}
         {% include "highchart_year_frequency.html" with context %}
     {% endif %}
 {% endblock chart %}
 
-
 {% block list_item %}
 
     {{production.autores}}.
     <b>{{production.titulo}}</b>.
     {{production.ano|int}}.
-    <i>{{production.natureza|default('', true)}}</i>.
-
-    <br>
-    <font size=-1>
-    [ <a href="http://scholar.google.com/scholar?hl=en&lr=&q={{production.titulo|e}}&btnG=Search">cita&ccedil;&otilde;es Google Scholar</a> |
-      <a href="http://academic.research.microsoft.com/Search?query={{production.titulo|e}}">cita&ccedil;&otilde;es Microsoft Acad&ecirc;mico</a> |
-      <a href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}">busca Google</a> ]
-    </font><br>
+    {% if production.natureza %}
+        <em>{{production.natureza|default('', true)}}</em>.
+    {% elif production.evento %}
+        <em>{{production.evento}}</em>.
+    {% elif production.revista %}
+        <em>{{production.revista}}</em>.
+    {% endif %}
 
 {% endblock %}

@@ -29,8 +29,8 @@ class BibliographicalProductions:
         for production in self.productions.values():
             for key in production.data_frame[key_by].unique():
                 if key not in group_dict.keys():
-                    group_dict[key] = pd.DataFrame(columns=['autores', 'titulo', 'ano', 'natureza'])
-                group_dict[key] = group_dict[key].append(production.data_frame.ix[production.data_frame[key_by] == key, ['autores', 'titulo', 'ano', 'natureza']]).fillna('')
+                    group_dict[key] = pd.DataFrame(columns=['autores', 'titulo', 'ano', 'natureza', 'evento', 'revista'])
+                group_dict[key] = group_dict[key].append(production.data_frame.ix[production.data_frame[key_by] == key, ['autores', 'titulo', 'ano', 'natureza', 'evento', 'revista']]).fillna('')
         return OrderedDict(sorted(group_dict.items(), key=lambda t: t[0], reverse=not ascending))
 
     def have_qualis(self):
