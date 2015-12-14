@@ -52,6 +52,7 @@ class WebPagesGenerator:
             "email": scriptLattes.__email__,
             "uri": scriptLattes.__uri__,
             "license": scriptLattes.__license__,
+            "copyright": scriptLattes.__copyright__,
             # "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
         }
         if admin_email:

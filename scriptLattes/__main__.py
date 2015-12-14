@@ -10,24 +10,25 @@ Invoke as ``scriptlattes`` (if installed)
 or ``python -m scriptlattes`` (no install required).
 
 Usage:
-  scriptlattes [options] all CONFIG_FILE [--offline]
-  scriptlattes [options] obtain CONFIG_FILE [--offline]
-  scriptlattes [options] extract CONFIG_FILE [--offline]
-  scriptlattes [options] process CONFIG_FILE [--offline]
-  scriptlattes [options] report CONFIG_FILE [--offline]
+  scriptlattes [options] all CONFIG_FILE [--offline] [--xml]
+  scriptlattes [options] obtain CONFIG_FILE [--offline] [--xml]
+  scriptlattes [options] extract CONFIG_FILE [--offline] [--xml]
+  scriptlattes [options] process CONFIG_FILE [--offline] [--xml]
+  scriptlattes [options] report CONFIG_FILE [--offline] [--xml]
   scriptlattes (-h | --help | --version)
 
 Arguments:
-  CONFIG_FILE  arquivo de configuração
+  CONFIG_FILE       arquivo de configuração
 
 Options:
-  -h --help            show this help message and exit
-  --version            show version and exit
-  -v --verbose         log debug messages
-  -q --quiet           log only warning and error messages
+  -h --help         show this help message and exit
+  --version         show version and exit
+  -v --verbose      log debug messages
+  -q --quiet        log only warning and error messages
 
 Other:
-  --offline            do not try to download data; instead, use persisted data configured in CONFIG_FILE
+  --offline         do not try to download data; instead, use persisted data configured in CONFIG_FILE
+  --xml             use XML curricula (will search or store 'ID-LATTES.xml' files in cache)
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -41,6 +42,7 @@ from configobj import ConfigObj
 from docopt import docopt
 
 import scriptLattes
+from extract.lattes_xml_parser import LattesXMLParser
 from extract.parserLattesHTML import ParserLattesHTML
 from extract.parserLattesXML import ParserLattesXML
 from fetch.download_html import download_html
@@ -215,7 +217,7 @@ def read_list_file(ids_file_path):
 
 
 def cli():
-    arguments = docopt(__doc__, argv=None, help=True, version='9.0.0', options_first=False)
+    arguments = docopt(__doc__, argv=None, help=True, version=scriptLattes.__version__, options_first=False)
 
     # configure root logger to print to STDERR
     if arguments['--verbose']:
@@ -266,8 +268,9 @@ def cli():
     # group.imprimirListaDeParametros()
     # group.imprimirListaDeRotulos()
 
+    use_xml = True if arguments['--xml'] else False  # FIXME: definir opção no arquivo de config?
+
     cvs_content = {'html': {}, 'xml': {}}
-    use_xml = False  # FIXME: definir opção no arquivo de config
     if arguments['obtain'] or arguments['extract'] or arguments['process'] or arguments['report']:
         # obter/carregar
         if not arguments['--offline']:
@@ -300,9 +303,10 @@ def cli():
                     raise Exception("FIXME: membro sem lattes ainda não implementado")
                     continue
                 try:
-                    cv_path = (cache.directory / id_lattes).resolve()
+                    suffix = '.xml' if use_xml else ''
+                    cv_path = (cache.directory / (id_lattes + suffix)).resolve()
                 except OSError:
-                    logger.error("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
+                    logger.warning("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
                     continue
 
                 assert isinstance(cv_path, Path)
@@ -312,22 +316,24 @@ def cli():
 
                 if use_xml:
                     # TODO: verificar se realmente isto é necessário
-                    extended_chars = u''.join(unichr(c) for c in xrange(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
-                    special_chars = ' -'''
-                    cv_lattes_content = cv_lattes_content.decode('iso-8859-1',
-                                                                 'replace') + extended_chars + special_chars
+                    # extended_chars = u''.join(unichr(c) for c in range(127, 65536, 1))  # srange(r"[\0x80-\0x7FF]")
+                    # special_chars = ' -'''
+                    # cv_lattes_content = cv_lattes_content.decode('iso-8859-1', 'replace') + extended_chars + special_chars
                     cvs_content['xml'][id_lattes] = cv_lattes_content
                 else:
                     cvs_content['html'][id_lattes] = cv_lattes_content
 
     if arguments['extract'] or arguments['process'] or arguments['report']:
         # extrair/carregar
+        logger.info("[INICIANDO EXTRAÇÃO]")
         if use_xml:
-            group.extract_cvs_data(ParserLattesXML, cvs_content['xml'])  # obrigatorio
+            # group.extract_cvs_data(ParserLattesXML, cvs_content['xml'])  # obrigatorio
+            group.extract_cvs_data(LattesXMLParser, cvs_content['xml'])  # obrigatorio
         else:
             group.extract_cvs_data(ParserLattesHTML, cvs_content['html'])  # obrigatorio
 
     if arguments['process'] or arguments['report'] or arguments['all']:
+        logger.info("[INICIANDO PROCESSAMENTO]")
         # processar/carregar
         group.aggregate_data()
         # FIXME: uncomment group.create_colaboration_matrices()
@@ -370,6 +376,7 @@ def cli():
                                            weight_collaborations=config['grafo'].get('mostrar_aresta_proporcional_ao_numero_de_colaboracoes'))
 
     if arguments['report']:
+        logger.info("[INICIANDO GERAÇÃO DE RELATÓRIO]")
         if config['geral'].get('criar_paginas_jsp'):
             raise Exception("Formato JSP não mais suportado (configuração geral.criar_paginas_jsp)")
 

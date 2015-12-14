@@ -56,7 +56,7 @@
     <div class="container">
         <div class="row">
             <div class="three columns">
-                <h4 class="brand">scriptLattes</h4>
+                <h4 class="brand">{{scriptLattes}}<strong>{{version.split('.')[0]}}</strong></h4>
             </div>
             <div class="nine columns u-pull-left">
                 <ul class="nav">
@@ -122,12 +122,12 @@
 
         <div class="row">
             <div class="three columns">
-                <strong>{{scriptLattes}} 2016</strong><br/>
+                <strong>{{scriptLattes}} {{version}}</strong><br>
                 {{license}}
             </div>
             <div class="six columns footer-center">
-                {{author}}<br/>
-                {{email}}
+                {{copyright}}<br>
+                {{email}}<br>
             </div>
             <div class="three columns footer-right">
                 <a class="u-pull-right" href="{{uri}}">

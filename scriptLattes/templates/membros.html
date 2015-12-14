@@ -43,7 +43,7 @@
     {% for membro in members_list|sort %}
         <tr>
             <td valign="center" height="40px">{{loop.index}}.</td>
-            <td valign="top" height="40px"><img src="{{membro.foto}}" width="40px"></td>
+            <td valign="top" height="40px">{% if membro.foto %}<img src="{{membro.foto}}" width="40px">{% endif %}</td>
             <td><a href="{{membro.url}}">{{membro.nome_completo}}</a></td>
             <td class="centered"><font size=-1>{{membro.rotulo if membro.rotulo else '[sem rótulo]'}}</font></td>
             <td class="centered"><font size=-1>{{'({})'.format(membro.bolsa) if membro.bolsa}}</font></td>

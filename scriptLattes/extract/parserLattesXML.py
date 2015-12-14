@@ -184,6 +184,8 @@ class ParserLattesXML(HTMLParser):
         self.listaOCIniciacaoCientifica = []
         self.listaOCOutroTipoDeOrientacao = []
 
+        self.listaPatente = []
+
         # inicializacao
         self.idLattes = ''
         self.url = ''

@@ -118,12 +118,11 @@ class Membro:
     def __init__(self, identificador, nome, periodo, rotulo, items_desde_ano, items_ate_ano):
         self.id_lattes = str(identificador)
         self.nome_completo = nome  # nome.split(";")[0].strip().decode('utf8', 'replace')
-        self.periodo = periodo
         self.rotulo = rotulo
 
         self.items_desde_ano = items_desde_ano
         self.items_ate_ano = items_ate_ano
-        self.member_timespans = self.parse_timespans_list(self.periodo)
+        self.member_timespans = self.parse_timespans_list(periodo)
 
         self.journal_papers = JournalPapers(self.id_lattes, timespan=self.member_timespans)
         self.event_papers = EventPapers(self.id_lattes, timespan=self.member_timespans)
@@ -139,7 +138,6 @@ class Membro:
         # else:
         #     self.url = 'http://lattes.cnpq.br/{}'.format(identificador)
         self.url = get_lattes_url(self.id_lattes)
-
 
     def __lt__(self, other):
         return self.nome_completo < other.nome_completo
@@ -200,7 +198,9 @@ class Membro:
         self.presentations.add_from_parser(parser.listaApresentacaoDeTrabalho)
         self.others.add_from_parser(parser.listaOutroTipoDeProducaoBibliografica)
 
-        # TODO: testando refatoracao até acima
+        return
+
+        # FIXME: refatorar abaixo
         # Produção técnica
         self.listaSoftwareComPatente = parser.listaSoftwareComPatente
         self.listaSoftwareSemPatente = parser.listaSoftwareSemPatente

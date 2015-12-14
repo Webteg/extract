@@ -19,7 +19,6 @@ from persist.cache import cache
 from process.authorRank import AuthorRank
 from process.compiladorDeListas import CompiladorDeListas
 from qualis import qualis
-from report.charts.graficoDeBarras import GraficoDeBarras
 from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
 from report.geradorDeXML import GeradorDeXML
 
@@ -104,13 +103,14 @@ class Grupo:
 
     def extract_cvs_data(self, parser, cvs_raw_data):
         for index, (id_lattes, cv_content) in enumerate(cvs_raw_data.items()):
-            logger.info('[LENDO REGISTRO LATTES: {0}o. DA LISTA]'.format(index + 1))
+            logger.info('[LENDO REGISTRO LATTES: {}o. DA LISTA (ID {})]'.format(index + 1, id_lattes))
             if id_lattes in self.members_list.keys():
                 parsed_content = parser(id_lattes, cv_content)
-                # TODO: FIXME: refatorar usando pandas para filtrar
                 self.members_list[id_lattes].carregar_dados_cv_lattes(parsed_content)
+                # TODO: FIXME: refatorar usando pandas para filtrar
                 # self.members_list[id_lattes].filtrarItemsPorPeriodo()
-                logger.debug(u"{}".format(self.members_list[id_lattes]))
+                # logger.debug(u"{}".format(self.members_list[id_lattes]))
+                # logger.debug("Extraindo dados do CV '{}'...".format(id_lattes))
 
     def aggregate_data(self):
         for _, member in self.members_list.items():

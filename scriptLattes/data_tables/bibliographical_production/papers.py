@@ -77,7 +77,10 @@ class Papers:
         if self.timespan:
             data_frame_to_append['ano'] = pd.to_numeric(data_frame_to_append['ano'])
             if isinstance(self.timespan, list):  # So this is a set of non-exclusive timespans (defined in the list, not the config)
-                raise "FIXME: implementar períodos de tempo para membro, lidos do arquivo de listas"
+                matched_years = pd.Series([False]*len(data_frame_to_append.ano))
+                for timespan in self.timespan:
+                    matched_years |= (data_frame_to_append.ano >= timespan[0]) & (data_frame_to_append.ano <= timespan[1])
+                data_frame_to_append = data_frame_to_append[matched_years]
             else:
                 data_frame_to_append = data_frame_to_append[(data_frame_to_append.ano >= self.timespan[0]) & (data_frame_to_append.ano <= self.timespan[1])]
 

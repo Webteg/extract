@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # encoding: utf-8
-# filename: graficoDeBarras.py
 #
 #  scriptLattes V8
 #  Copyright 2005-2013: Jesús P. Mena-Chalco e Roberto M. Cesar-Jr.

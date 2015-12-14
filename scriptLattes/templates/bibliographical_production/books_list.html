@@ -1,5 +1,21 @@
 {% extends "bibliographical_production/list.html" %}
 
 {% block list_item %}
-    {% include "bibliographical_production/book.html" with context %}
+
+    {{production.autores}}.
+    <b>{{production.titulo}}</b>.
+    {% if production.livro %}
+        Em: <i>{{production.livro}}</i>.
+    {% endif %}
+    {% if production.edicao %}
+        {{production.edicao}} ed.
+    {% endif %}
+    {% if production.editora %}
+        {{production.editora}},
+    {% endif %}
+    {{production.ano}}.
+    {{ 'v. {},'.format(production.volume) if production.volume else '' }}
+    {{ 'p. {},'.format(production.paginas) if production.paginas else '' }}
+    {{ 'isbn: {}.'.format(production.isbn) if production.isbn else '' }}
+
 {% endblock %}
