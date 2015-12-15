@@ -24,13 +24,14 @@
     {% if bibliographical_productions_index %}
         {% for page, title, count in bibliographical_productions_index %}
             <li>
-                <a href="{{page}}">{{title}}</a> ({{count}})
+                <a href="{{page}}">{{title}} <strong>({{count}})</strong></a>
             </li>
         {% endfor %}
     {% else %}
         <i>Nenhum item achado nos currículos Lattes</i>
     {% endif %}
 </ul>
+
 {% endblock %}
 
 

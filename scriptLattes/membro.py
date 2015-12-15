@@ -70,11 +70,11 @@ class Membro:
 
     # Produção técnica
     listaSoftwareComPatente = []
-    listaSoftwareSemPatente = []
-    listaProdutoTecnologico = []
-    listaProcessoOuTecnica = []
-    listaTrabalhoTecnico = []
-    listaOutroTipoDeProducaoTecnica = []
+    softwares = []
+    produtos_tecnologicos = []
+    processos_ou_tecnicas = []
+    trabalhos_tecnicos = []
+    demais_tipos_de_producao_tecnica = []
 
     # Patentes e registros
     listaPatente = []
@@ -164,7 +164,7 @@ class Membro:
                     logger.warning("[AVISO IMPORTANTE] CV Lattes: {}. Membro: {}".format(self.id_lattes, self.nome_completo.encode('utf8')))
         return timespans
 
-    def carregar_dados_cv_lattes(self, parser):
+    def carregar_dados_cv_lattes(self, parser, html_compat=False):
         # Obtemos todos os dados do CV Lattes
         self.nome_completo = parser.nomeCompleto
         self.bolsaProdutividade = parser.bolsaProdutividade
@@ -198,17 +198,25 @@ class Membro:
         self.presentations.add_from_parser(parser.listaApresentacaoDeTrabalho)
         self.others.add_from_parser(parser.listaOutroTipoDeProducaoBibliografica)
 
+        # Produção técnica
+        # SOFTWARE*, PRODUTO-TECNOLOGICO*, PROCESSOS-OU-TECNICAS*, TRABALHO-TECNICO*, DEMAIS-TIPOS-DE-PRODUCAO-TECNICA*
+        if html_compat:
+            # self.listaSoftwareComPatente = parser.listaSoftwareComPatente
+            self.softwares = parser.listaSoftwareSemPatente
+            self.produtos_tecnologicos = parser.listaProdutoTecnologico
+            self.processos_ou_tecnicas = parser.listaProcessoOuTecnica
+            self.trabalhos_tecnicos = parser.listaTrabalhoTecnico
+            self.demais_tipos_de_producao_tecnica = parser.listaOutroTipoDeProducaoTecnica
+        else:
+            self.softwares = parser.softwares
+            self.produtos_tecnologicos = parser.produtos_tecnologicos
+            self.processos_ou_tecnicas = parser.processos_ou_tecnicas
+            self.trabalhos_tecnicos = parser.trabalhos_tecnicos
+            self.demais_tipos_de_producao_tecnica = parser.demais_tipos_de_producao_tecnica
+
         return
 
         # FIXME: refatorar abaixo
-        # Produção técnica
-        self.listaSoftwareComPatente = parser.listaSoftwareComPatente
-        self.listaSoftwareSemPatente = parser.listaSoftwareSemPatente
-        self.listaProdutoTecnologico = parser.listaProdutoTecnologico
-        self.listaProcessoOuTecnica = parser.listaProcessoOuTecnica
-        self.listaTrabalhoTecnico = parser.listaTrabalhoTecnico
-        self.listaOutroTipoDeProducaoTecnica = parser.listaOutroTipoDeProducaoTecnica
-
         # Patentes e registros
         self.listaPatente = parser.listaPatente
         self.listaProgramaComputador = parser.listaProgramaComputador
@@ -254,11 +262,11 @@ class Membro:
         self.listaOutroTipoDeProducaoBibliografica = self.filtrarItems(self.listaOutroTipoDeProducaoBibliografica)
 
         self.listaSoftwareComPatente = self.filtrarItems(self.listaSoftwareComPatente)
-        self.listaSoftwareSemPatente = self.filtrarItems(self.listaSoftwareSemPatente)
-        self.listaProdutoTecnologico = self.filtrarItems(self.listaProdutoTecnologico)
-        self.listaProcessoOuTecnica = self.filtrarItems(self.listaProcessoOuTecnica)
-        self.listaTrabalhoTecnico = self.filtrarItems(self.listaTrabalhoTecnico)
-        self.listaOutroTipoDeProducaoTecnica = self.filtrarItems(self.listaOutroTipoDeProducaoTecnica)
+        self.softwares = self.filtrarItems(self.softwares)
+        self.produtos_tecnologicos = self.filtrarItems(self.produtos_tecnologicos)
+        self.processos_ou_tecnicas = self.filtrarItems(self.processos_ou_tecnicas)
+        self.trabalhos_tecnicos = self.filtrarItems(self.trabalhos_tecnicos)
+        self.demais_tipos_de_producao_tecnica = self.filtrarItems(self.demais_tipos_de_producao_tecnica)
 
         self.listaPatente = self.filtrarItems(self.listaPatente)
         self.listaProgramaComputador = self.filtrarItems(self.listaProgramaComputador)
@@ -478,23 +486,23 @@ class Membro:
                 s += pub.__str__()
 
             s += "\n"
-            for pub in self.listaSoftwareSemPatente:
+            for pub in self.softwares:
                 s += pub.__str__()
 
             s += "\n"
-            for pub in self.listaProdutoTecnologico:
+            for pub in self.produtos_tecnologicos:
                 s += pub.__str__()
 
             s += "\n"
-            for pub in self.listaProcessoOuTecnica:
+            for pub in self.processos_ou_tecnicas:
                 s += pub.__str__()
 
             s += "\n"
-            for pub in self.listaTrabalhoTecnico:
+            for pub in self.trabalhos_tecnicos:
                 s += pub.__str__()
 
             s += "\n"
-            for pub in self.listaOutroTipoDeProducaoTecnica:
+            for pub in self.demais_tipos_de_producao_tecnica:
                 s += pub.__str__()
 
             s += "\n"
@@ -527,11 +535,11 @@ class Membro:
                 (u'- Apresentações de Trabalho', len(self.listaApresentacaoDeTrabalho)),
                 (u'- Demais tipos de produção bibliográfica', len(self.listaOutroTipoDeProducaoBibliografica)),
                 (u'- Softwares com registro de patente', len(self.listaSoftwareComPatente)),
-                (u'- Softwares sem registro de patente', len(self.listaSoftwareSemPatente)),
-                (u'- Produtos tecnológicos', len(self.listaProdutoTecnologico)),
-                (u'- Processos ou técnicas', len(self.listaProcessoOuTecnica)),
-                (u'- Trabalhos técnicos', len(self.listaTrabalhoTecnico)),
-                (u'- Demais tipos de produção técnica', len(self.listaOutroTipoDeProducaoTecnica)),
+                (u'- Softwares sem registro de patente', len(self.softwares)),
+                (u'- Produtos tecnológicos', len(self.produtos_tecnologicos)),
+                (u'- Processos ou técnicas', len(self.processos_ou_tecnicas)),
+                (u'- Trabalhos técnicos', len(self.trabalhos_tecnicos)),
+                (u'- Demais tipos de produção técnica', len(self.demais_tipos_de_producao_tecnica)),
                 (u'- Patente', len(self.listaPatente)),
                 (u'- Programa de computador', len(self.listaProgramaComputador)),
                 (u'- Desenho industrial', len(self.listaDesenhoIndustrial)),

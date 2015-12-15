@@ -7,7 +7,7 @@ import logging
 from scipy import sparse
 
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
-from data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
+from data_tables.bibliographical_production.all_productions import BibliographicalProductions
 from data_tables.bibliographical_production.books import Books
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers

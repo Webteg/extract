@@ -3,13 +3,13 @@ import logging
 
 import pandas as pd
 
-from data_tables.bibliographical_production.papers import Papers
+from data_tables.bibliographical_production.basic_production import BasicProduction
 from util.util import similaridade_entre_cadeias
 
 logger = logging.getLogger(__name__)
 
 
-class Presentations(Papers):
+class Presentations(BasicProduction):
     columns = ['id_membro',
                'autores',
                'titulo',

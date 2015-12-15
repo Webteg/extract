@@ -1,5 +1,6 @@
 import logging
 import xml.etree.ElementTree as et
+from lxml import etree
 from data.producoesBibliograficas.artigoEmPeriodico import ArtigoEmPeriodico
 from data.producoesBibliograficas.capituloDeLivroPublicado import CapituloDeLivroPublicado
 from data.producoesBibliograficas.livroPublicado import LivroPublicado
@@ -8,6 +9,8 @@ from data.producoesBibliograficas.resumoEmCongresso import ResumoEmCongresso
 from data.producoesBibliograficas.resumoExpandidoEmCongresso import ResumoExpandidoEmCongresso
 from data.producoesBibliograficas.textoEmJornalDeNoticia import TextoEmJornalDeNoticia
 from data.producoesBibliograficas.trabalhoCompletoEmCongresso import TrabalhoCompletoEmCongresso
+from data_tables.technical_production.basic_production import BasicProduction
+from data_tables.technical_production.softwares import Softwares
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +66,26 @@ class LattesXMLParser:
         self.listaApresentacaoDeTrabalho = []
         self.listaOutroTipoDeProducaoBibliografica = []
 
+        # Produção técnica
+        self.softwares = []
+        self.produtos_tecnologicos = []
+        self.processos_ou_tecnicas = []
+        self.trabalhos_tecnicos = []
+        self.demais_tipos_de_producao_tecnica = []
+
+        # Reading and parsing
         root = et.fromstring(cv_content)
+        cv = etree.fromstring(cv_content.encode('utf-8'))
 
         self.atualizacaoCV = root.get('DATA-ATUALIZACAO')
 
         self.set_general_data(root.find('./DADOS-GERAIS'))
 
         if root.find('./PRODUCAO-BIBLIOGRAFICA'):
-            self.set_bibliographical_production(root.find('./PRODUCAO-BIBLIOGRAFICA'))
+            self.set_bibliographical_productions(root.find('./PRODUCAO-BIBLIOGRAFICA'))
+
+        if cv.xpath('./PRODUCAO-TECNICA'):
+            self.set_technical_productions(cv.xpath('./PRODUCAO-TECNICA')[0])
 
     def set_general_data(self, general_data_element):
         self.nomeCompleto = general_data_element.get('NOME-COMPLETO')
@@ -94,9 +109,8 @@ class LattesXMLParser:
         # IDIOMAS
         # PREMIOS-TITULOS
 
-    def set_bibliographical_production(self, element):
+    def set_bibliographical_productions(self, element):
         """
-
         :param element: XML element corresponding to ./PRODUCAO-BIBLIOGRAFICA
         :return:
         """
@@ -279,3 +293,18 @@ class LattesXMLParser:
 
             productions.append(production)
         return productions
+
+    def set_technical_productions(self, element):
+        # PRODUCAO-TECNICA (CULTIVAR-REGISTRADA*,SOFTWARE*, PATENTE*, CULTIVAR-PROTEGIDA*, DESENHO-INDUSTRIAL*, MARCA*, TOPOGRAFIA-DE-CIRCUITO-INTEGRADO*,
+        #                   PRODUTO-TECNOLOGICO*, PROCESSOS-OU-TECNICAS*, TRABALHO-TECNICO*, DEMAIS-TIPOS-DE-PRODUCAO-TECNICA*)>
+        self.softwares = self.get_software_mapping(element.xpath('SOFTWARE'))
+        self.produtos_tecnologicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PRODUTO-TECNOLOGICO'))
+        self.processos_ou_tecnicas = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PROCESSOS-OU-TECNICAS'))
+        self.trabalhos_tecnicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('TRABALHO-TECNICO'))
+        # self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('DEMAIS-TIPOS-DE-PRODUCAO-TECNICA'))
+
+    def get_software_mapping(self, elements):
+        # SOFTWARE (DADOS-BASICOS-DO-SOFTWARE?, DETALHAMENTO-DO-SOFTWARE?, AUTORES*
+        self.softwares = Softwares(id=self.id_lattes)
+        self.softwares.add_from_xml_elements(elements)
+        return self.softwares

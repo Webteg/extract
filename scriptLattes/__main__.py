@@ -10,11 +10,11 @@ Invoke as ``scriptlattes`` (if installed)
 or ``python -m scriptlattes`` (no install required).
 
 Usage:
-  scriptlattes [options] all CONFIG_FILE [--offline] [--xml]
-  scriptlattes [options] obtain CONFIG_FILE [--offline] [--xml]
-  scriptlattes [options] extract CONFIG_FILE [--offline] [--xml]
-  scriptlattes [options] process CONFIG_FILE [--offline] [--xml]
-  scriptlattes [options] report CONFIG_FILE [--offline] [--xml]
+  scriptlattes [options] all CONFIG_FILE [--offline] [--xml|--html]
+  scriptlattes [options] obtain CONFIG_FILE [--offline] [--xml|--html]
+  scriptlattes [options] extract CONFIG_FILE [--offline] [--xml|--html]
+  scriptlattes [options] process CONFIG_FILE [--offline] [--xml|--html]
+  scriptlattes [options] report CONFIG_FILE [--offline] [--xml|--html]
   scriptlattes (-h | --help | --version)
 
 Arguments:
@@ -28,7 +28,8 @@ Options:
 
 Other:
   --offline         do not try to download data; instead, use persisted data configured in CONFIG_FILE
-  --xml             use XML curricula (will search or store 'ID-LATTES.xml' files in cache)
+  --xml             (default) use XML curricula (will search or store 'ID-LATTES.xml' files in cache)
+  --html            use HTML curricula (will search or store 'ID-LATTES' files in cache)
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -268,7 +269,9 @@ def cli():
     # group.imprimirListaDeParametros()
     # group.imprimirListaDeRotulos()
 
-    use_xml = True if arguments['--xml'] else False  # FIXME: definir opção no arquivo de config?
+    use_xml = True if not arguments['--html'] else False  # FIXME: definir opção no arquivo de config?
+    if not use_xml:
+        logger.warning("Support for HTML CVs is no longer supported.")
 
     cvs_content = {'html': {}, 'xml': {}}
     if arguments['obtain'] or arguments['extract'] or arguments['process'] or arguments['report']:
@@ -309,8 +312,7 @@ def cli():
                     logger.warning("O CV {} não existe na cache ('{}'); ignorando.".format(id_lattes, cache.cache_directory))
                     continue
 
-                assert isinstance(cv_path, Path)
-                with cv_path.open() as f:
+                with cv_path.open(encoding='latin1') as f:
                     cv_lattes_content = f.read()  # py2 dá erros difíceis de consertar # .decode(encoding)#.encode("utf-8")
                 logger.debug("Utilizando CV armazenado na cache: {}.".format(cv_path))
 

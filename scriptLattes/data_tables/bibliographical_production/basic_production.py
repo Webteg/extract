@@ -8,7 +8,7 @@ import pandas as pd
 from data_tables.util import create_adjacency_matrix, create_weighted_matrix
 
 
-class Papers:
+class BasicProduction:
     __metaclass__ = ABCMeta
 
     columns = ['id_membro', 'ano']
@@ -162,6 +162,7 @@ class Papers:
         return 'qualis' in self.data_frame.columns and self.data_frame.qualis.any()
 
     def filter_by_year(self):
+        # FIXME: ver se método é útil
         if not objeto.ano:  # se nao for identificado o ano sempre o mostramos na lista
             objeto.ano = 0
             return 1
