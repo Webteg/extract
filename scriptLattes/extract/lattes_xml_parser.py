@@ -297,14 +297,9 @@ class LattesXMLParser:
     def set_technical_productions(self, element):
         # PRODUCAO-TECNICA (CULTIVAR-REGISTRADA*,SOFTWARE*, PATENTE*, CULTIVAR-PROTEGIDA*, DESENHO-INDUSTRIAL*, MARCA*, TOPOGRAFIA-DE-CIRCUITO-INTEGRADO*,
         #                   PRODUTO-TECNOLOGICO*, PROCESSOS-OU-TECNICAS*, TRABALHO-TECNICO*, DEMAIS-TIPOS-DE-PRODUCAO-TECNICA*)>
-        self.softwares = self.get_software_mapping(element.xpath('SOFTWARE'))
+        # SOFTWARE (DADOS-BASICOS-DO-SOFTWARE?, DETALHAMENTO-DO-SOFTWARE?, AUTORES*
+        self.softwares = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('SOFTWARE'))
         self.produtos_tecnologicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PRODUTO-TECNOLOGICO'))
         self.processos_ou_tecnicas = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PROCESSOS-OU-TECNICAS'))
         self.trabalhos_tecnicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('TRABALHO-TECNICO'))
         # self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('DEMAIS-TIPOS-DE-PRODUCAO-TECNICA'))
-
-    def get_software_mapping(self, elements):
-        # SOFTWARE (DADOS-BASICOS-DO-SOFTWARE?, DETALHAMENTO-DO-SOFTWARE?, AUTORES*
-        self.softwares = Softwares(id=self.id_lattes)
-        self.softwares.add_from_xml_elements(elements)
-        return self.softwares

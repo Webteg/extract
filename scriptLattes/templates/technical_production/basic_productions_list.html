@@ -1,0 +1,16 @@
+{% extends "technical_production/list.html" %}
+
+{% block list_item %}
+
+    {{production.autores}}.
+    <b>{{production.titulo}}</b>.
+    {{production.ano|int}}.
+    {% if production.natureza %}
+        <em>{{production.natureza|default('', true)}}</em>.
+    {% elif production.evento %}
+        <em>{{production.evento}}</em>.
+    {% elif production.revista %}
+        <em>{{production.revista}}</em>.
+    {% endif %}
+
+{% endblock %}

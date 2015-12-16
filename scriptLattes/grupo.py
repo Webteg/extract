@@ -7,13 +7,17 @@ import logging
 from scipy import sparse
 
 from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
-from data_tables.bibliographical_production.all_productions import BibliographicalProductions
+from data_tables import technical_production
+from data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
 from data_tables.bibliographical_production.books import Books
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
 from data_tables.bibliographical_production.newspaper_texts import NewspaperTexts
 from data_tables.bibliographical_production.others import Others
 from data_tables.bibliographical_production.presentations import Presentations
+from data_tables.technical_production import technical_productions
+from data_tables.technical_production.basic_production import BasicProduction
+from data_tables.technical_production.technical_productions import TechnicalProductions
 from membro import Membro
 from persist.cache import cache
 from process.authorRank import AuthorRank
@@ -94,8 +98,17 @@ class Grupo:
         self.newspaper_texts = NewspaperTexts(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.presentations = Presentations(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.others = Others(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
-        self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
         self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others)
+
+        self.softwares = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.produtos_tecnologicos = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.processos_ou_tecnicas = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.trabalhos_tecnicos = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
+        self.technical_productions = TechnicalProductions(self.softwares, self.produtos_tecnologicos, self.processos_ou_tecnicas, self.trabalhos_tecnicos, self.demais_tipos_de_producao_tecnica)
+
+        # Lista usada para extrair as colaborações. TODO: incluir produções técnicas?
+        self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
 
     @property
     def labels_set(self):
@@ -120,6 +133,12 @@ class Grupo:
             self.newspaper_texts.append(member.newspaper_texts)
             self.presentations.append(member.presentations)
             self.others.append(member.others)
+
+            self.softwares.append(member.softwares)
+            self.produtos_tecnologicos.append(member.produtos_tecnologicos)
+            self.processos_ou_tecnicas.append(member.processos_ou_tecnicas)
+            self.trabalhos_tecnicos.append(member.trabalhos_tecnicos)
+            # self.demais_tipos_de_producao_tecnica.append(member.demais_tipos_de_producao_tecnica)
 
     # REFATORADO ATE AQUI *********************************************************************************************
 

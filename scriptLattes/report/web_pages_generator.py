@@ -65,9 +65,9 @@ class WebPagesGenerator:
         self.bibliographical_productions_routes = [
             ("PB0-0.html", u"Artigos completos publicados em periódicos", self.grupo.journal_papers.published, "bibliographical_production/journal_papers_list.html"),
             ("PB7-0.html", u"Artigos aceitos para publicação", self.grupo.journal_papers.only_accepted, "bibliographical_production/journal_papers_list.html"),
-            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos ", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
-            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos ", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
-            ("PB6-0.html", u"Resumos publicados em anais de congressos ", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB4-0.html", u"Trabalhos completos publicados em anais de congressos", self.grupo.event_papers.complete, "bibliographical_production/event_papers_list.html"),
+            ("PB5-0.html", u"Resumos expandidos publicados em anais de congressos", self.grupo.event_papers.abstract, "bibliographical_production/event_papers_list.html"),
+            ("PB6-0.html", u"Resumos publicados em anais de congressos", self.grupo.event_papers.expanded_abstract, "bibliographical_production/event_papers_list.html"),
             ("PB1-0.html", u"Livros publicados/organizados ou edições", self.grupo.books.full, "bibliographical_production/books_list.html"),
             ("PB2-0.html", u"Capítulos de livros publicados ", self.grupo.books.only_chapter, "bibliographical_production/books_list.html"),
             ("PB3-0.html", u"Textos em jornais de notícias/revistas ", self.grupo.newspaper_texts, "bibliographical_production/newspaper_texts_list.html"),
@@ -76,16 +76,25 @@ class WebPagesGenerator:
             ("PB-0.html", u"Produção bibliográfica total", self.grupo.bibliographical_productions, "bibliographical_production/bibliographical_productions_list.html"),
         ]
 
-        bibliographical_productions_index = [
-            (page, title, len(production)) for page, title, production, _ in self.bibliographical_productions_routes
-            ]
-        self.global_template_vars["bibliographical_productions_index"] = bibliographical_productions_index
+        # Format: (page, title, object, template)
+        # template is a relative path; check self.jinja initialization
+        self.technical_productions_routes = [
+            ("PT0-0.html", u"Programas de computador", self.grupo.softwares, "technical_production/basic_productions_list.html"),
+            ("PT2-0.html", u"Produtos tecnológicos", self.grupo.produtos_tecnologicos, "technical_production/basic_productions_list.html"),
+            ("PT3-0.html", u"Processos ou técnicas", self.grupo.processos_ou_tecnicas, "technical_production/basic_productions_list.html"),
+            ("PT4-0.html", u"Trabalhos técnicos", self.grupo.trabalhos_tecnicos, "technical_production/basic_productions_list.html"),
+            ("PT-0.html", u"Produção técnica total", self.grupo.technical_productions, "technical_production/basic_productions_list.html"),
+        ]
+            # ("PT5-0.html", u"Demais tipos de produção técnica", self.grupo.demais_tipos_de_producao_tecnica, "technical_production/event_papers_list.html"),
 
     def generate(self):
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
-        self.generate_bibliographical_production_pages(routes=self.bibliographical_productions_routes)
+        self.generate_bibliographical_production_pages(routes=self.bibliographical_productions_routes,
+                                                       index_id="producao_bibliografica", index_title="Produção bibliográfica")
         # self.gerarPaginasDeProducoesTecnicas()
+        self.generate_bibliographical_production_pages(routes=self.technical_productions_routes,
+                                                       index_id="produca_tecnica", index_title="Produção técnica")
         # self.gerarPaginasDeProducoesArtisticas()
         # self.gerarPaginasDePatentes()
         #
@@ -133,44 +142,6 @@ class WebPagesGenerator:
         file_generator.save_string_to_file(s, file_path)
 
         return
-
-        s += '</ul>' \
-             ' <h3 id="producaoTecnica">Produção técnica</h3> <ul>'.decode("utf8")
-        if self.nPT0 > 0:
-            s += '<li> <a href="PT0-0' + self.extensaoPagina + '">Programas de computador com registro de patente</a> '.decode(
-                "utf8") + '(' + str(self.nPT0) + ')'
-        if self.nPT1 > 0:
-            s += '<li> <a href="PT1-0' + self.extensaoPagina + '">Programas de computador sem registro de patente</a> '.decode(
-                "utf8") + '(' + str(self.nPT1) + ')'
-        if self.nPT2 > 0:
-            s += '<li> <a href="PT2-0' + self.extensaoPagina + '">Produtos tecnológicos</a> '.decode(
-                "utf8") + '(' + str(self.nPT2) + ')'
-        if self.nPT3 > 0:
-            s += '<li> <a href="PT3-0' + self.extensaoPagina + '">Processos ou técnicas</a> '.decode(
-                "utf8") + '(' + str(self.nPT3) + ')'
-        if self.nPT4 > 0:
-            s += '<li> <a href="PT4-0' + self.extensaoPagina + '">Trabalhos técnicos</a> '.decode("utf8") + '(' + str(
-                self.nPT4) + ')'
-        if self.nPT5 > 0:
-            s += '<li> <a href="PT5-0' + self.extensaoPagina + '">Demais tipos de produção técnica</a> '.decode(
-                "utf8") + '(' + str(self.nPT5) + ')'
-        if self.nPT > 0:
-            s += '<li> <a href="PT-0' + self.extensaoPagina + '">Total de produção técnica</a> '.decode(
-                "utf8") + '(' + str(self.nPT) + ')'
-        else:
-            s += '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
-
-
-            # s+='</ul> <h3 id="patenteRegistro">Patente e Registro</h3> <ul>'.decode("utf8")
-        # if self.nPR0>0:
-        #	s+= '<li> <a href="PR0-0'+self.extensaoPagina+'">Patente</a> '.decode("utf8")+'('+str(self.nPR0)+')'
-        # if self.nPR1>0:
-        #	s+= '<li> <a href="PR1-0'+self.extensaoPagina+'">Programa de computador</a> '.decode("utf8")+'('+str(self.nPR1)+')'
-        # if self.nPR2>0:
-        #	s+= '<li> <a href="PR2-0'+self.extensaoPagina+'">Desenho industrial</a> '.decode("utf8")+'('+str(self.nPR2)+')'
-        # if self.nPR0 == 0 and self.nPR1 == 0 and self.nPR2 == 0:
-        #	s+= '<i>Nenhum item achado nos currículos Lattes</i>'.decode("utf8")
-
 
         s += '</ul>' \
              ' <h3 id="producaoArtistica">Produção artística</h3> <ul>'.decode("utf8")
@@ -333,12 +304,13 @@ class WebPagesGenerator:
         #
         # nomeCompleto = unicodedata.normalize('NFKD', membro.nomeCompleto).encode('ASCII', 'ignore')
 
-    def generate_production_page(self, productions, template_name, title, page, group_by='ano', ascending=True, ris=False):
+    def generate_production_page(self, productions, template_name, title, page, group_by='ano', ascending=True, ris=False, index_template_vars={}):
         # template = self.jinja.get_template("list.html")
         template = self.jinja.get_template(template_name)
         file_name = page
 
         template_vars = self.global_template_vars.copy()
+        template_vars.update(index_template_vars)
         template_vars.update({
             "timestamp": datetime.datetime.isoformat(datetime.datetime.now(dateutil.tz.tzlocal())),
             "subtitle": title,
@@ -425,11 +397,22 @@ class WebPagesGenerator:
         #         self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
         # return total_producoes
 
-    def generate_bibliographical_production_pages(self, routes):
+    def generate_bibliographical_production_pages(self, routes, index_id, index_title):
+        productions_index = [
+            (page, title, len(production)) for page, title, production, _ in routes
+            ]
+
+        template_vars = {
+            "productions_index": productions_index,
+            "index_id": index_id,
+            "index_title": index_title
+        }
+
         for page, title, productions, template in routes:
             self.generate_production_page(productions, group_by='ano', ascending=False,
                                           template_name=template,  # self.grupo.compilador.listaCompletaPB,
-                                          title=title, page=page)
+                                          title=title, page=page,
+                                          index_template_vars=template_vars)
         return
         #########################################
         # FIXME: refatorar

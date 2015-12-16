@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from abc import abstractmethod, ABCMeta
 from collections import OrderedDict
+
 import pandas as pd
 from pandas.core.common import flatten
 
@@ -10,8 +10,6 @@ from util.util import similaridade_entre_cadeias
 
 
 class BasicProduction:
-    __metaclass__ = ABCMeta
-
     columns = ['ano', 'titulo', 'autores', 'relevante', 'natureza']
 
     mapping_attribute_path = {
@@ -54,14 +52,15 @@ class BasicProduction:
         Add a list of productions from an XML element (passed by a parser).
         :param elements_list: list of XML elements corresponding to productions to add
         :param kwargs: extra columns to set a fixed value (key: value -> df[key] = value)
-        :return:
+        :return: self, to allow nesting calls
         """
         assert self.adjacency_matrix is None
         productions_df = self._df_from_xml_parser(elements_list)
         productions_df['id_membro'] = self.id
         for key, value in kwargs.items():
             productions_df[key] = value
-        self.append(productions_df)
+        self.append_data(productions_df)
+        return self
 
     def _df_from_xml_parser(self, elements_list):
         productions = {}
@@ -71,21 +70,27 @@ class BasicProduction:
                 path = self.mapping_attribute_path[column]
             values = [element.xpath(path) for element in elements_list]
             if column not in self.array_columns:
-                productions[column] = list(flatten(values))
+                productions[column] = tuple(flatten(values))
             else:
-                productions[column] = values
+                # FIXME: usar lista para não perder estrutura (problema: template ordena por autores, o que causa erro quando é uma lista)
+                # productions[column] = values
+                productions[column] = tuple(map('; '.join, values))
         return pd.DataFrame(productions)
 
     def append(self, productions):
+        self.append_data(productions.data_frame)
+
+    def append_data(self, productions_df):
         assert self.adjacency_matrix is None
-        assert isinstance(productions, type(self)) or isinstance(productions, pd.DataFrame)
-        if isinstance(productions, type(self)):
-            # self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
-            data_frame_to_append = productions.data_frame
-        # elif isinstance(productions, pd.DataFrame):
-        else:
-            # self.data_frame = self.data_frame.append(productions, ignore_index=True)
-            data_frame_to_append = productions
+        # assert isinstance(productions, type(self)) or isinstance(productions, pd.DataFrame)
+        # if isinstance(productions, type(self)):
+        #     # self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
+        #     data_frame_to_append = productions.data_frame
+        # # elif isinstance(productions, pd.DataFrame):
+        # else:
+        #     # self.data_frame = self.data_frame.append(productions, ignore_index=True)
+        #     data_frame_to_append = productions
+        data_frame_to_append = productions_df
 
         # Filter by timespan
         # TODO: make this dynamic, when porting to a web framework
@@ -112,7 +117,8 @@ class BasicProduction:
         else:
             self.data_frame = self.data_frame.append(data_frame_to_append, ignore_index=True)
 
-    def is_similar(self, row1, row2):
+    @staticmethod
+    def is_similar(row1, row2):
         # TODO: testar outras similaridades (autores, issn, etc.)
         # TODO: ver se é preciso ignorar quando id_membro é o mesmo
         if similaridade_entre_cadeias(row1.titulo, row2.titulo):

@@ -24,14 +24,13 @@
     {% if productions_index %}
         {% for page, title, count in productions_index %}
             <li>
-                <a href="{{page}}">{{title}} <strong class="label-body">({{count}})</strong></a>
+                <a href="{{page}}">{{title}} <strong>({{count}})</strong></a>
             </li>
         {% endfor %}
     {% else %}
         <i>Nenhum item achado nos currículos Lattes</i>
     {% endif %}
 </ul>
-
 {% endblock %}
 
 
@@ -63,17 +62,13 @@
                             </td>
                             <td>
                                 {% block list_item_actions scoped %}
-                                    <a class="small" href="http://scholar.google.com/scholar?hl=en&lr=&q={{production.titulo|e}}&btnG=Search"
-                                       alt="cita&ccedil;&otilde;es no Google Scholar" title="cita&ccedil;&otilde;es no Google Scholar">
-                                        <img class="logo" src="https://www.google.com/images/icons/product/scholar-32.png"/>
-                                    </a>
-                                    <a class="small" href="http://academic.research.microsoft.com/Search?query={{production.titulo|e}}"
-                                       alt="cita&ccedil;&otilde;es no Microsoft Acad&ecirc;mico" title="cita&ccedil;&otilde;es no Microsoft Acad&ecirc;mico">
-                                        <img class="logo" src="https://pbs.twimg.com/profile_images/558060418/academic_logo_400x400.png"/>
-                                    </a>
                                     <a class="small" href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}"
                                        alt="busca no Google" title="busca no Google">
                                         <img class="logo" src="https://www.google.com/images/branding/product/1x/gsa_32dp.png"/>
+                                    </a>
+                                    <a class="small" href="http://www.bing.com/search?q={{production.titulo|e}}"
+                                        alt="busca no Bing" title="busca no Bing">
+                                        <img class="logo" src="http://c.s-microsoft.com/en-us/CMSImages/SafariIcon.png?version=2f672ad7-c691-24d0-e97a-569f8b59fd72"/>
                                     </a>
                                 {% endblock %}
                             </td>
