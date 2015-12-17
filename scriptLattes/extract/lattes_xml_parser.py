@@ -318,4 +318,4 @@ class LattesXMLParser:
         # OUTRA-PRODUCAO (PRODUCAO-ARTISTICA-CULTURAL*, ORIENTACOES-CONCLUIDAS*, DEMAIS-TRABALHOS*)
         # PRODUCAO-ARTISTICA-CULTURAL (APRESENTACAO-DE-OBRA-ARTISTICA*, APRESENTACAO-EM-RADIO-OU-TV*, ARRANJO-MUSICAL*, COMPOSICAO-MUSICAL*, CURSO-DE-CURTA-DURACAO*, OBRA-DE-ARTES-VISUAIS*, OUTRA-PRODUCAO-ARTISTICA-CULTURAL*, SONOPLASTIA*,ARTES-CENICAS*,ARTES-VISUAIS*,MUSICA*)
         self.artistic_productions = BasicProduction(id=self.id_lattes)
-        self.artistic_productions.add_from_xml_elements(element.xpath('APRESENTACAO-DE-OBRA-ARTISTICA'))
+        self.artistic_productions.add_from_xml_elements(element.xpath('*'))

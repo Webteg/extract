@@ -87,15 +87,21 @@ class WebPagesGenerator:
             ("PT-0.html", u"Produção técnica total", self.grupo.technical_productions, "technical_production/basic_productions_list.html"),
         ]
 
+        self.other_productions_routes = [
+            ("OP-0.html", u"Produções artísticas", self.grupo.artistic_productions, "artistic_production/basic_productions_list.html"),
+        ]
+
     def generate(self):
         self.gerar_pagina_de_membros()
         # self.gerar_pagina_de_producao_qualificado_por_membro()
-        self.generate_bibliographical_production_pages(routes=self.bibliographical_productions_routes,
-                                                       index_id="producao_bibliografica", index_title="Produção bibliográfica")
+        self.generate_production_pages(routes=self.bibliographical_productions_routes,
+                                       index_id="producao_bibliografica", index_title="Produção bibliográfica")
         # self.gerarPaginasDeProducoesTecnicas()
-        self.generate_bibliographical_production_pages(routes=self.technical_productions_routes,
-                                                       index_id="produca_tecnica", index_title="Produção técnica")
+        self.generate_production_pages(routes=self.technical_productions_routes,
+                                       index_id="producao_tecnica", index_title="Produção técnica")
         # self.gerarPaginasDeProducoesArtisticas()
+        self.generate_production_pages(routes=self.other_productions_routes,
+                                       index_id="outras_producoes", index_title="Outras produções")
         # self.gerarPaginasDePatentes()
         #
         # if self.grupo.obterParametro('relatorio-mostrar_orientacoes'):
@@ -397,7 +403,7 @@ class WebPagesGenerator:
         #         self.salvarPagina(prefixo + '-' + str(numero_pagina) + self.extensaoPagina, pagina_html)
         # return total_producoes
 
-    def generate_bibliographical_production_pages(self, routes, index_id, index_title):
+    def generate_production_pages(self, routes, index_id, index_title):
         productions_index = [
             (page, title, len(production)) for page, title, production, _ in routes
             ]
