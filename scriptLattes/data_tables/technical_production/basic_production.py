@@ -70,7 +70,8 @@ class BasicProduction:
                 path = self.mapping_attribute_path[column]
             values = [element.xpath(path) for element in elements_list]
             if column not in self.array_columns:
-                productions[column] = tuple(flatten(values))
+                # productions[column] = tuple(flatten(values))
+                productions[column] = tuple(map(lambda x: x[0] if x else None, values))
             else:
                 # FIXME: usar lista para não perder estrutura (problema: template ordena por autores, o que causa erro quando é uma lista)
                 # productions[column] = values
@@ -78,7 +79,8 @@ class BasicProduction:
         return pd.DataFrame(productions)
 
     def append(self, productions):
-        self.append_data(productions.data_frame)
+        if productions:
+            self.append_data(productions.data_frame)
 
     def append_data(self, productions_df):
         assert self.adjacency_matrix is None

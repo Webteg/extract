@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% set active_page = "{{index_id}}" %}
+
+{% block title %}{{group_name}}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="css/dataTables.colVis.min.css">
+    <script type="text/javascript" charset="utf8" src="js/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="js/dataTables.colVis.min.js"></script>
+    <!--<script type="text/javascript" charset="utf8" src="js/jexpand/jExpand.js"></script>-->
+    <!--<script>-->
+        <!--$(document).ready(function () {-->
+            <!--$(".collapse-box").jExpand();-->
+        <!--});-->
+    <!--</script>-->
+{% endblock %}
+
+{% block sidemenu %}
+<h5 id="{{index_id}}">{{index_title}}</h5>
+<ul class="sidenav">
+    {% if productions_index %}
+        {% for page, title, count in productions_index %}
+            <li>
+                <a href="{{page}}">{{title}} <strong>({{count}})</strong></a>
+            </li>
+        {% endfor %}
+    {% else %}
+        <i>Nenhum item achado nos currículos Lattes</i>
+    {% endif %}
+</ul>
+{% endblock %}
+
+
+{% block content %}
+    <h4>{{subtitle}}</h4>
+
+    {% block chart %}
+        {% if chart %}
+            {% include "highchart_year_frequency.html" with context %}
+        {% endif %}
+    {% endblock chart %}
+
+    Número total de itens: {{numero_itens}}
+    <br>
+    <!--{{totais_qualis}}-->
+    <!--{{indice_paginas}}-->
+
+    <!--{producoes}-->
+    {% block list %}
+        {% for pivot, productions in grouped_productions.items() %}
+            <div id="dv-year-{{pivot}}"><h3 class="year">{{pivot}}</h3>
+                <table>
+                    {% for i, production in productions.sort_values(['autores', 'titulo']).iterrows() %}
+                        <tr valign="top">
+                            <td>{{loop.index}}. </td>
+                            <td>
+                                {% block list_item scoped %}
+                                {% endblock %}
+                            </td>
+                            <td>
+                                {% block list_item_actions scoped %}
+                                    <a class="small" href="http://www.google.com/search?btnG=Google+Search&q={{production.titulo|e}}"
+                                       alt="busca no Google" title="busca no Google">
+                                        <img class="logo" src="https://www.google.com/images/branding/product/1x/gsa_32dp.png"/>
+                                    </a>
+                                    <a class="small" href="http://www.bing.com/search?q={{production.titulo|e}}"
+                                        alt="busca no Bing" title="busca no Bing">
+                                        <img class="logo" src="http://c.s-microsoft.com/en-us/CMSImages/SafariIcon.png?version=2f672ad7-c691-24d0-e97a-569f8b59fd72"/>
+                                    </a>
+                                {% endblock %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endfor %}
+    {% endblock %}
+
+{% endblock content %}

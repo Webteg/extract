@@ -82,7 +82,7 @@ class Membro:
     listaDesenhoIndustrial = []
 
     # Produção artística/cultural
-    listaProducaoArtistica = []
+    artistic_productions = []
 
     # Orientações em andamento
     listaOASupervisaoDePosDoutorado = []
@@ -213,6 +213,8 @@ class Membro:
             self.processos_ou_tecnicas = parser.processos_ou_tecnicas
             self.trabalhos_tecnicos = parser.trabalhos_tecnicos
             self.demais_tipos_de_producao_tecnica = parser.demais_tipos_de_producao_tecnica
+
+            self.artistic_productions = parser.artistic_productions
 
         return
 

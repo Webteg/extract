@@ -73,19 +73,25 @@ class LattesXMLParser:
         self.trabalhos_tecnicos = []
         self.demais_tipos_de_producao_tecnica = []
 
+        # Outras produções
+        self.artistic_productions = []
+
         # Reading and parsing
         root = et.fromstring(cv_content)
         cv = etree.fromstring(cv_content.encode('utf-8'))
 
         self.atualizacaoCV = root.get('DATA-ATUALIZACAO')
 
-        self.set_general_data(root.find('./DADOS-GERAIS'))
+        self.set_general_data(root.find('DADOS-GERAIS'))
 
-        if root.find('./PRODUCAO-BIBLIOGRAFICA'):
-            self.set_bibliographical_productions(root.find('./PRODUCAO-BIBLIOGRAFICA'))
+        if root.find('PRODUCAO-BIBLIOGRAFICA'):
+            self.set_bibliographical_productions(root.find('PRODUCAO-BIBLIOGRAFICA'))
 
-        if cv.xpath('./PRODUCAO-TECNICA'):
-            self.set_technical_productions(cv.xpath('./PRODUCAO-TECNICA')[0])
+        if cv.xpath('PRODUCAO-TECNICA'):
+            self.set_technical_productions(cv.xpath('PRODUCAO-TECNICA')[0])
+
+        if cv.xpath('OUTRA-PRODUCAO/PRODUCAO-ARTISTICA-CULTURAL'):
+            self.set_artistic_productions(cv.xpath('OUTRA-PRODUCAO/PRODUCAO-ARTISTICA-CULTURAL')[0])
 
     def set_general_data(self, general_data_element):
         self.nomeCompleto = general_data_element.get('NOME-COMPLETO')
@@ -302,4 +308,14 @@ class LattesXMLParser:
         self.produtos_tecnologicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PRODUTO-TECNOLOGICO'))
         self.processos_ou_tecnicas = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('PROCESSOS-OU-TECNICAS'))
         self.trabalhos_tecnicos = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('TRABALHO-TECNICO'))
-        # self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.id_lattes).add_from_xml_elements(element.xpath('DEMAIS-TIPOS-DE-PRODUCAO-TECNICA'))
+
+        self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.id_lattes)
+        # APRESENTACAO-DE-TRABALHO*, CARTA-MAPA-OU-SIMILAR*, CURSO-DE-CURTA-DURACAO-MINISTRADO*, DESENVOLVIMENTO-DE-MATERIAL-DIDATICO-OU-INSTRUCIONAL*, EDITORACAO*, MANUTENCAO-DE-OBRA-ARTISTICA*, MAQUETE*, ORGANIZACAO-DE-EVENTO*, PROGRAMA-DE-RADIO-OU-TV*, RELATORIO-DE-PESQUISA*,MIDIA-SOCIAL-WEBSITE-BLOG*, OUTRA-PRODUCAO-TECNICA*
+        self.demais_tipos_de_producao_tecnica.add_from_xml_elements(element.xpath('DEMAIS-TIPOS-DE-PRODUCAO-TECNICA/*'))
+        # self.demais_tipos_de_producao_tecnica.add_from_xml_elements(element.xpath('DEMAIS-TIPOS-DE-PRODUCAO-TECNICA/OUTRA-PRODUCAO-TECNICA'))
+
+    def set_artistic_productions(self, element):
+        # OUTRA-PRODUCAO (PRODUCAO-ARTISTICA-CULTURAL*, ORIENTACOES-CONCLUIDAS*, DEMAIS-TRABALHOS*)
+        # PRODUCAO-ARTISTICA-CULTURAL (APRESENTACAO-DE-OBRA-ARTISTICA*, APRESENTACAO-EM-RADIO-OU-TV*, ARRANJO-MUSICAL*, COMPOSICAO-MUSICAL*, CURSO-DE-CURTA-DURACAO*, OBRA-DE-ARTES-VISUAIS*, OUTRA-PRODUCAO-ARTISTICA-CULTURAL*, SONOPLASTIA*,ARTES-CENICAS*,ARTES-VISUAIS*,MUSICA*)
+        self.artistic_productions = BasicProduction(id=self.id_lattes)
+        self.artistic_productions.add_from_xml_elements(element.xpath('APRESENTACAO-DE-OBRA-ARTISTICA'))

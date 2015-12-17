@@ -83,9 +83,9 @@ class WebPagesGenerator:
             ("PT2-0.html", u"Produtos tecnológicos", self.grupo.produtos_tecnologicos, "technical_production/basic_productions_list.html"),
             ("PT3-0.html", u"Processos ou técnicas", self.grupo.processos_ou_tecnicas, "technical_production/basic_productions_list.html"),
             ("PT4-0.html", u"Trabalhos técnicos", self.grupo.trabalhos_tecnicos, "technical_production/basic_productions_list.html"),
+            ("PT5-0.html", u"Demais tipos de produção técnica", self.grupo.demais_tipos_de_producao_tecnica, "technical_production/basic_productions_list.html"),
             ("PT-0.html", u"Produção técnica total", self.grupo.technical_productions, "technical_production/basic_productions_list.html"),
         ]
-            # ("PT5-0.html", u"Demais tipos de produção técnica", self.grupo.demais_tipos_de_producao_tecnica, "technical_production/event_papers_list.html"),
 
     def generate(self):
         self.gerar_pagina_de_membros()

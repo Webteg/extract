@@ -92,6 +92,7 @@ class Grupo:
 
         self.ids_df = ids_df
 
+        # Produção bibliográfica
         self.journal_papers = JournalPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.event_papers = EventPapers(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.books = Books(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
@@ -100,12 +101,16 @@ class Grupo:
         self.others = Others(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.bibliographical_productions = BibliographicalProductions(self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others)
 
+        # Produção técnica
         self.softwares = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.produtos_tecnologicos = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.processos_ou_tecnicas = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.trabalhos_tecnicos = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.demais_tipos_de_producao_tecnica = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
         self.technical_productions = TechnicalProductions(self.softwares, self.produtos_tecnologicos, self.processos_ou_tecnicas, self.trabalhos_tecnicos, self.demais_tipos_de_producao_tecnica)
+
+        # Produção artística
+        self.artistic_productions = BasicProduction(id=self.group_id, group_similar=True, timespan=(self.items_desde_ano, self.items_ate_ano))
 
         # Lista usada para extrair as colaborações. TODO: incluir produções técnicas?
         self.productions_list = [self.journal_papers, self.event_papers, self.books, self.newspaper_texts, self.presentations, self.others]
@@ -138,7 +143,9 @@ class Grupo:
             self.produtos_tecnologicos.append(member.produtos_tecnologicos)
             self.processos_ou_tecnicas.append(member.processos_ou_tecnicas)
             self.trabalhos_tecnicos.append(member.trabalhos_tecnicos)
-            # self.demais_tipos_de_producao_tecnica.append(member.demais_tipos_de_producao_tecnica)
+            self.demais_tipos_de_producao_tecnica.append(member.demais_tipos_de_producao_tecnica)
+
+            self.artistic_productions.append(member.artistic_productions)
 
     # REFATORADO ATE AQUI *********************************************************************************************
 
