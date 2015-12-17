@@ -58,8 +58,8 @@ from data.producoesUnitarias.formacaoAcademica import FormacaoAcademica
 from data.producoesUnitarias.idioma import Idioma
 from data.producoesUnitarias.premioOuTitulo import PremioOuTitulo
 from data.producoesUnitarias.projetoDePesquisa import ProjetoDePesquisa
-from eventos.organizacaoDeEvento import OrganizacaoDeEvento
-from eventos.participacaoEmEvento import ParticipacaoEmEvento
+from data.eventos.organizacaoDeEvento import OrganizacaoDeEvento
+from data.eventos.participacaoEmEvento import ParticipacaoEmEvento
 
 
 class ParserLattesHTML(HTMLParser):

@@ -21,6 +21,8 @@
 #  junto com este programa, se não, escreva para a Fundação do Software
 #  Livre(FSF) Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import logging
+
 from data_tables.bibliographical_production.books import Books
 from data_tables.bibliographical_production.event_papers import EventPapers
 from data_tables.bibliographical_production.journal_papers import JournalPapers
@@ -30,6 +32,9 @@ from data_tables.bibliographical_production.presentations import Presentations
 from extract.parserLattesXML import *
 from report.charts.geolocalizador import *
 from util.util import get_lattes_url
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 class Membro:
@@ -143,6 +148,8 @@ class Membro:
         return self.nome_completo < other.nome_completo
 
     def parse_timespans_list(self, timespans_string):
+        if not timespans_string:
+            return None
         timespans = []
         timespans_string = re.sub('\s+', '', timespans_string)
 

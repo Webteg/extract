@@ -214,6 +214,7 @@ def read_list_file(ids_file_path):
     column_names = ['identificador', 'nome', 'periodo', 'rotulo']
     ids.columns = column_names[:num_columns]
     ids = ids.reindex(columns=column_names, fill_value='')  # Add new columns with empty strings
+    ids.periodo.fillna('', inplace=True)
     return ids
 
 
