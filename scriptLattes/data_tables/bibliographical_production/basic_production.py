@@ -63,14 +63,13 @@ class BasicProduction:
 
     def append(self, productions):
         assert self.adjacency_matrix is None
-        assert isinstance(productions, type(self)) or isinstance(productions, pd.DataFrame)
-        if isinstance(productions, type(self)):
-            # self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
-            data_frame_to_append = productions.data_frame
-        # elif isinstance(productions, pd.DataFrame):
-        else:
+        assert issubclass(productions, type(self)) or isinstance(productions, type(self)) or isinstance(productions, pd.DataFrame)
+        if isinstance(productions, pd.DataFrame):
             # self.data_frame = self.data_frame.append(productions, ignore_index=True)
             data_frame_to_append = productions
+        else:
+            # self.data_frame = self.data_frame.append(productions.data_frame, ignore_index=True)
+            data_frame_to_append = productions.data_frame
 
         # Filter by timespan
         # TODO: make this dynamic, when porting to a web framework
