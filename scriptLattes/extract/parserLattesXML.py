@@ -38,17 +38,17 @@ else:
     from html.parser import HTMLParser
     from html.entities import name2codepoint
 
-from data.orientacoes.orientacaoConcluida import *
-from data.producoesBibliograficas.apresentacaoDeTrabalho import *
-from data.producoesBibliograficas.artigoAceito import *
-from data.producoesBibliograficas.artigoEmPeriodico import *
-from data.producoesBibliograficas.capituloDeLivroPublicado import *
-from data.producoesBibliograficas.livroPublicado import LivroPublicado
-from data.producoesBibliograficas.outroTipoDeProducaoBibliografica import *
-from data.producoesBibliograficas.resumoEmCongresso import *
-from data.producoesBibliograficas.resumoExpandidoEmCongresso import *
-from data.producoesBibliograficas.textoEmJornalDeNoticia import *
-from data.producoesBibliograficas.trabalhoCompletoEmCongresso import *
+from scriptLattes.data.orientacoes.orientacaoConcluida import *
+from scriptLattes.data.producoesBibliograficas.apresentacaoDeTrabalho import *
+from scriptLattes.data.producoesBibliograficas.artigoAceito import *
+from scriptLattes.data.producoesBibliograficas.artigoEmPeriodico import *
+from scriptLattes.data.producoesBibliograficas.capituloDeLivroPublicado import *
+from scriptLattes.data.producoesBibliograficas.livroPublicado import LivroPublicado
+from scriptLattes.data.producoesBibliograficas.outroTipoDeProducaoBibliografica import *
+from scriptLattes.data.producoesBibliograficas.resumoEmCongresso import *
+from scriptLattes.data.producoesBibliograficas.resumoExpandidoEmCongresso import *
+from scriptLattes.data.producoesBibliograficas.textoEmJornalDeNoticia import *
+from scriptLattes.data.producoesBibliograficas.trabalhoCompletoEmCongresso import *
 
 
 class ParserLattesXML(HTMLParser):

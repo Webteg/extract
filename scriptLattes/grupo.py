@@ -6,25 +6,25 @@ import logging
 
 from scipy import sparse
 
-from data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
-from data_tables import technical_production
-from data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
-from data_tables.bibliographical_production.books import Books
-from data_tables.bibliographical_production.event_papers import EventPapers
-from data_tables.bibliographical_production.journal_papers import JournalPapers
-from data_tables.bibliographical_production.newspaper_texts import NewspaperTexts
-from data_tables.bibliographical_production.others import Others
-from data_tables.bibliographical_production.presentations import Presentations
-from data_tables.technical_production import technical_productions
-from data_tables.technical_production.basic_production import BasicProduction
-from data_tables.technical_production.technical_productions import TechnicalProductions
-from membro import Membro
-from persist.cache import cache
-from process.authorRank import AuthorRank
-from process.compiladorDeListas import CompiladorDeListas
-from qualis import qualis
-from report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
-from report.geradorDeXML import GeradorDeXML
+from scriptLattes.data.internacionalizacao.analisadorDePublicacoes import AnalisadorDePublicacoes
+from scriptLattes.data_tables import technical_production
+from scriptLattes.data_tables.bibliographical_production.bibliographical_productions import BibliographicalProductions
+from scriptLattes.data_tables.bibliographical_production.books import Books
+from scriptLattes.data_tables.bibliographical_production.event_papers import EventPapers
+from scriptLattes.data_tables.bibliographical_production.journal_papers import JournalPapers
+from scriptLattes.data_tables.bibliographical_production.newspaper_texts import NewspaperTexts
+from scriptLattes.data_tables.bibliographical_production.others import Others
+from scriptLattes.data_tables.bibliographical_production.presentations import Presentations
+from scriptLattes.data_tables.technical_production import technical_productions
+from scriptLattes.data_tables.technical_production.basic_production import BasicProduction
+from scriptLattes.data_tables.technical_production.technical_productions import TechnicalProductions
+from scriptLattes.membro import Membro
+from scriptLattes.persist.cache import cache
+from scriptLattes.process.authorRank import AuthorRank
+from scriptLattes.process.compiladorDeListas import CompiladorDeListas
+from scriptLattes.qualis import qualis
+from scriptLattes.report.charts.mapaDeGeolocalizacao import MapaDeGeolocalizacao
+from scriptLattes.report.geradorDeXML import GeradorDeXML
 
 logger = logging.getLogger(__name__)
 

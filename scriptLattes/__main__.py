@@ -43,19 +43,19 @@ from configobj import ConfigObj
 from docopt import docopt
 
 import scriptLattes
-from extract.lattes_xml_parser import LattesXMLParser
-from extract.parserLattesHTML import ParserLattesHTML
-from extract.parserLattesXML import ParserLattesXML
-from fetch.download_html import download_html
-from grupo import Grupo
-from persist.cache import cache
-from persist.store import Store
-from qualis.qualis import Qualis
-from report.charts.collaboration_graph import CollaborationGraph
-from report.web_pages_generator import WebPagesGenerator
-from scriptLattes.log import configure_stream
-from scriptLattes.util import util, config_migrator
-from validate import Validator
+from .extract.lattes_xml_parser import LattesXMLParser
+from .extract.parserLattesHTML import ParserLattesHTML
+from .extract.parserLattesXML import ParserLattesXML
+from .fetch.download_html import download_html
+from .grupo import Grupo
+from .persist.cache import cache
+from .persist.store import Store
+from .qualis.qualis import Qualis
+from .report.charts.collaboration_graph import CollaborationGraph
+from .report.web_pages_generator import WebPagesGenerator
+from .log import configure_stream
+from .util import util, config_migrator
+from .validate import Validator
 
 logger = logging.getLogger(__name__)
 

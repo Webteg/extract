@@ -23,7 +23,7 @@
 #
 import datetime
 
-from grupo import *
+from scriptLattes.grupo import *
 
 
 class GeradorDeXML:
