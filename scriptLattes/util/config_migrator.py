@@ -65,7 +65,7 @@ def migrate_config_file(file_path):
     new_file_path = Path(file_path)
     file_path.rename(file_path.with_suffix(bak_file))
 
-    new_config = ConfigObj(infile=str(new_file_path), create_empty=True, write_empty_values=True)
+    new_config = ConfigObj(infile=str(new_file_path), create_empty=True, write_empty_values=True, default_encoding='utf-8', encoding='utf-8')
     new_config.initial_comment = config.initial_comment
     new_config.final_comment = config.final_comment
 
