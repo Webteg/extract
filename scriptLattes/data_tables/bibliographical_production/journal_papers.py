@@ -31,7 +31,7 @@ class JournalPapers(BasicProduction):
         :param only_accepted: whether the papers in the list are only accepted for publication and not yet published
         :return:
         """
-        super().add_from_parser(papers_list, only_accepted=only_accepted)
+        super(JournalPapers, self).add_from_parser(papers_list, only_accepted=only_accepted)
         # papers_df = self._df_from_parser(papers_list)
         # papers_df['id_membro'] = self.id
         # papers_df['only_accepted'] = only_accepted

@@ -38,7 +38,7 @@ class Books(BasicProduction):
         :param only_chapter: whether the books in the list are only book chapters and not full books
         :return:
         """
-        super().add_from_parser(books_list, only_chapter=only_chapter)
+        super(Books, self).add_from_parser(books_list, only_chapter=only_chapter)
         # assert self.adjacency_matrix is None
         # books_df = self._df_from_parser(books_list)
         # books_df['id_membro'] = self.id

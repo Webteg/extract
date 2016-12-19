@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import logging
 import xml.etree.ElementTree as et
 from lxml import etree
