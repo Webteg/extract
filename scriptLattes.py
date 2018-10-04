@@ -61,18 +61,18 @@ if __name__ == "__main__":
 	if criarDiretorio(novoGrupo.obterParametro('global-diretorio_de_saida')):
 		novoGrupo.carregarDadosCVLattes() #obrigatorio
 		novoGrupo.compilarListasDeItems() # obrigatorio
-		novoGrupo.identificarQualisEmPublicacoes() # obrigatorio
-		novoGrupo.calcularInternacionalizacao() # obrigatorio
+		# novoGrupo.identificarQualisEmPublicacoes() # obrigatorio
+		# novoGrupo.calcularInternacionalizacao() # obrigatorio
 		#novoGrupo.imprimirMatrizesDeFrequencia() 
 
-		novoGrupo.gerarGrafosDeColaboracoes() # obrigatorio
+		# novoGrupo.gerarGrafosDeColaboracoes() # obrigatorio
 		#novoGrupo.gerarGraficosDeBarras() # java charts
-		novoGrupo.gerarMapaDeGeolocalizacao() # obrigatorio
-		novoGrupo.gerarPaginasWeb() # obrigatorio
-		novoGrupo.gerarArquivosTemporarios() # obrigatorio
+		# novoGrupo.gerarMapaDeGeolocalizacao() # obrigatorio
+		# novoGrupo.gerarPaginasWeb() # obrigatorio
+		# novoGrupo.gerarArquivosTemporarios() # obrigatorio
 
 		# copiar imagens e css
-		copiarArquivos(novoGrupo.obterParametro('global-diretorio_de_saida'))
+		# copiarArquivos(novoGrupo.obterParametro('global-diretorio_de_saida'))
 
 		# finalizando o processo
 		#print '[AVISO] Quem vê \'Lattes\', não vê coração! B-)'
