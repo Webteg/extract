@@ -185,6 +185,12 @@ class ParserLattesXML(HTMLParser):
 		self.listaApresentacaoDeTrabalho = []
 		self.listaOutroTipoDeProducaoBibliografica = []
 
+		self.listaPatente = []
+		self.listaProgramaComputador = []
+		self.listaDesenhoIndustrial = []
+		self.listaParticipacaoEmEvento = []
+		self.listaOrganizacaoDeEvento = []
+
 		self.listaSoftwareComPatente = []
 		self.listaSoftwareSemPatente = []
 		self.listaProdutoTecnologico = []
