@@ -187,8 +187,8 @@ class Membro:
 	def carregarDadosCVLattes(self):
 		cvPath = self.diretorioCache+'/'+self.idLattes
 
-		if 'xml' in cvPath:
-			arquivoX = open(cvPath)
+		if True:
+			arquivoX = open(cvPath+'.xml')
 			cvLattesXML = arquivoX.read()
 			arquivoX.close()
 
