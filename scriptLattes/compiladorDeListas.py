@@ -307,8 +307,8 @@ class CompiladorDeListas:
 					item = pub.compararCom( listaCompleta[pub.ano][i] ) # comparamos: pub com listaCompleta[pub.ano][i]
 					if not item==None: # sao similares
 						print "\n[AVISO] PRODUÇÕES SIMILARES",
-						print pub,
-						print listaCompleta[pub.ano][i]
+						# print pub,
+						# print listaCompleta[pub.ano][i]
 						# print "Membro " + str(pub.idMembro) + ": " + pub.titulo.encode('utf8')
 						# print "Membro " + str(listaCompleta[pub.ano][i].idMembro) + ": " + listaCompleta[pub.ano][i].titulo.encode('utf8')
 
