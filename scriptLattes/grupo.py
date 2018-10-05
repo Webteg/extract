@@ -27,6 +27,7 @@ import fileinput
 import sets
 import operator
 import os
+import datetime
 from pymongo import MongoClient
 
 from membro import *
@@ -828,6 +829,16 @@ class Grupo:
 				data['members'] = map(lambda i: self.listaDeMembros[i]._id, producao.idMembro)
 				data['type'] = tipo
 				data['category'] = categoria
+
+				if 'date' in data.keys():
+					if data['date']:
+						ano = int(data['date'][4:8])
+						mes = int(data['date'][2:4])
+						dia = int(data['date'][:2])
+
+						data['date'] = datetime.datetime(ano, mes, dia)
+					else:
+						data['date'] = None
 
 				producao._id = db.productions.insert_one(data).inserted_id
 
