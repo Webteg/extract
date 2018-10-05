@@ -27,6 +27,7 @@ import fileinput
 import sets
 import operator
 import os
+from pymongo import MongoClient
 
 from membro import *
 from compiladorDeListas import *
@@ -734,3 +735,128 @@ class Grupo:
 		self.listaDeParametros.append(['mapa-incluir_alunos_de_doutorado', 'sim'])
 		self.listaDeParametros.append(['mapa-incluir_alunos_de_mestrado', 'nao'])
 
+	def armazenaNoMongoDB(self):
+		client = MongoClient(os.environ['MONGO_URL'])
+		db = client.openlattesdev
+
+		db.members.drop()
+
+		for membro in self.listaDeMembros:
+			membro.armazena(db)
+
+		db.productions.drop()
+		db.supervisions.drop()
+		db.coauthorships.drop()
+		db.cosupervisions.drop()
+
+		self.armazenaProducoes(db, self.compilador.listaCompletaArtigoEmPeriodico, 'Artigo em Periódico', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaLivroPublicado, 'Livro', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaCapituloDeLivroPublicado, 'Capítulo de Livro', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaTextoEmJornalDeNoticia, 'Texto em Jornal de Notícia', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaTrabalhoCompletoEmCongresso, 'Trabalho Completo em Congresso', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaResumoExpandidoEmCongresso, 'Resumo Expandido em Congresso', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaResumoEmCongresso, 'Resumo em Congresso', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaArtigoAceito, 'Artigo Aceito', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaApresentacaoDeTrabalho, 'Apresentação de Trabalho', 'Produção Bibliográfica')
+		self.armazenaProducoes(db, self.compilador.listaCompletaOutroTipoDeProducaoBibliografica, 'Outra Produção Bibliográfica', 'Produção Bibliográfica')
+
+		# self.armazenaProducoes(db, self.compilador.listaCompletaSoftwareComPatente, 'Software com Patente', 'Produção Técnica')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaSoftwareSemPatente, 'Software sem Patente', 'Produção Técnica')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaProdutoTecnologico, 'Produto Tecnológico', 'Produção Técnica')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaProcessoOuTecnica, 'Processo ou Técnica', 'Produção Técnica')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaTrabalhoTecnico, 'Trabalho Técnico', 'Produção Técnica')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOutroTipoDeProducaoTecnica, 'Outra Produção Técnica', 'Produção Técnica')
+
+		# self.armazenaProducoes(db, self.compilador.listaCompletaPatente, 'Patente', '')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaProgramaComputador, 'Programa de Computador', '')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaDesenhoIndustrial, 'Desenho Industrial', '')
+
+		# self.armazenaProducoes(db, self.compilador.listaCompletaProducaoArtistica, None, 'Produção Artística')
+
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOASupervisaoDePosDoutorado, 'Supervisão de Pós-Doutorado', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOATeseDeDoutorado, 'Tese de Doutorado', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOADissertacaoDeMestrado, 'Dissertação de Mestrado', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOAMonografiaDeEspecializacao, 'Monografia de Especialização', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOATCC, 'TCC', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOAIniciacaoCientifica, 'Iniciação Científica', 'Orientação em Andamento')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOAOutroTipoDeOrientacao, 'Outra Orientação', 'Orientação em Andamento')
+
+		self.armazenaProducoes(db, self.compilador.listaCompletaOCSupervisaoDePosDoutorado, 'Supervisão de Pós-Doutorado', 'Orientação Concluída', False)
+		self.armazenaProducoes(db, self.compilador.listaCompletaOCTeseDeDoutorado, 'Tese de Doutorado', 'Orientação Concluída', False)
+		self.armazenaProducoes(db, self.compilador.listaCompletaOCDissertacaoDeMestrado, 'Dissertação de Mestrado', 'Orientação Concluída', False)
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOCMonografiaDeEspecializacao, 'Monografia de Especialização', 'Orientação Concluída')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOCTCC, 'TCC', 'Orientação Concluída')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOCIniciacaoCientifica, 'Iniciação Científica', 'Orientação Concluída')
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOCOutroTipoDeOrientacao, 'Outra Orientação', 'Orientação Concluída')
+
+		# self.armazenaProducoes(db, self.compilador.listaCompletaPremioOuTitulo, 'Prêmio ou Título', None)
+		# self.armazenaProducoes(db, self.compilador.listaCompletaProjetoDePesquisa, 'Projeto de Pesquisa', None)
+		# self.armazenaProducoes(db, self.compilador.listaCompletaParticipacaoEmEvento, 'Participação em Evento', None)
+		# self.armazenaProducoes(db, self.compilador.listaCompletaOrganizacaoDeEvento, 'Organização de Evento', None)
+
+	def armazenaProducoes(self, db, listaCompleta, tipo, categoria, production = True):
+		def setfield(data, field, obj, attr):
+			try:
+				data[field] = getattr(obj, attr)
+			except Exception:
+				sys.exc_clear() # Ignora e apaga última exceção
+
+		collections = []
+		if production:
+			collections = [db.productions, db.coauthorships]
+		else:
+			collections = [db.supervisions, db.cosupervisions]
+
+		for ano in listaCompleta.keys():
+			for producao in listaCompleta[ano]:
+				data = {}
+
+				# Insere dados extraídos do currículo caso eles existam
+				setfield(data, 'agenciaDeFomento', producao, 'agenciaDeFomento')
+				setfield(data, 'year', producao, 'ano')
+				setfield(data, 'authors', producao, 'autores')
+				setfield(data, 'key', producao, 'chave')
+				setfield(data, 'date', producao, 'data')
+				setfield(data, 'doi', producao, 'doi')
+				setfield(data, 'edition', producao, 'edicao')
+				setfield(data, 'editor', producao, 'editora')
+				setfield(data, 'institution', producao, 'instituicao')
+				setfield(data, 'issn', producao, 'issn')
+				setfield(data, 'book', producao, 'livro')
+				setfield(data, 'nature', producao, 'natureza')
+				setfield(data, 'name', producao, 'nome')
+				setfield(data, 'eventName', producao, 'nomeDoEvento')
+				setfield(data, 'newspaperName', producao, 'nomeJornal')
+				setfield(data, 'number', producao, 'numero')
+				setfield(data, 'pages', producao, 'paginas')
+				setfield(data, 'relevant', producao, 'relevante')
+				setfield(data, 'magazine', producao, 'revista')
+				setfield(data, 'supervisionType', producao, 'tipoDeOrientacao')
+				setfield(data, 'title', producao, 'titulo')
+				setfield(data, 'tituloDoTrabalho', producao, 'tituloDoTrabalho')
+				setfield(data, 'volume', producao, 'volume')
+
+				# Insere dados não extraídos do currículo
+				# Lista de ObjectIds dos membros dessa produção
+				data['members'] = map(lambda i: self.listaDeMembros[i]._id, producao.idMembro)
+				data['type'] = tipo
+				data['category'] = categoria
+
+				producao._id = collections[0].insert_one(data).inserted_id
+
+				if len(data['members']) > 1:
+					coautorias = self.compilador.calcularCombinacoes(data['members'])
+					for coautores in coautorias:
+						self.armazenaCoautoria(db, collections[1], coautores, producao._id)
+
+	def armazenaCoautoria(self, db, collection, idCoautores, idProducao):
+		match = { 'members': { '$all': idCoautores } }
+
+		if db.coauthorships.find_one(match):
+			# Atualiza registro existente
+			replace = { '$push': { 'productions': idProducao } }
+			collection.update_one(match, replace)
+		else:
+			# Cria registro novo
+			data = { 'members': idCoautores, 'productions': [idProducao] }
+			collection.insert_one(data)

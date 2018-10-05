@@ -417,6 +417,28 @@ class Membro:
 		self.enderecoProfissionalLat = geo.lat
 		self.enderecoProfissionalLon = geo.lon
 
+	def armazena(self, db):
+		ano = int(self.atualizacaoCV[4:8])
+		mes = int(self.atualizacaoCV[2:4])
+		dia = int(self.atualizacaoCV[:2])
+
+		dados = {
+			'fullName': self.nomeCompleto,
+			'citationName': self.nomeEmCitacoesBibliograficas,
+			'professionalAddress': self.enderecoProfissional,
+			'academicDegrees': self.listaFormacaoAcademica,
+			'lattesId': self.idLattes,
+			'cvLastUpdate': datetime.datetime(ano, mes, dia),
+			'areas': self.listaAreaDeAtuacao,
+			'fromYear': self.itemsDesdeOAno,
+			'toYear': self.itemsAteOAno,
+			'languages': self.listaIdioma,
+			'gender': self.sexo,
+			'summary': self.textoResumo,
+		}
+
+		self._id = db.members.insert_one(dados).inserted_id
+
 	def ris(self):
 		s = ''
 		s+= '\nTY  - MEMBRO'

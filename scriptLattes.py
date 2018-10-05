@@ -61,6 +61,7 @@ if __name__ == "__main__":
 	if criarDiretorio(novoGrupo.obterParametro('global-diretorio_de_saida')):
 		novoGrupo.carregarDadosCVLattes() #obrigatorio
 		novoGrupo.compilarListasDeItems() # obrigatorio
+		novoGrupo.armazenaNoMongoDB()
 		# novoGrupo.identificarQualisEmPublicacoes() # obrigatorio
 		# novoGrupo.calcularInternacionalizacao() # obrigatorio
 		#novoGrupo.imprimirMatrizesDeFrequencia() 
