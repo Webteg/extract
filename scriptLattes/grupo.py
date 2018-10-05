@@ -773,68 +773,57 @@ class Grupo:
 
 		# self.armazenaProducoes(db, self.compilador.listaCompletaProducaoArtistica, None, 'Produção Artística')
 
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOASupervisaoDePosDoutorado, 'Supervisão de Pós-Doutorado', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOATeseDeDoutorado, 'Tese de Doutorado', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOADissertacaoDeMestrado, 'Dissertação de Mestrado', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOAMonografiaDeEspecializacao, 'Monografia de Especialização', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOATCC, 'TCC', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOAIniciacaoCientifica, 'Iniciação Científica', 'Orientação em Andamento')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOAOutroTipoDeOrientacao, 'Outra Orientação', 'Orientação em Andamento')
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOASupervisaoDePosDoutorado, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOATeseDeDoutorado, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOADissertacaoDeMestrado, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOAMonografiaDeEspecializacao, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOATCC, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOAIniciacaoCientifica, False)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOAOutroTipoDeOrientacao, False)
 
-		self.armazenaProducoes(db, self.compilador.listaCompletaOCSupervisaoDePosDoutorado, 'Supervisão de Pós-Doutorado', 'Orientação Concluída', False)
-		self.armazenaProducoes(db, self.compilador.listaCompletaOCTeseDeDoutorado, 'Tese de Doutorado', 'Orientação Concluída', False)
-		self.armazenaProducoes(db, self.compilador.listaCompletaOCDissertacaoDeMestrado, 'Dissertação de Mestrado', 'Orientação Concluída', False)
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOCMonografiaDeEspecializacao, 'Monografia de Especialização', 'Orientação Concluída')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOCTCC, 'TCC', 'Orientação Concluída')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOCIniciacaoCientifica, 'Iniciação Científica', 'Orientação Concluída')
-		# self.armazenaProducoes(db, self.compilador.listaCompletaOCOutroTipoDeOrientacao, 'Outra Orientação', 'Orientação Concluída')
+		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCSupervisaoDePosDoutorado)
+		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCTeseDeDoutorado)
+		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCDissertacaoDeMestrado)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOCMonografiaDeEspecializacao)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOCTCC)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOCIniciacaoCientifica)
+		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOCOutroTipoDeOrientacao)
 
 		# self.armazenaProducoes(db, self.compilador.listaCompletaPremioOuTitulo, 'Prêmio ou Título', None)
 		# self.armazenaProducoes(db, self.compilador.listaCompletaProjetoDePesquisa, 'Projeto de Pesquisa', None)
 		# self.armazenaProducoes(db, self.compilador.listaCompletaParticipacaoEmEvento, 'Participação em Evento', None)
 		# self.armazenaProducoes(db, self.compilador.listaCompletaOrganizacaoDeEvento, 'Organização de Evento', None)
 
-	def armazenaProducoes(self, db, listaCompleta, tipo, categoria, production = True):
-		def setfield(data, field, obj, attr):
-			try:
-				data[field] = getattr(obj, attr)
-			except Exception:
-				sys.exc_clear() # Ignora e apaga última exceção
+	def setfield(self, data, field, obj, attr):
+		try:
+			data[field] = getattr(obj, attr)
+		except Exception:
+			sys.exc_clear() # Ignora e apaga última exceção
 
-		collections = []
-		if production:
-			collections = [db.productions, db.coauthorships]
-		else:
-			collections = [db.supervisions, db.cosupervisions]
-
+	def armazenaProducoes(self, db, listaCompleta, tipo, categoria):
 		for ano in listaCompleta.keys():
 			for producao in listaCompleta[ano]:
 				data = {}
 
 				# Insere dados extraídos do currículo caso eles existam
-				setfield(data, 'agenciaDeFomento', producao, 'agenciaDeFomento')
-				setfield(data, 'year', producao, 'ano')
-				setfield(data, 'authors', producao, 'autores')
-				setfield(data, 'key', producao, 'chave')
-				setfield(data, 'date', producao, 'data')
-				setfield(data, 'doi', producao, 'doi')
-				setfield(data, 'edition', producao, 'edicao')
-				setfield(data, 'editor', producao, 'editora')
-				setfield(data, 'institution', producao, 'instituicao')
-				setfield(data, 'issn', producao, 'issn')
-				setfield(data, 'book', producao, 'livro')
-				setfield(data, 'nature', producao, 'natureza')
-				setfield(data, 'name', producao, 'nome')
-				setfield(data, 'eventName', producao, 'nomeDoEvento')
-				setfield(data, 'newspaperName', producao, 'nomeJornal')
-				setfield(data, 'number', producao, 'numero')
-				setfield(data, 'pages', producao, 'paginas')
-				setfield(data, 'relevant', producao, 'relevante')
-				setfield(data, 'magazine', producao, 'revista')
-				setfield(data, 'supervisionType', producao, 'tipoDeOrientacao')
-				setfield(data, 'title', producao, 'titulo')
-				setfield(data, 'tituloDoTrabalho', producao, 'tituloDoTrabalho')
-				setfield(data, 'volume', producao, 'volume')
+				self.setfield(data, 'year', producao, 'ano')
+				self.setfield(data, 'authors', producao, 'autores')
+				self.setfield(data, 'key', producao, 'chave')
+				self.setfield(data, 'date', producao, 'data')
+				self.setfield(data, 'doi', producao, 'doi')
+				self.setfield(data, 'edition', producao, 'edicao')
+				self.setfield(data, 'editor', producao, 'editora')
+				self.setfield(data, 'issn', producao, 'issn')
+				self.setfield(data, 'book', producao, 'livro')
+				self.setfield(data, 'nature', producao, 'natureza')
+				self.setfield(data, 'eventName', producao, 'nomeDoEvento')
+				self.setfield(data, 'newspaperName', producao, 'nomeJornal')
+				self.setfield(data, 'number', producao, 'numero')
+				self.setfield(data, 'pages', producao, 'paginas')
+				self.setfield(data, 'relevant', producao, 'relevante')
+				self.setfield(data, 'magazine', producao, 'revista')
+				self.setfield(data, 'title', producao, 'titulo')
+				self.setfield(data, 'volume', producao, 'volume')
 
 				# Insere dados não extraídos do currículo
 				# Lista de ObjectIds dos membros dessa produção
@@ -842,21 +831,45 @@ class Grupo:
 				data['type'] = tipo
 				data['category'] = categoria
 
-				producao._id = collections[0].insert_one(data).inserted_id
+				producao._id = db.productions.insert_one(data).inserted_id
 
-				if len(data['members']) > 1:
-					coautorias = self.compilador.calcularCombinacoes(data['members'])
-					for coautores in coautorias:
-						self.armazenaCoautoria(db, collections[1], coautores, producao._id)
+				self.armazenaColaboracoes(db.coauthorships, data['members'], producao._id)
 
-	def armazenaCoautoria(self, db, collection, idCoautores, idProducao):
-		match = { 'members': { '$all': idCoautores } }
+	def armazenaOrientacoes(self, db, listaCompleta, concluido = True):
+		for ano in listaCompleta.keys():
+			for orientacao in listaCompleta[ano]:
+				data = {}
 
-		if collection.find_one(match):
-			# Atualiza registro existente
-			replace = { '$push': { 'productions': idProducao } }
-			collection.update_one(match, replace)
-		else:
-			# Cria registro novo
-			data = { 'members': idCoautores, 'productions': [idProducao] }
-			collection.insert_one(data)
+				# Insere dados extraídos do currículo caso eles existam
+				self.setfield(data, 'agenciaDeFomento', orientacao, 'agenciaDeFomento')
+				self.setfield(data, 'institution', orientacao, 'instituicao')
+				self.setfield(data, 'key', orientacao, 'chave')
+				self.setfield(data, 'name', orientacao, 'nome')
+				self.setfield(data, 'type', orientacao, 'tipoDeOrientacao')
+				self.setfield(data, 'tituloDoTrabalho', orientacao, 'tituloDoTrabalho')
+				self.setfield(data, 'year', orientacao, 'ano')
+
+				# Insere dados não extraídos do currículo
+				# Lista de ObjectIds dos membros dessa produção
+				data['members'] = map(lambda i: self.listaDeMembros[i]._id, orientacao.idMembro)
+				data['completed'] = concluido
+
+				orientacao._id = db.supervisions.insert_one(data).inserted_id
+
+				self.armazenaColaboracoes(db.cosupervisions, data['members'], orientacao._id)
+
+	def armazenaColaboracoes(self, collection, idMembros, idProducao):
+		if len(idMembros) > 1:
+			coautorias = self.compilador.calcularCombinacoes(idMembros)
+
+			for idCoautores in coautorias:
+				match = { 'members': { '$all': idCoautores } }
+
+				if collection.find_one(match):
+					# Atualiza registro existente
+					replace = { '$push': { 'productions': idProducao } }
+					collection.update_one(match, replace)
+				else:
+					# Cria registro novo
+					data = { 'members': idCoautores, 'productions': [idProducao] }
+					collection.insert_one(data)
