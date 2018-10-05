@@ -807,7 +807,6 @@ class Grupo:
 				# Insere dados extraídos do currículo caso eles existam
 				self.setfield(data, 'year', producao, 'ano')
 				self.setfield(data, 'authors', producao, 'autores')
-				self.setfield(data, 'key', producao, 'chave')
 				self.setfield(data, 'date', producao, 'data')
 				self.setfield(data, 'doi', producao, 'doi')
 				self.setfield(data, 'edition', producao, 'edicao')
@@ -842,7 +841,6 @@ class Grupo:
 				# Insere dados extraídos do currículo caso eles existam
 				self.setfield(data, 'agenciaDeFomento', orientacao, 'agenciaDeFomento')
 				self.setfield(data, 'institution', orientacao, 'instituicao')
-				self.setfield(data, 'key', orientacao, 'chave')
 				self.setfield(data, 'name', orientacao, 'nome')
 				self.setfield(data, 'type', orientacao, 'tipoDeOrientacao')
 				self.setfield(data, 'tituloDoTrabalho', orientacao, 'tituloDoTrabalho')
