@@ -852,7 +852,7 @@ class Grupo:
 	def armazenaCoautoria(self, db, collection, idCoautores, idProducao):
 		match = { 'members': { '$all': idCoautores } }
 
-		if db.coauthorships.find_one(match):
+		if collection.find_one(match):
 			# Atualiza registro existente
 			replace = { '$push': { 'productions': idProducao } }
 			collection.update_one(match, replace)
