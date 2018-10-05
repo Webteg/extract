@@ -819,7 +819,6 @@ class Grupo:
 				self.setfield(data, 'newspaperName', producao, 'nomeJornal')
 				self.setfield(data, 'number', producao, 'numero')
 				self.setfield(data, 'pages', producao, 'paginas')
-				self.setfield(data, 'relevant', producao, 'relevante')
 				self.setfield(data, 'magazine', producao, 'revista')
 				self.setfield(data, 'title', producao, 'titulo')
 				self.setfield(data, 'volume', producao, 'volume')

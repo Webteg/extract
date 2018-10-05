@@ -432,8 +432,6 @@ class Membro:
 			'areas': self.listaAreaDeAtuacao,
 			'fromYear': self.itemsDesdeOAno,
 			'toYear': self.itemsAteOAno,
-			'languages': self.listaIdioma,
-			'gender': self.sexo,
 			'summary': self.textoResumo,
 		}
 
