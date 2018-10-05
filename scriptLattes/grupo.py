@@ -362,26 +362,26 @@ class Grupo:
 		# Grafos de coautoria 
 		self.compilador.criarMatrizesDeColaboracao()
 
-		[self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
-		self.vetorDeCoAutoria = self.matrizDeFrequencia.sum(axis=1) # suma das linhas = num. de items feitos em co-autoria (parceria) com outro membro do grupo
-		self.matrizDeFrequenciaNormalizada = self.matrizDeFrequencia.copy()
+		# [self.matrizDeAdjacencia, self.matrizDeFrequencia] = self.compilador.uniaoDeMatrizesDeColaboracao()
+		# self.vetorDeCoAutoria = self.matrizDeFrequencia.sum(axis=1) # suma das linhas = num. de items feitos em co-autoria (parceria) com outro membro do grupo
+		# self.matrizDeFrequenciaNormalizada = self.matrizDeFrequencia.copy()
 
-		for i in range(0, self.numeroDeMembros()):
-			if not self.vetorDeCoAutoria[i]==0:
-				self.matrizDeFrequenciaNormalizada[i,:] /= float(self.vetorDeCoAutoria[i])
+		# for i in range(0, self.numeroDeMembros()):
+		# 	if not self.vetorDeCoAutoria[i]==0:
+		# 		self.matrizDeFrequenciaNormalizada[i,:] /= float(self.vetorDeCoAutoria[i])
 
-		# AuthorRank
-		authorRank = AuthorRank(self.matrizDeFrequenciaNormalizada, 100)
-		self.vectorRank = authorRank.vectorRank
+		# # AuthorRank
+		# authorRank = AuthorRank(self.matrizDeFrequenciaNormalizada, 100)
+		# self.vectorRank = authorRank.vectorRank
 
-		# listas de nomes, rotulos e IDs
-		self.nomes = list([]) 
-		self.rotulos = list([])
-		self.ids = list([])
-		for membro in self.listaDeMembros:
-			self.nomes.append(membro.nomeCompleto)
-			self.rotulos.append(membro.rotulo)
-			self.ids.append(membro.idLattes)
+		# # listas de nomes, rotulos e IDs
+		# self.nomes = list([]) 
+		# self.rotulos = list([])
+		# self.ids = list([])
+		# for membro in self.listaDeMembros:
+		# 	self.nomes.append(membro.nomeCompleto)
+		# 	self.rotulos.append(membro.rotulo)
+		# 	self.ids.append(membro.idLattes)
 
 
 	def identificarQualisEmPublicacoes(self):
