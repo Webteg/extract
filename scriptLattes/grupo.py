@@ -746,8 +746,7 @@ class Grupo:
 
 		db.productions.drop()
 		db.supervisions.drop()
-		db.coauthorships.drop()
-		db.cosupervisions.drop()
+		db.collaborations.drop()
 
 		self.armazenaProducoes(db, self.compilador.listaCompletaArtigoEmPeriodico, 'Artigo em Periódico', 'Produção Bibliográfica')
 		self.armazenaProducoes(db, self.compilador.listaCompletaLivroPublicado, 'Livro', 'Produção Bibliográfica')
@@ -833,7 +832,7 @@ class Grupo:
 
 				producao._id = db.productions.insert_one(data).inserted_id
 
-				self.armazenaColaboracoes(db.coauthorships, data['members'], producao._id)
+				self.armazenaColaboracoes(db, 'productions', data['members'], producao._id)
 
 	def armazenaOrientacoes(self, db, listaCompleta, concluido = True):
 		for ano in listaCompleta.keys():
@@ -856,20 +855,28 @@ class Grupo:
 
 				orientacao._id = db.supervisions.insert_one(data).inserted_id
 
-				self.armazenaColaboracoes(db.cosupervisions, data['members'], orientacao._id)
+				self.armazenaColaboracoes(db, 'supervisions', data['members'], orientacao._id)
 
-	def armazenaColaboracoes(self, collection, idMembros, idProducao):
+	def armazenaColaboracoes(self, db, campo, idMembros, idProducao):
 		if len(idMembros) > 1:
 			coautorias = self.compilador.calcularCombinacoes(idMembros)
 
 			for idCoautores in coautorias:
 				match = { 'members': { '$all': idCoautores } }
 
-				if collection.find_one(match):
+				if db.collaborations.find_one(match):
 					# Atualiza registro existente
-					replace = { '$push': { 'productions': idProducao } }
-					collection.update_one(match, replace)
+					replace = { '$push': { campo: idProducao } }
+
+					db.collaborations.update_one(match, replace)
 				else:
 					# Cria registro novo
-					data = { 'members': idCoautores, 'productions': [idProducao] }
-					collection.insert_one(data)
+					data = {
+						'members': idCoautores,
+						'productions': [],
+						'supervisions': [],
+					}
+
+					data[campo].append(idProducao)
+
+					db.collaborations.insert_one(data)
