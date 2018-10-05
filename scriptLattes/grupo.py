@@ -737,7 +737,7 @@ class Grupo:
 
 	def armazenaNoMongoDB(self):
 		client = MongoClient(os.environ['MONGO_URL'])
-		db = client.openlattesdev
+		db = client.get_database()
 
 		db.members.drop()
 
