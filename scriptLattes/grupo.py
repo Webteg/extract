@@ -850,7 +850,7 @@ class Grupo:
 				data = {}
 
 				# Insere dados extraídos do currículo caso eles existam
-				self.setfield(data, 'agency', orientacao, 'agenciaDeFomento')
+				self.setfield(data, 'fundingAgency', orientacao, 'agenciaDeFomento')
 				self.setfield(data, 'institution', orientacao, 'instituicao')
 				self.setfield(data, 'supervisedStudent', orientacao, 'nome')
 				self.setfield(data, 'degreeType', orientacao, 'tipoDeOrientacao')
