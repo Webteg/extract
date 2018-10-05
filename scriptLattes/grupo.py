@@ -839,11 +839,11 @@ class Grupo:
 				data = {}
 
 				# Insere dados extraídos do currículo caso eles existam
-				self.setfield(data, 'agenciaDeFomento', orientacao, 'agenciaDeFomento')
+				self.setfield(data, 'agency', orientacao, 'agenciaDeFomento')
 				self.setfield(data, 'institution', orientacao, 'instituicao')
-				self.setfield(data, 'name', orientacao, 'nome')
-				self.setfield(data, 'type', orientacao, 'tipoDeOrientacao')
-				self.setfield(data, 'tituloDoTrabalho', orientacao, 'tituloDoTrabalho')
+				self.setfield(data, 'supervisedStudent', orientacao, 'nome')
+				self.setfield(data, 'degreeType', orientacao, 'tipoDeOrientacao')
+				self.setfield(data, 'documentTitle', orientacao, 'tituloDoTrabalho')
 				self.setfield(data, 'year', orientacao, 'ano')
 
 				# Insere dados não extraídos do currículo
