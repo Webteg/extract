@@ -798,7 +798,7 @@ class Grupo:
 			sys.exc_clear() # Ignora e apaga última exceção
 
 	def armazenaProducoes(self, db, listaCompleta, tipo, categoria):
-		print('Armazenando %s' % (tipo))
+		print('Armazenando produções do tipo %s' % (tipo))
 
 		for ano in listaCompleta.keys():
 			for producao in listaCompleta[ano]:
