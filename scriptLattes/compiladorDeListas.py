@@ -108,6 +108,7 @@ class CompiladorDeListas:
 		self.listaCompletaParticipacaoEmEvento = {}
 		self.listaCompletaOrganizacaoDeEvento = {}
 
+		print('Compilando lista de produções e identificando produções similares')
 
 		# compilamos as producoes de todos os membros (separados por tipos)
 		for membro in grupo.listaDeMembros:
@@ -297,8 +298,6 @@ class CompiladorDeListas:
 
 
 	def compilarLista(self, listaDoMembro, listaCompleta):
-		print('Compilando lista de produções e identificando produções similares')
-
 		for pub in listaDoMembro: # adicionar 'pub'  em  'listaCompleta'
 			if pub == None or listaCompleta.get(pub.ano)==None:   # Se o ano nao existe no listaCompleta (lista total)
 				listaCompleta[pub.ano] = []        # criamos uma nova entrada vazia
