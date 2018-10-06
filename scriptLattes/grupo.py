@@ -28,7 +28,6 @@ import sets
 import operator
 import os
 import datetime
-from pymongo import MongoClient
 
 from membro import *
 from compiladorDeListas import *
@@ -736,10 +735,7 @@ class Grupo:
 		self.listaDeParametros.append(['mapa-incluir_alunos_de_doutorado', 'sim'])
 		self.listaDeParametros.append(['mapa-incluir_alunos_de_mestrado', 'nao'])
 
-	def armazenaNoMongoDB(self):
-		cliente = MongoClient(os.environ['MONGO_URL'])
-		db = cliente.get_database()
-
+	def armazenaNoMongoDB(self, db):
 		db.members.drop()
 
 		for membro in self.listaDeMembros:

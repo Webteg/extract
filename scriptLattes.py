@@ -29,6 +29,7 @@ import os, errno
 import warnings
 import requests, BeautifulSoup # required by QualisExtractor
 warnings.filterwarnings('ignore')
+import pymongo
 
 
 from scriptLattes.producoesBibliograficas import *
@@ -59,29 +60,42 @@ if __name__ == "__main__":
 	novoGrupo.imprimirListaDeRotulos()
 
 	if criarDiretorio(novoGrupo.obterParametro('global-diretorio_de_saida')):
-		novoGrupo.carregarDadosCVLattes() #obrigatorio
-		novoGrupo.compilarListasDeItems() # obrigatorio
-		novoGrupo.armazenaNoMongoDB()
-		# novoGrupo.identificarQualisEmPublicacoes() # obrigatorio
-		# novoGrupo.calcularInternacionalizacao() # obrigatorio
-		#novoGrupo.imprimirMatrizesDeFrequencia() 
+		try:
+			cliente = pymongo.MongoClient(os.environ['MONGO_URL'])
+			cliente.server_info()
+			db = cliente.get_database()
 
-		# novoGrupo.gerarGrafosDeColaboracoes() # obrigatorio
-		#novoGrupo.gerarGraficosDeBarras() # java charts
-		# novoGrupo.gerarMapaDeGeolocalizacao() # obrigatorio
-		# novoGrupo.gerarPaginasWeb() # obrigatorio
-		# novoGrupo.gerarArquivosTemporarios() # obrigatorio
+			novoGrupo.carregarDadosCVLattes() #obrigatorio
+			novoGrupo.compilarListasDeItems() # obrigatorio
+			novoGrupo.armazenaNoMongoDB(db)
+			# novoGrupo.identificarQualisEmPublicacoes() # obrigatorio
+			# novoGrupo.calcularInternacionalizacao() # obrigatorio
+			#novoGrupo.imprimirMatrizesDeFrequencia() 
 
-		# copiar imagens e css
-		# copiarArquivos(novoGrupo.obterParametro('global-diretorio_de_saida'))
+			# novoGrupo.gerarGrafosDeColaboracoes() # obrigatorio
+			#novoGrupo.gerarGraficosDeBarras() # java charts
+			# novoGrupo.gerarMapaDeGeolocalizacao() # obrigatorio
+			# novoGrupo.gerarPaginasWeb() # obrigatorio
+			# novoGrupo.gerarArquivosTemporarios() # obrigatorio
 
-		# finalizando o processo
-		#print '[AVISO] Quem vê \'Lattes\', não vê coração! B-)'
-		#print '[AVISO] Por favor, cadastre-se na página: http://scriptlattes.sourceforge.net\n'
-		print '\n\n\n[PARA REFERENCIAR/CITAR ESTE SOFTWARE USE]'
-		print '    Jesus P. Mena-Chalco & Roberto M. Cesar-Jr.'
-		print '    scriptLattes: An open-source knowledge extraction system from the Lattes Platform.'
-		print '    Journal of the Brazilian Computer Society, vol.15, n.4, páginas 31-39, 2009.'
-		print '    http://dx.doi.org/10.1007/BF03194511'
-		print '\n\nscriptLattes executado!'
+			# copiar imagens e css
+			# copiarArquivos(novoGrupo.obterParametro('global-diretorio_de_saida'))
 
+			# finalizando o processo
+			#print '[AVISO] Quem vê \'Lattes\', não vê coração! B-)'
+			#print '[AVISO] Por favor, cadastre-se na página: http://scriptlattes.sourceforge.net\n'
+			print '\n\n\n[PARA REFERENCIAR/CITAR ESTE SOFTWARE USE]'
+			print '	Jesus P. Mena-Chalco & Roberto M. Cesar-Jr.'
+			print '	scriptLattes: An open-source knowledge extraction system from the Lattes Platform.'
+			print '	Journal of the Brazilian Computer Society, vol.15, n.4, páginas 31-39, 2009.'
+			print '	http://dx.doi.org/10.1007/BF03194511'
+			print '\n\nscriptLattes executado!'
+
+		except (
+			pymongo.errors.ServerSelectionTimeoutError,
+			pymongo.errors.ConfigurationError
+		) as err:
+			print('Erro na conexão com MongoDB:')
+			print(err)
+
+			print('\nIndique a URL completa do MongoDB na variável $MONGO_URL e verifique se o servidor está funcionando.')
