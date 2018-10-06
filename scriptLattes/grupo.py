@@ -737,8 +737,8 @@ class Grupo:
 		self.listaDeParametros.append(['mapa-incluir_alunos_de_mestrado', 'nao'])
 
 	def armazenaNoMongoDB(self):
-		client = MongoClient(os.environ['MONGO_URL'])
-		db = client.get_database()
+		cliente = MongoClient(os.environ['MONGO_URL'])
+		db = cliente.get_database()
 
 		db.members.drop()
 
@@ -794,76 +794,76 @@ class Grupo:
 		# self.armazenaProducoes(db, self.compilador.listaCompletaParticipacaoEmEvento, 'Participação em Evento', None)
 		# self.armazenaProducoes(db, self.compilador.listaCompletaOrganizacaoDeEvento, 'Organização de Evento', None)
 
-	def setfield(self, data, field, obj, attr):
+	def insereCampo(self, dados, campo, obj, atrib):
 		try:
-			data[field] = getattr(obj, attr)
+			dados[campo] = getattr(obj, atrib)
 		except Exception:
 			sys.exc_clear() # Ignora e apaga última exceção
 
 	def armazenaProducoes(self, db, listaCompleta, tipo, categoria):
 		for ano in listaCompleta.keys():
 			for producao in listaCompleta[ano]:
-				data = {}
+				dados = {}
 
 				# Insere dados extraídos do currículo caso eles existam
-				self.setfield(data, 'year', producao, 'ano')
-				self.setfield(data, 'authors', producao, 'autores')
-				self.setfield(data, 'date', producao, 'data')
-				self.setfield(data, 'doi', producao, 'doi')
-				self.setfield(data, 'edition', producao, 'edicao')
-				self.setfield(data, 'editor', producao, 'editora')
-				self.setfield(data, 'issn', producao, 'issn')
-				self.setfield(data, 'book', producao, 'livro')
-				self.setfield(data, 'nature', producao, 'natureza')
-				self.setfield(data, 'eventName', producao, 'nomeDoEvento')
-				self.setfield(data, 'newspaperName', producao, 'nomeJornal')
-				self.setfield(data, 'number', producao, 'numero')
-				self.setfield(data, 'pages', producao, 'paginas')
-				self.setfield(data, 'magazine', producao, 'revista')
-				self.setfield(data, 'title', producao, 'titulo')
-				self.setfield(data, 'volume', producao, 'volume')
+				self.insereCampo(dados, 'year', producao, 'ano')
+				self.insereCampo(dados, 'authors', producao, 'autores')
+				self.insereCampo(dados, 'date', producao, 'data')
+				self.insereCampo(dados, 'doi', producao, 'doi')
+				self.insereCampo(dados, 'edition', producao, 'edicao')
+				self.insereCampo(dados, 'editor', producao, 'editora')
+				self.insereCampo(dados, 'issn', producao, 'issn')
+				self.insereCampo(dados, 'book', producao, 'livro')
+				self.insereCampo(dados, 'nature', producao, 'natureza')
+				self.insereCampo(dados, 'eventName', producao, 'nomeDoEvento')
+				self.insereCampo(dados, 'newspaperName', producao, 'nomeJornal')
+				self.insereCampo(dados, 'number', producao, 'numero')
+				self.insereCampo(dados, 'pages', producao, 'paginas')
+				self.insereCampo(dados, 'magazine', producao, 'revista')
+				self.insereCampo(dados, 'title', producao, 'titulo')
+				self.insereCampo(dados, 'volume', producao, 'volume')
 
 				# Insere dados não extraídos do currículo
 				# Lista de ObjectIds dos membros dessa produção
-				data['members'] = map(lambda i: self.listaDeMembros[i]._id, producao.idMembro)
-				data['type'] = tipo
-				data['category'] = categoria
+				dados['members'] = map(lambda i: self.listaDeMembros[i]._id, producao.idMembro)
+				dados['type'] = tipo
+				dados['category'] = categoria
 
-				if 'date' in data.keys():
-					if data['date']:
-						ano = int(data['date'][4:8])
-						mes = int(data['date'][2:4])
-						dia = int(data['date'][:2])
+				if 'date' in dados.keys():
+					if dados['date']:
+						ano = int(dados['date'][4:8])
+						mes = int(dados['date'][2:4])
+						dia = int(dados['date'][:2])
 
-						data['date'] = datetime.datetime(ano, mes, dia)
+						dados['date'] = datetime.datetime(ano, mes, dia)
 					else:
-						data['date'] = None
+						dados['date'] = None
 
-				producao._id = db.productions.insert_one(data).inserted_id
+				producao._id = db.productions.insert_one(dados).inserted_id
 
-				self.armazenaColaboracoes(db, 'productions', data['members'], producao._id)
+				self.armazenaColaboracoes(db, 'productions', dados['members'], producao._id)
 
 	def armazenaOrientacoes(self, db, listaCompleta, concluido = True):
 		for ano in listaCompleta.keys():
 			for orientacao in listaCompleta[ano]:
-				data = {}
+				dados = {}
 
 				# Insere dados extraídos do currículo caso eles existam
-				self.setfield(data, 'fundingAgency', orientacao, 'agenciaDeFomento')
-				self.setfield(data, 'institution', orientacao, 'instituicao')
-				self.setfield(data, 'supervisedStudent', orientacao, 'nome')
-				self.setfield(data, 'degreeType', orientacao, 'tipoDeOrientacao')
-				self.setfield(data, 'documentTitle', orientacao, 'tituloDoTrabalho')
-				self.setfield(data, 'year', orientacao, 'ano')
+				self.insereCampo(dados, 'fundingAgency', orientacao, 'agenciaDeFomento')
+				self.insereCampo(dados, 'institution', orientacao, 'instituicao')
+				self.insereCampo(dados, 'supervisedStudent', orientacao, 'nome')
+				self.insereCampo(dados, 'degreeType', orientacao, 'tipoDeOrientacao')
+				self.insereCampo(dados, 'documentTitle', orientacao, 'tituloDoTrabalho')
+				self.insereCampo(dados, 'year', orientacao, 'ano')
 
 				# Insere dados não extraídos do currículo
 				# Lista de ObjectIds dos membros dessa produção
-				data['members'] = map(lambda i: self.listaDeMembros[i]._id, orientacao.idMembro)
-				data['completed'] = concluido
+				dados['members'] = map(lambda i: self.listaDeMembros[i]._id, orientacao.idMembro)
+				dados['completed'] = concluido
 
-				orientacao._id = db.supervisions.insert_one(data).inserted_id
+				orientacao._id = db.supervisions.insert_one(dados).inserted_id
 
-				self.armazenaColaboracoes(db, 'supervisions', data['members'], orientacao._id)
+				self.armazenaColaboracoes(db, 'supervisions', dados['members'], orientacao._id)
 
 	def armazenaColaboracoes(self, db, campo, idMembros, idProducao):
 		if len(idMembros) > 1:
@@ -879,12 +879,12 @@ class Grupo:
 					db.collaborations.update_one(match, replace)
 				else:
 					# Cria registro novo
-					data = {
+					dados = {
 						'members': idCoautores,
 						'productions': [],
 						'supervisions': [],
 					}
 
-					data[campo].append(idProducao)
+					dados[campo].append(idProducao)
 
-					db.collaborations.insert_one(data)
+					db.collaborations.insert_one(dados)
