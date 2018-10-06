@@ -297,6 +297,8 @@ class CompiladorDeListas:
 
 
 	def compilarLista(self, listaDoMembro, listaCompleta):
+        print('Compilando lista de produções e identificando produções similares')
+
 		for pub in listaDoMembro: # adicionar 'pub'  em  'listaCompleta'
 			if pub == None or listaCompleta.get(pub.ano)==None:   # Se o ano nao existe no listaCompleta (lista total)
 				listaCompleta[pub.ano] = []        # criamos uma nova entrada vazia
@@ -306,7 +308,7 @@ class CompiladorDeListas:
 				for i in range(0, len(listaCompleta[pub.ano])):
 					item = pub.compararCom( listaCompleta[pub.ano][i] ) # comparamos: pub com listaCompleta[pub.ano][i]
 					if not item==None: # sao similares
-						print "\n[AVISO] PRODUÇÕES SIMILARES",
+						# print "\n[AVISO] PRODUÇÕES SIMILARES",
 						# print pub,
 						# print listaCompleta[pub.ano][i]
 						# print "Membro " + str(pub.idMembro) + ": " + pub.titulo.encode('utf8')

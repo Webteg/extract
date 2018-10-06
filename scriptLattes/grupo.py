@@ -777,6 +777,7 @@ class Grupo:
 		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOAIniciacaoCientifica, False)
 		# self.armazenaOrientacoes(db, self.compilador.listaCompletaOAOutroTipoDeOrientacao, False)
 
+		print('Armazenando Orientações Concluídas')
 		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCSupervisaoDePosDoutorado)
 		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCTeseDeDoutorado)
 		self.armazenaOrientacoes(db, self.compilador.listaCompletaOCDissertacaoDeMestrado)
@@ -797,6 +798,8 @@ class Grupo:
 			sys.exc_clear() # Ignora e apaga última exceção
 
 	def armazenaProducoes(self, db, listaCompleta, tipo, categoria):
+		print('Armazenando %s' % (tipo))
+
 		for ano in listaCompleta.keys():
 			for producao in listaCompleta[ano]:
 				dados = {}
