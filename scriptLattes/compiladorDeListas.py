@@ -297,7 +297,7 @@ class CompiladorDeListas:
 
 
 	def compilarLista(self, listaDoMembro, listaCompleta):
-        print('Compilando lista de produções e identificando produções similares')
+		print('Compilando lista de produções e identificando produções similares')
 
 		for pub in listaDoMembro: # adicionar 'pub'  em  'listaCompleta'
 			if pub == None or listaCompleta.get(pub.ano)==None:   # Se o ano nao existe no listaCompleta (lista total)
