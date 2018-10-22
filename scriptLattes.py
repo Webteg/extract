@@ -61,7 +61,8 @@ if __name__ == "__main__":
 
 	if criarDiretorio(novoGrupo.obterParametro('global-diretorio_de_saida')):
 		try:
-			cliente = pymongo.MongoClient(os.environ['MONGO_URL'])
+			mongo_url = os.environ.get('MONGO_URL', '')
+			cliente = pymongo.MongoClient(mongo_url)
 			cliente.server_info()
 			db = cliente.get_database()
 
