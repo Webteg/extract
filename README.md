@@ -7,19 +7,17 @@
 
 ## REQUISITOS
 
-Para a compilação precisam-se de alguns módulos Python. Para instalar esses módulos execute como root (admin):
+Use a versão 2.7 do python. Por exemplo, assumindo que o executável do python 2.7 seja `python2.7` e que esteja usando o `virtualenv`:
 ```
-$ apt-get install python-all python-setuptools python-utidylib python-matplotlib python-levenshtein python-pygraphviz python-numpy tidy python-scipy python-imaging python-mechanize
-$ easy_install pytidylib
-$ pip install beautifulsoup
+$ cd <diretório-do-projeto>
+$ virtualenv -p python2.7 venv
+$ source venv/bin/activate
 ```	
 
-Em Ubuntu pode executar as seguintes instruções no terminal (linha de comandos):
+Depois proceda com a instalação dos requisitos.
 ```
-$ sudo apt-get install python-all python-setuptools python-utidylib python-matplotlib python-levenshtein python-pygraphviz python-numpy tidy python-scipy python-imaging python-mechanize
-$ sudo easy_install pytidylib
-$ sudo pip install beautifulsoup
-```
+$ pip install -r requirements.txt
+```	
 
 ## EXECUÇÃO
 
