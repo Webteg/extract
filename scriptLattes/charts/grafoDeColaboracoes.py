@@ -23,9 +23,9 @@
 #
 
 
-import pygraphviz
+# import pygraphviz
 #import Image
-from PIL import Image
+# from PIL import Image
 
 class GrafoDeColaboracoes:
 	grupo = None
