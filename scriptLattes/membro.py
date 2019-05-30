@@ -433,7 +433,7 @@ class Membro:
 			'fromYear': self.itemsDesdeOAno,
 			'toYear': self.itemsAteOAno,
 			'summary': self.textoResumo,
-			'campus': self.rotulo,
+			'group': self.rotulo,
 		}
 
 		self._id = db.members.insert_one(dados).inserted_id
